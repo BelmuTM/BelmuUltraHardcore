@@ -1,0 +1,28 @@
+main : com.belmu.uhc.Main
+name : BelmuUHC
+author : Belmu
+version : 1.0
+api-version : 1.8
+description : Plugin developed by Belmu. [UHC 1.8] | Twitter - @BelmuTM
+commands :
+  info :
+    description : Info command.
+  start :
+    description : Start command.
+  heal :
+    description : Heal command.
+  revive :
+    description : Revive command.
+  sethost :
+    description : Host command.
+    aliases : [sh]
+  menu :
+    description : Menu command.
+  h :
+    description : Hide command.
+    aliases : [hide]
+  forcepvp :
+    description : Force PvP command.
+    aliases : [fpvp]
+  co :
+    description : Coordinates command.

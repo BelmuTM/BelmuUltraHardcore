@@ -52,85 +52,81 @@ public class Teams {
 
     }
 
-    private static List<UUID> playersToSpread = new ArrayList<>();
+    public static List<UUID> playersToSpread = new ArrayList<>();
 
-    public static void addPlayersToTeams() {
+    public static void addPlayersToTeams(Player player) {
 
-        if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
+        if (Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
 
             ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
 
-            for (Player online : Bukkit.getOnlinePlayers()) {
+            UUID uuid = player.getUniqueId();
 
-                UUID uuid = online.getUniqueId();
+            playersToSpread.add(player.getUniqueId());
 
-                playersToSpread.add(online.getUniqueId());
+            new BukkitRunnable() {
 
-                new BukkitRunnable() {
+                @Override
+                public void run() {
 
-                    @Override
-                    public void run() {
+                    if (playersToSpread.contains(uuid)) {
 
-                        if (playersToSpread.contains(uuid)) {
+                        if (Main.online.size() > Options.pPerTeam) {
 
-                            if(Main.online.size() > Options.pPerTeam) {
+                            int divide = Main.online.size() / Options.pPerTeam;
 
-                                int divide = Main.online.size() / Options.pPerTeam;
+                            int max = Math.round(divide - 1);
+                            int min = 0;
 
-                                int max = Math.round(divide - 1);
-                                int min = 0;
+                            Random r = new Random();
+                            int upper = ((max - min) + 1) + min; //((max - min) + 1) + min;
 
-                                Random r = new Random();
-                                int upper = ((max - min) + 1) + min; //((max - min) + 1) + min;
+                            Team team = s.getTeam(teams.get(r.nextInt(upper)).teamName);
 
-                                Team team = s.getTeam(teams.get(r.nextInt(upper)).teamName);
+                            if (team.getPlayers().size() < Options.pPerTeam) {
 
-                                if (team.getPlayers().size() < Options.pPerTeam) {
+                                this.cancel();
 
-                                    this.cancel();
+                                team.addPlayer(player);
 
-                                    team.addPlayer(online);
+                                playersToSpread.remove(uuid);
 
-                                    playersToSpread.remove(uuid);
+                                player.setDisplayName(s.getPlayerTeam(player).getPrefix() + player.getName());
+                                player.setPlayerListName(s.getPlayerTeam(player).getPrefix() + player.getName());
 
-                                    online.setDisplayName(s.getPlayerTeam(online).getPrefix() + online.getName());
-                                    online.setPlayerListName(s.getPlayerTeam(online).getPrefix() + online.getName());
+                                if (!inGameTeams.contains(s.getPlayerTeam(player))) {
 
-                                    if (!inGameTeams.contains(s.getPlayerTeam(online))) {
-
-                                        inGameTeams.add(s.getPlayerTeam(online));
-
-                                    }
+                                    inGameTeams.add(s.getPlayerTeam(player));
 
                                 }
 
-                            } else {
+                            }
 
-                                int max = Main.online.size();
-                                int min = 0;
+                        } else {
 
-                                Random r = new Random();
-                                int upper = ((max - min) + 1) + min; //((max - min) + 1) + min;
+                            int max = Main.online.size();
+                            int min = 0;
 
-                                Team team = s.getTeam(teams.get(r.nextInt(upper)).teamName);
+                            Random r = new Random();
+                            int upper = ((max - min) + 1) + min; //((max - min) + 1) + min;
 
-                                if (team.getPlayers().size() < Options.pPerTeam) {
+                            Team team = s.getTeam(teams.get(r.nextInt(upper)).teamName);
 
-                                    this.cancel();
+                            if (team.getPlayers().size() < Options.pPerTeam) {
 
-                                    team.addPlayer(online);
+                                this.cancel();
 
-                                    playersToSpread.remove(uuid);
+                                team.addPlayer(player);
 
-                                    online.setDisplayName(s.getPlayerTeam(online).getPrefix() + online.getName());
-                                    online.setPlayerListName(s.getPlayerTeam(online).getPrefix() + online.getName());
+                                playersToSpread.remove(uuid);
 
-                                    if (!inGameTeams.contains(s.getPlayerTeam(online))) {
+                                player.setDisplayName(s.getPlayerTeam(player).getPrefix() + player.getName());
+                                player.setPlayerListName(s.getPlayerTeam(player).getPrefix() + player.getName());
 
-                                        inGameTeams.add(s.getPlayerTeam(online));
+                                if (!inGameTeams.contains(s.getPlayerTeam(player))) {
 
-                                    }
+                                    inGameTeams.add(s.getPlayerTeam(player));
 
                                 }
 
@@ -140,9 +136,9 @@ public class Teams {
 
                     }
 
-                }.runTaskTimer(Main.getInstance(), 5, 5);
+                }
 
-            }
+            }.runTaskTimer(Main.getInstance(), 5, 5);
 
         }
 

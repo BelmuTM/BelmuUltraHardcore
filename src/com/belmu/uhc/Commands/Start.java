@@ -17,6 +17,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -219,266 +222,333 @@ public class Start implements CommandExecutor {
 
                                     double preparationTime = Bukkit.getOnlinePlayers().size() * 1.3D;
 
-                                    CountdownWithDouble prep = new CountdownWithDouble(Main.getInstance(),
-
-                                            preparationTime,
+                                    CountdownWithDouble untilStart = new CountdownWithDouble(Main.getInstance(),
+                                            Options.untilGameStarts,
 
                                             () -> {
 
-                                                for(Player all : Bukkit.getOnlinePlayers()) {
+                                                Bukkit.broadcastMessage(Main.prefix + "§7Teleporting players in§cb " + (Options.untilGameStarts / 60) + "§7 minutes!");
 
-                                                    UsefulMethods.sendPacket(all, "§a§oGenerating chunks... §7§o(Estimated time: " + preparationTime + "s)");
+                                                if(Main.getInstance().getConfig().get("UHC" + "." + "TeamPicking").equals("Normal")) {
+
+                                                    ItemStack ch = new ItemStack(Material.BANNER, 1);
+                                                    ItemMeta chM = ch.getItemMeta();
+
+                                                    chM.setDisplayName("§fChoose Team§7 (Right Click)");
+                                                    ch.setItemMeta(chM);
+
+                                                    for (Player online : Bukkit.getOnlinePlayers()) {
+
+                                                        Teams.playersToSpread.add(online.getUniqueId());
+
+                                                    }
 
                                                 }
 
-                                                Teams.addPlayersToTeams();
+                                                for (Player online : Bukkit.getOnlinePlayers()) {
 
-                                                Main.partie.add("lancée");
-                                                Main.début.clear();
-                                                Main.preparation.add(true);
-
-                                                EasyCountdown oof = new EasyCountdown(Main.getInstance(),
-                                                        1.5D,
-
-                                                        UsefulMethods::prepareTp
-
-                                                );
-                                                oof.scheduleTimer();
-
-                                                for (Player all : Bukkit.getOnlinePlayers()) {
-
-                                                    all.playSound(all.getLocation(), Sound.CHICKEN_EGG_POP, 1, Integer.MAX_VALUE);
+                                                    online.playSound(online.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
 
                                                 }
 
                                             },
 
                                             () -> {
-                                                Main.preparation.remove(true);
-                                                Main.preparation.add(false);
 
-                                                CountdownWithInt gtimer = new CountdownWithInt(Main.getInstance(),
-                                                        Main.timer,
+                                                CountdownWithDouble prep = new CountdownWithDouble(Main.getInstance(),
+
+                                                        preparationTime,
 
                                                         () -> {
 
-                                                            Location loc3 = new Location(world, Main.platformSize, Main.height + 1, -Main.platformSize);
-                                                            Location loc4 = new Location(world, -Main.platformSize, Main.height + 1, Main.platformSize);
+                                                            for(Player all : Bukkit.getOnlinePlayers()) {
 
-                                                            UsefulMethods.setBlocksRegion(loc3, loc4, Material.AIR);
+                                                                UsefulMethods.sendPacket(all, "§a§oGenerating chunks... §7§o(Estimated time: " + preparationTime + "s)");
 
-                                                            Location loc1 = new Location(world, Main.platformSize, Main.height, -Main.platformSize);
-                                                            Location loc2 = new Location(world, -Main.platformSize, Main.height, Main.platformSize);
+                                                            }
 
-                                                            UsefulMethods.setBlocksRegion(loc1, loc2, Material.AIR);
+                                                            if(Main.getInstance().getConfig().get("UHC" + "." + "TeamPicking").equals("Random")) {
 
+                                                                for(Player online : Bukkit.getOnlinePlayers()) {
 
-                                                            UsefulMethods.tp();
-                                                            UsefulMethods.start();
+                                                                    Teams.addPlayersToTeams(online);
+
+                                                                }
+
+                                                            } else {
+
+                                                                for(int i = 0; i < Teams.playersToSpread.size(); i++) {
+
+                                                                    Player toSpread = Bukkit.getPlayer(Teams.playersToSpread.get(i));
+
+                                                                    Teams.addPlayersToTeams(toSpread);
+                                                                }
+
+                                                            }
+
+                                                            Main.partie.add("lancée");
+                                                            Main.début.clear();
+                                                            Main.preparation.add(true);
+
+                                                            EasyCountdown oof = new EasyCountdown(Main.getInstance(),
+                                                                    1.5D,
+
+                                                                    UsefulMethods::prepareTp
+
+                                                            );
+                                                            oof.scheduleTimer();
+
+                                                            for (Player all : Bukkit.getOnlinePlayers()) {
+
+                                                                all.playSound(all.getLocation(), Sound.CHICKEN_EGG_POP, 1, Integer.MAX_VALUE);
+
+                                                            }
 
                                                         },
 
-
                                                         () -> {
-                                                            for (Player all : Bukkit.getOnlinePlayers()) {
+                                                            Main.preparation.remove(true);
+                                                            Main.preparation.add(false);
 
-                                                                Main.joueurs.add(all.getName());
-                                                                all.getInventory().clear();
-                                                                all.setGameMode(GameMode.SURVIVAL);
+                                                            CountdownWithInt gtimer = new CountdownWithInt(Main.getInstance(),
+                                                                    Main.timer,
 
-                                                            }
+                                                                    () -> {
 
-                                                            world.setTime(0);
-                                                            world.getWorldBorder().setSize(Options.borderScale);
-                                                            world.getWorldBorder().setCenter(0, 0);
-                                                            world.getWorldBorder().setWarningDistance(25);
+                                                                        Location loc3 = new Location(world, Main.platformSize, Main.height + 1, -Main.platformSize);
+                                                                        Location loc4 = new Location(world, -Main.platformSize, Main.height + 1, Main.platformSize);
 
-                                                            for (Player all : Bukkit.getOnlinePlayers()) {
+                                                                        UsefulMethods.setBlocksRegion(loc3, loc4, Material.AIR);
 
-                                                                all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
-                                                                all.sendMessage(Main.prefix + "§aGood luck!");
+                                                                        Location loc1 = new Location(world, Main.platformSize, Main.height, -Main.platformSize);
+                                                                        Location loc2 = new Location(world, -Main.platformSize, Main.height, Main.platformSize);
 
-                                                                GameScoreboard.createGameScoreboard(all);
+                                                                        UsefulMethods.setBlocksRegion(loc1, loc2, Material.AIR);
 
-                                                                new BukkitRunnable() {
 
-                                                                    @Override
-                                                                    public void run() {
+                                                                        UsefulMethods.tp();
+                                                                        UsefulMethods.start();
 
-                                                                        try {
+                                                                    },
 
-                                                                            GameScoreboard.updateGameScoreboard(all);
 
-                                                                        } catch (NullPointerException exc) {
+                                                                    () -> {
+                                                                        for (Player all : Bukkit.getOnlinePlayers()) {
 
-                                                                            System.out.println("Having troubles with Scoreboard...");
+                                                                            Main.joueurs.add(all.getName());
+                                                                            all.getInventory().clear();
+                                                                            all.setGameMode(GameMode.SURVIVAL);
 
                                                                         }
 
-                                                                    }
-                                                                }.runTaskTimer(Main.getInstance(), 0, 5);
-
-                                                                DiamondLimit.dLimit.put(all.getUniqueId(), 0);
-
-                                                                GameScoreboard.initializeHealth(all);
-
-                                                                all.setHealth(all.getHealth());
-
-                                                            }
-
-                                                            Netheribus.startNetheribus();
-                                                            FinalHeal.finalHeal(Options.finalHealSeconds);
-
-                                                            GameScoreboard.startScoreboardTimer();
-
-                                                            if(Main.scenarios.contains("paranoia")) {
-
-                                                                Bukkit.broadcastMessage(Main.prefix + "§2Tip :§a Use /h to hide the§c Paranoïa§a alerts.");
-
-                                                            }
-
-                                                            if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
-
-                                                                Bukkit.broadcastMessage(Main.prefix + "§2Tip :§a Type ! before your message to talk in the global chat.");
-
-                                                            }
-
-                                                            CountdownWithInt monsters = new CountdownWithInt(Main.getInstance(),
-                                                                    Options.monstersSpawn,
-                                                                    () -> Bukkit.broadcastMessage(Main.prefix + "§cMonsters§f will spawn in§7 " + (Options.monstersSpawn / 60) + " minutes§c."),
-
-                                                                    () -> {
-
-                                                                        world.setMonsterSpawnLimit(70);
-                                                                        Bukkit.broadcastMessage(Main.prefix + "§cMonsters§f will now §7spawn§f.");
-
-                                                                    },
-                                                                    (t) -> {
-
-                                                                    }
-                                                            );
-                                                            monsters.scheduleTimer();
-
-                                                            CountdownWithInt border = new CountdownWithInt(Main.getInstance(),
-                                                                    Options.borderSeconds,
-                                                                    () -> {
-                                                                    },
-                                                                    () -> {
-
-                                                                        world.getWorldBorder().setSize(250, Options.borderShrinkingSeconds);
+                                                                        world.setTime(0);
+                                                                        world.getWorldBorder().setSize(Options.borderScale);
                                                                         world.getWorldBorder().setCenter(0, 0);
                                                                         world.getWorldBorder().setWarningDistance(25);
 
                                                                         for (Player all : Bukkit.getOnlinePlayers()) {
 
-                                                                            all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1, Integer.MAX_VALUE);
-                                                                            all.sendMessage(Main.prefix + "§bBorder§c is shrinking!");
+                                                                            all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
+                                                                            all.sendMessage(Main.prefix + "§aGood luck!");
+
+                                                                            GameScoreboard.createGameScoreboard(all);
+
+                                                                            new BukkitRunnable() {
+
+                                                                                @Override
+                                                                                public void run() {
+
+                                                                                    try {
+
+                                                                                        GameScoreboard.updateGameScoreboard(all);
+
+                                                                                    } catch (NullPointerException exc) {
+
+                                                                                        System.out.println("Having troubles with Scoreboard...");
+
+                                                                                    }
+
+                                                                                }
+                                                                            }.runTaskTimer(Main.getInstance(), 0, 5);
+
+                                                                            DiamondLimit.dLimit.put(all.getUniqueId(), 0);
+
+                                                                            GameScoreboard.initializeHealth(all);
+
+                                                                            all.setHealth(all.getHealth());
 
                                                                         }
 
-                                                                        Main.border.add("yes");
+                                                                        Netheribus.startNetheribus();
+                                                                        FinalHeal.finalHeal(Options.finalHealSeconds);
+
+                                                                        GameScoreboard.startScoreboardTimer();
+
+                                                                        if(Main.scenarios.contains("paranoia")) {
+
+                                                                            Bukkit.broadcastMessage(Main.prefix + "§2Tip :§a Use /h to hide the§c Paranoïa§a alerts.");
+
+                                                                        }
+
+                                                                        if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
+
+                                                                            Bukkit.broadcastMessage(Main.prefix + "§2Tip :§a Type ! before your message to talk in the global chat.");
+
+                                                                        }
+
+                                                                        CountdownWithInt monsters = new CountdownWithInt(Main.getInstance(),
+                                                                                Options.monstersSpawn,
+                                                                                () -> Bukkit.broadcastMessage(Main.prefix + "§cMonsters§f will spawn in§7 " + (Options.monstersSpawn / 60) + " minutes§c."),
+
+                                                                                () -> {
+
+                                                                                    world.setMonsterSpawnLimit(70);
+                                                                                    Bukkit.broadcastMessage(Main.prefix + "§cMonsters§f will now §7spawn§f.");
+
+                                                                                },
+                                                                                (t) -> {
+
+                                                                                }
+                                                                        );
+                                                                        monsters.scheduleTimer();
+
+                                                                        CountdownWithInt border = new CountdownWithInt(Main.getInstance(),
+                                                                                Options.borderSeconds,
+                                                                                () -> {
+                                                                                },
+                                                                                () -> {
+
+                                                                                    world.getWorldBorder().setSize(250, Options.borderShrinkingSeconds);
+                                                                                    world.getWorldBorder().setCenter(0, 0);
+                                                                                    world.getWorldBorder().setWarningDistance(25);
+
+                                                                                    for (Player all : Bukkit.getOnlinePlayers()) {
+
+                                                                                        all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1, Integer.MAX_VALUE);
+                                                                                        all.sendMessage(Main.prefix + "§bBorder§c is shrinking!");
+
+                                                                                    }
+
+                                                                                    Main.border.add("yes");
+
+                                                                                },
+                                                                                (t) -> {
+
+                                                                                }
+                                                                        );
+                                                                        border.scheduleTimer();
+
+                                                                        CountdownWithInt pvp = new CountdownWithInt(Main.getInstance(),
+
+                                                                                Options.pvpSeconds,
+                                                                                () -> {
+                                                                                },
+                                                                                () -> {
+
+                                                                                    if(!Bukkit.getWorld("world").getPVP() && !Bukkit.getWorld("world_nether").getPVP()) {
+
+                                                                                        for (Player all : Bukkit.getOnlinePlayers()) {
+
+                                                                                            all.playSound(all.getLocation(), Sound.SUCCESSFUL_HIT, 1, Integer.MAX_VALUE);
+                                                                                            all.sendMessage(Main.prefix + "§bGrace period§c ended!");
+
+                                                                                        }
+
+                                                                                        Bukkit.getWorld("world").setPVP(true);
+                                                                                        Bukkit.getWorld("world_nether").setPVP(true);
+
+                                                                                    }
+
+                                                                                },
+                                                                                (t) -> {
+
+                                                                                    int s = t.getSecondsLeft();
+
+                                                                                    if(!Bukkit.getWorld("world").getPVP() && !Bukkit.getWorld("world_nether").getPVP() && !Bukkit.getWorld("world_the_end").getPVP()) {
+
+                                                                                        if (s == 600 || s == 300 || s == 60) {
+
+                                                                                            Bukkit.broadcastMessage(Main.prefix + "§cPvP will be activated in §7" + s / 60 + " minutes");
+
+                                                                                            for (Player all : Bukkit.getOnlinePlayers()) {
+
+                                                                                                all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
+
+                                                                                            }
+
+                                                                                        } else if (s == 5 || s == 4 || s == 3 || s == 2 || s == 1) {
+
+                                                                                            Bukkit.broadcastMessage(Main.prefix + "§cPvP will be activated in §7" + s + " seconds");
+
+                                                                                            for (Player all : Bukkit.getOnlinePlayers()) {
+
+                                                                                                all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
+
+                                                                                            }
+
+                                                                                        }
+
+                                                                                    }
+
+                                                                                }
+                                                                        );
+                                                                        pvp.scheduleTimer();
 
                                                                     },
                                                                     (t) -> {
 
-                                                                    }
-                                                            );
-                                                            border.scheduleTimer();
+                                                                        for (Player all : Bukkit.getOnlinePlayers()) {
 
-                                                            CountdownWithInt pvp = new CountdownWithInt(Main.getInstance(),
+                                                                            String sec = "§8» §c" + t.getSecondsLeft() + "s§8 «";
+                                                                            String text = "§4Start";
+                                                                            IChatBaseComponent chatTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + text + "\",color:" + ChatColor.YELLOW.name().toLowerCase() + "}");
 
-                                                                    Options.pvpSeconds,
-                                                                    () -> {
-                                                                    },
-                                                                    () -> {
+                                                                            PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, chatTitle);
+                                                                            PacketPlayOutTitle length = new PacketPlayOutTitle(0, 20, 0);
 
-                                                                        if(!Bukkit.getWorld("world").getPVP() && !Bukkit.getWorld("world_nether").getPVP()) {
 
-                                                                            for (Player all : Bukkit.getOnlinePlayers()) {
+                                                                            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(title);
+                                                                            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(length);
 
-                                                                                all.playSound(all.getLocation(), Sound.SUCCESSFUL_HIT, 1, Integer.MAX_VALUE);
-                                                                                all.sendMessage(Main.prefix + "§bGrace period§c ended!");
+                                                                            IChatBaseComponent chatSubTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + sec + "\",color:" + ChatColor.GREEN.name().toLowerCase() + "}");
 
-                                                                            }
+                                                                            PacketPlayOutTitle subtitle = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, chatSubTitle);
 
-                                                                            Bukkit.getWorld("world").setPVP(true);
-                                                                            Bukkit.getWorld("world_nether").setPVP(true);
+                                                                            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(subtitle);
+                                                                            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(length);
 
-                                                                        }
+                                                                            all.playSound(all.getLocation(), Sound.CLICK, 1, Integer.MAX_VALUE);
 
-                                                                    },
-                                                                    (t) -> {
-
-                                                                        int s = t.getSecondsLeft();
-
-                                                                        if(!Bukkit.getWorld("world").getPVP() && !Bukkit.getWorld("world_nether").getPVP() && !Bukkit.getWorld("world_the_end").getPVP()) {
-
-                                                                            if (s == 600 || s == 300 || s == 60) {
-
-                                                                                Bukkit.broadcastMessage(Main.prefix + "§cPvP will be activated in §7" + s / 60 + " minutes");
-
-                                                                                for (Player all : Bukkit.getOnlinePlayers()) {
-
-                                                                                    all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
-
-                                                                                }
-
-                                                                            } else if (s == 5 || s == 4 || s == 3 || s == 2 || s == 1) {
-
-                                                                                Bukkit.broadcastMessage(Main.prefix + "§cPvP will be activated in §7" + s + " seconds");
-
-                                                                                for (Player all : Bukkit.getOnlinePlayers()) {
-
-                                                                                    all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
-
-                                                                                }
-
-                                                                            }
+                                                                            all.sendMessage(Main.prefix + "§7Game starts in§c " + t.getSecondsLeft() + "s");
 
                                                                         }
-
                                                                     }
                                                             );
-                                                            pvp.scheduleTimer();
+                                                            gtimer.scheduleTimer();
 
                                                         },
                                                         (t) -> {
 
-                                                            for (Player all : Bukkit.getOnlinePlayers()) {
+                                                            if(t.getSecondsLeft() < 10) {
 
-                                                                String sec = "§8» §c" + t.getSecondsLeft() + "s§8 «";
-                                                                String text = "§4Start";
-                                                                IChatBaseComponent chatTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + text + "\",color:" + ChatColor.YELLOW.name().toLowerCase() + "}");
-
-                                                                PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, chatTitle);
-                                                                PacketPlayOutTitle length = new PacketPlayOutTitle(0, 20, 0);
-
-
-                                                                ((CraftPlayer) all).getHandle().playerConnection.sendPacket(title);
-                                                                ((CraftPlayer) all).getHandle().playerConnection.sendPacket(length);
-
-                                                                IChatBaseComponent chatSubTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + sec + "\",color:" + ChatColor.GREEN.name().toLowerCase() + "}");
-
-                                                                PacketPlayOutTitle subtitle = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, chatSubTitle);
-
-                                                                ((CraftPlayer) all).getHandle().playerConnection.sendPacket(subtitle);
-                                                                ((CraftPlayer) all).getHandle().playerConnection.sendPacket(length);
-
-                                                                all.playSound(all.getLocation(), Sound.CLICK, 1, Integer.MAX_VALUE);
-
-                                                                all.sendMessage(Main.prefix + "§7Game starts in§c " + t.getSecondsLeft() + "s");
+                                                                Bukkit.broadcastMessage(Main.prefix + "§7 Teleporting players in§cb " + t.getSecondsLeft() + "§7s!");
 
                                                             }
+
                                                         }
                                                 );
-                                                gtimer.scheduleTimer();
+                                                prep.scheduleTimer();
 
                                             },
+
+
                                             (t) -> {
 
+
                                             }
+
                                     );
-                                    prep.scheduleTimer();
+                                    untilStart.scheduleTimer();
 
                                 }
 

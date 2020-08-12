@@ -703,52 +703,7 @@ public class UsefulMethods {
 
     public static void sendPacket(Player p, String text) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + text + "\"}"), (byte) 2);
         ((CraftPlayer)p).getHandle().playerConnection.sendPacket(packet);
 
     }

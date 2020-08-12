@@ -3,6 +3,7 @@ package com.belmu.uhc;
 import com.belmu.uhc.Events.*;
 import com.belmu.uhc.Main;
 import com.belmu.uhc.Scenarios.*;
+import com.belmu.uhc.Teams.TeamChooser;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
@@ -22,6 +23,7 @@ public class ListenerManager {
         reg(new FoodEvent());
         reg(new CancelledEvents());
         reg(new PlayerMove());
+        reg(new TeamChooser());
 
         //Scenarios
         reg(new Timber());

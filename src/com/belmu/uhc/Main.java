@@ -104,6 +104,7 @@ public class Main extends JavaPlugin implements Listener {
         getConfig().set("Host", "None");
         getConfig().set("UHC", null);
         getConfig().set("UHC" + "." + "Mode", "Teams");
+        getConfig().set("UHC" + "." + "TeamPicking", "Normal"); //Normal or Random
 
         joueurs.clear();
         spectateurs.clear();

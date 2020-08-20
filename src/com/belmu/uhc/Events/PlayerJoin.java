@@ -38,6 +38,18 @@ public class PlayerJoin implements Listener {
 
         Netherboard.instance().removeBoard(player);
 
+        if(Main.startTeams.equals(true)) {
+
+            ItemStack ch = new ItemStack(Material.MELON, 1);
+            ItemMeta chM = ch.getItemMeta();
+
+            chM.setDisplayName("§fChoose Team§7 (Right Click)");
+            ch.setItemMeta(chM);
+
+            player.getInventory().setItem(0, ch);
+
+        }
+
         if (Main.spectateurs.contains(player.getName())) {
 
             try {

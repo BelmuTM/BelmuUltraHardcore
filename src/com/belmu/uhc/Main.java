@@ -45,6 +45,7 @@ public class Main extends JavaPlugin implements Listener {
     public static List<String> scenarios = new ArrayList<>();
     public static List<String> border = new ArrayList<>();
 
+    public static List<Boolean> startTeams = new ArrayList<>();
     public static List<Boolean> justTeleported = new ArrayList<>();
     public static List<Boolean> preparation = new ArrayList<>();
     public static List<Boolean> fell = new ArrayList<>();

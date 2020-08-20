@@ -227,19 +227,26 @@ public class Start implements CommandExecutor {
 
                                             () -> {
 
-                                                Bukkit.broadcastMessage(Main.prefix + "§7Teleporting players in§cb " + (Options.untilGameStarts / 60) + "§7 minutes!");
+                                                Bukkit.broadcastMessage(Main.prefix + "§7Teleporting players in§c " + (Options.untilGameStarts / 60) + "§7 minutes!");
 
-                                                if(Main.getInstance().getConfig().get("UHC" + "." + "TeamPicking").equals("Normal")) {
+                                                if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
 
-                                                    ItemStack ch = new ItemStack(Material.BANNER, 1);
-                                                    ItemMeta chM = ch.getItemMeta();
+                                                    if (Main.getInstance().getConfig().get("UHC" + "." + "TeamPicking").equals("Normal")) {
 
-                                                    chM.setDisplayName("§fChoose Team§7 (Right Click)");
-                                                    ch.setItemMeta(chM);
+                                                        ItemStack ch = new ItemStack(Material.MELON, 1);
+                                                        ItemMeta chM = ch.getItemMeta();
 
-                                                    for (Player online : Bukkit.getOnlinePlayers()) {
+                                                        chM.setDisplayName("§fChoose Team§7 (Right Click)");
+                                                        ch.setItemMeta(chM);
 
-                                                        Teams.playersToSpread.add(online.getUniqueId());
+                                                        for (Player online : Bukkit.getOnlinePlayers()) {
+
+                                                            Teams.playersToSpread.add(online.getUniqueId());
+                                                            online.getInventory().setItem(0, ch);
+
+                                                        }
+
+                                                        Main.startTeams.add(true);
 
                                                     }
 
@@ -267,21 +274,28 @@ public class Start implements CommandExecutor {
 
                                                             }
 
-                                                            if(Main.getInstance().getConfig().get("UHC" + "." + "TeamPicking").equals("Random")) {
+                                                            if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
 
-                                                                for(Player online : Bukkit.getOnlinePlayers()) {
+                                                                if (Main.getInstance().getConfig().get("UHC" + "." + "TeamPicking").equals("Random")) {
 
-                                                                    Teams.addPlayersToTeams(online);
+                                                                    for (Player online : Bukkit.getOnlinePlayers()) {
 
-                                                                }
+                                                                        Teams.addPlayersToTeams(online);
 
-                                                            } else {
+                                                                    }
 
-                                                                for(int i = 0; i < Teams.playersToSpread.size(); i++) {
+                                                                } else {
 
-                                                                    Player toSpread = Bukkit.getPlayer(Teams.playersToSpread.get(i));
+                                                                    Main.startTeams.clear();
+                                                                    Main.startTeams.add(false);
 
-                                                                    Teams.addPlayersToTeams(toSpread);
+                                                                    for (int i = 0; i < Teams.playersToSpread.size(); i++) {
+
+                                                                        Player toSpread = Bukkit.getPlayer(Teams.playersToSpread.get(i));
+
+                                                                        Teams.addPlayersToTeams(toSpread);
+                                                                    }
+
                                                                 }
 
                                                             }

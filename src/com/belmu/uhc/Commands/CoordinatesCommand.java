@@ -16,16 +16,15 @@ public class CoordinatesCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String msg, String[] args) {
 
         if (sender instanceof Player) {
-
             Player player = (Player) sender;
 
             if (cmd.getName().equalsIgnoreCase("co")) {
 
-                if (Main.partie.contains("lancée")) {
+                if (Main.game.contains("running")) {
 
                     if (args.length == 0) {
 
-                        if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
+                        if(Main.getMode().equalsIgnoreCase("Teams")) {
 
                             ScoreboardManager m = Bukkit.getScoreboardManager();
                             Scoreboard s = m.getMainScoreboard();
@@ -36,48 +35,30 @@ public class CoordinatesCommand implements CommandExecutor {
                             long y = loc.getBlockY();
                             long z = loc.getBlockZ();
 
-                            if(!Main.spectateurs.contains(player.getName())) {
+                            if(!Main.spectators.contains(player.getName())) {
 
                                 for (OfflinePlayer p : s.getPlayerTeam(player).getPlayers()) {
 
-                                    if (p instanceof Player) {
-
+                                    if (p instanceof Player)
                                         ((Player) p).sendMessage("§8[§cUHC§8]§b " + player.getName() + "§8 » X:§7" + x + "§8 Y:§7" + y + "§8 Z:§7" + z);
-
-                                    }
-
                                 }
 
-                            } else {
-
+                            } else
                                 player.sendMessage(Main.prefix + "§cYou can not do that as a spectator.");
 
-                            }
+                        } else if(Main.getMode().equalsIgnoreCase("Solo"))
+                            player.sendMessage(Main.prefix + "§cYou don't have any team mates!");
 
-                        } else if(!Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
-
-                            player.sendMessage(Main.prefix + "§cGame isn't in Teams mode.");
-
-                        }
-
-                    } else {
-
+                    } else
                         player.sendMessage(Main.prefix + "§cWrong usage. Try /co");
 
-                    }
-
-                } else {
-
+                } else
                     player.sendMessage(Main.prefix + "§cGame hasn't started yet.");
 
-                }
-
             }
-
         }
 
         return false;
-
     }
 
 }

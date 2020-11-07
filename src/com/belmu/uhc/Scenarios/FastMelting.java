@@ -13,10 +13,10 @@ public class FastMelting implements Listener {
 
     @EventHandler
     public void onFurnaceBurn(final FurnaceBurnEvent e) {
-        Random RND = new Random();
+        Random r = new Random();
 
         if(Main.scenarios.contains("fastsmelting")) {
-            UsefulMethods.startUpdate((Furnace) e.getBlock().getState(), RND.nextBoolean() ? 1 : 2);
+            UsefulMethods.startUpdate((Furnace) e.getBlock().getState(), r.nextBoolean() ? 1 : 2);
         }
     }
 }

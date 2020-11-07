@@ -23,36 +23,25 @@ public class GameScoreboard {
     private static FileConfiguration cfg = Main.getInstance().getConfig();
 
     public static void createGameScoreboard(Player player) {
-
         BPlayerBoard board = Netherboard.instance().createBoard(player, "uhcScoreboard");
 
         if(cfg.get("UHC" + "." + "Mode").equals("Teams")) {
-
-            board.setName("§c§lUHC Anciens");
+            board.setName("§c§lUHC Teams");
 
         } else if(cfg.get("UHC" + "." + "Mode").equals("Solo")) {
-
             board.setName("§c§lUHC Solo");
 
-        } else {
-
+        } else
             board.setName("§c§lUHC");
-
-        }
-
     }
 
     public static void createLobbyScoreboard(Player player) {
-
         BPlayerBoard board = Netherboard.instance().createBoard(player, "lobbyScoreboard");
         board.setName("§c§lUHC");
-
     }
 
     public static void updateLobbyScoreboard(Player player) {
-
         BPlayerBoard b = Netherboard.instance().getBoard(player);
-
         FileConfiguration cfg = Main.getInstance().getConfig();
 
         String g = "§7";
@@ -66,15 +55,12 @@ public class GameScoreboard {
         b.set("§7Online§7»§c " + Bukkit.getOnlinePlayers().size() + "§7/§c" + Bukkit.getMaxPlayers(), 3);
         b.set("§7Host§7»§a " + cfg.get("Host"), 2);
         b.set(u, 1);
-
     }
 
     public static void updateGameScoreboard(Player player) {
 
         BPlayerBoard b = Netherboard.instance().getBoard(player);
-
         World world = Bukkit.getWorld("world");
-
         Location loc = new Location(player.getWorld(), 0, player.getLocation().getY(), 0);
 
         String g = "§7";
@@ -146,7 +132,7 @@ public class GameScoreboard {
 
         b.set(f2 + c + " Stats " + e2, 7);
 
-        int si = Main.joueurs.size();
+        int si = Main.players.size();
         int go = Teams.inGameTeams.size();
 
         if (cfg.get("UHC" + "." + "Mode").equals("Solo")) {
@@ -167,13 +153,11 @@ public class GameScoreboard {
         b.set(re + c + "Center" + g + z + t + h, 2);
 
         b.set(u, 1);
-
     }
 
     private static int timer = 0;
 
     public static void startScoreboardTimer() {
-
         new BukkitRunnable() {
 
             @Override
@@ -182,17 +166,13 @@ public class GameScoreboard {
             }
 
         }.runTaskTimer(Main.getInstance(), 20, 20);
-
     }
 
     private static String getTimer() {
-
         return new SimpleDateFormat("mm:ss").format(timer * 1000);
-
     }
 
     public static void initializeHealth(Player player) {
-
         Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
 
         if(sb.getObjective("showhealth") == null) {
@@ -205,11 +185,8 @@ public class GameScoreboard {
             Objective objective2 = sb.registerNewObjective("showhealth2", "health");
 
             objective2.setDisplaySlot(DisplaySlot.PLAYER_LIST);
-
         }
-
         player.setScoreboard(sb);
-
     }
 
 }

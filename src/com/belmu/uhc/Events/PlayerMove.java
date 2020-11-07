@@ -23,50 +23,34 @@ public class PlayerMove implements Listener {
 
         Location loc = new Location(world, 0, Main.height + 1.500, 0);
 
-        if(!Main.partie.contains("lancée")) {
+        if(!Main.game.contains("running")) {
 
-            if (player.getLocation().getY() < Main.height) {
-
-                player.teleport(loc);
-
-            }
+            if (player.getLocation().getY() < Main.height) player.teleport(loc);
 
         } else {
 
-            if(Main.preparation.contains(true)) {
+            if(Main.preparation) {
 
-                if (player.getLocation().getY() < Main.height) {
-
-                    player.teleport(loc);
-
-                }
-
+                if (player.getLocation().getY() < Main.height) player.teleport(loc);
             }
-
         }
 
-        if(!Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
+        if(Main.getMode().equalsIgnoreCase("Solo")) {
 
-            if (Main.justTeleported.contains(true)) {
+            if (Main.justTeleported) {
 
                 if (UsefulMethods.tpLocation.containsKey(player.getUniqueId())) {
 
                     Location tpLoc = UsefulMethods.tpLocation.get(player.getUniqueId());
                     Location pLoc = player.getLocation();
 
-                    if (pLoc.getX() != tpLoc.getX() && pLoc.getZ() != tpLoc.getZ()) {
-
-                        player.teleport(tpLoc);
-
-                    }
-
+                    if (pLoc.getX() != tpLoc.getX() && pLoc.getZ() != tpLoc.getZ()) player.teleport(tpLoc);
                 }
-
             }
 
-        } else if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
+        } else if(Main.getMode().equalsIgnoreCase("Teams")) {
 
-            if (Main.justTeleported.contains(true)) {
+            if (Main.justTeleported) {
 
                 ScoreboardManager m = Bukkit.getScoreboardManager();
                 Scoreboard s = m.getMainScoreboard();
@@ -78,18 +62,10 @@ public class PlayerMove implements Listener {
                     Location tpLoc = UsefulMethods.tpLocationTeams.get(team);
                     Location pLoc = player.getLocation();
 
-                    if (pLoc.getX() != tpLoc.getX() && pLoc.getZ() != tpLoc.getZ()) {
-
-                        player.teleport(tpLoc);
-
-                    }
-
+                    if (pLoc.getX() != tpLoc.getX() && pLoc.getZ() != tpLoc.getZ()) player.teleport(tpLoc);
                 }
-
             }
-
         }
-
     }
 
 }

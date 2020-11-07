@@ -8,10 +8,10 @@ import org.bukkit.entity.Player;
 
 public class MenuCommand implements CommandExecutor {
 
+    @Override
     public boolean onCommand(CommandSender sender, Command cmd, String msg, String[] args) {
 
         if (sender instanceof Player) {
-
             Player player = (Player) sender;
 
             if (cmd.getName().equalsIgnoreCase("menu")) {
@@ -19,41 +19,28 @@ public class MenuCommand implements CommandExecutor {
                 if (args.length == 0) {
 
                     if (!player.isOp()) {
-
                         player.sendMessage(Main.prefix + "§cYou must be operator to do that.");
 
                     } else {
 
                         if(Main.getInstance().getConfig().get("Host") != player.getName()) {
-
                             player.sendMessage(Main.prefix + "§cYou must be host to do that.");
 
                         } else if(Main.getInstance().getConfig().get("Host") == player.getName()) {
 
-                            if(Main.partie.contains("willlancée") || Main.partie.contains("lancée")) {
-
+                            if(Main.game.contains("preparing") || Main.game.contains("running"))
                                 player.sendMessage(Main.prefix + "§cGame has already started.");
 
-                            } else {
-
-                            }
-
                         }
-
                     }
 
-                } else {
-
+                } else
                     player.sendMessage(Main.prefix + "§cWrong usage. Try /menu");
 
-                }
-
             }
-
         }
 
         return false;
-
     }
 
 }

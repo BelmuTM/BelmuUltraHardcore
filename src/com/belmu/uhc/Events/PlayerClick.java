@@ -32,14 +32,10 @@ public class PlayerClick implements Listener {
                 HumanEntity target = Bukkit.getPlayer(cur.getItemMeta().getDisplayName());
                 player.teleport(target.getLocation());
                 player.sendMessage("§7You have been teleported to§f " + cur.getItemMeta().getDisplayName() + "§7.");
-
             }
 
-        } else {
-
-            if(Main.spectateurs.contains(player.getName())) e.setCancelled(true);
-
-        }
+        } else
+            if(Main.spectators.contains(player.getName())) e.setCancelled(true);
     }
 
 }

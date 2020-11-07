@@ -11,7 +11,6 @@ public class NoFall implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent e) {
-
         Entity player = e.getEntity();
 
         if(player instanceof Player) {
@@ -20,13 +19,11 @@ public class NoFall implements Listener {
 
                 if (!e.isCancelled()) {
 
-                    if (e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) {
-
+                    if (e.getCause().equals(EntityDamageEvent.DamageCause.FALL))
                         e.setCancelled(true);
-
-                    }
                 }
             }
         }
     }
+
 }

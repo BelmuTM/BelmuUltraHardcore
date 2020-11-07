@@ -46,37 +46,25 @@ public class Paranoïa implements Listener {
 
             if (!e.isCancelled()) {
 
-
-                if (type == Material.EMERALD_ORE) {
+                if (type == Material.EMERALD_ORE)
                     sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f mined an §aEmerald§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
 
-                }
-
-                if (type == Material.GOLD_ORE) {
-
+                if (type == Material.GOLD_ORE)
                     sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f mined a §6Gold§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-
-                }
 
                 if (type == Material.DIAMOND_ORE) {
 
                     if(!Main.scenarios.contains("diamondlimit")) {
-
                         sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f mined a §bDiamond§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
 
                     } else if(Main.scenarios.contains("diamondlimit")) {
 
                         int a = cfg.getInt("Players" + "." + player.getName() + "." + "diamond");
-
                         if(a >= (Options.diamondLimit - 1)) {
 
                             return;
-
-                        } else {
-
+                        } else
                             sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f mined a §bDiamond§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-
-                        }
 
                     }
                 }
@@ -106,17 +94,11 @@ public class Paranoïa implements Listener {
 
             if (Main.scenarios.contains("paranoia")) {
 
-                if (type == Material.GOLDEN_APPLE) {
-
+                if (type == Material.GOLDEN_APPLE)
                     sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f crafted a §eGolden Apple§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
 
-                }
-
-                if (type == Material.BREWING_STAND_ITEM) {
-
+                if (type == Material.BREWING_STAND_ITEM)
                     sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f crafted a §dBrewing Stand§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-
-                }
             }
         }
     }
@@ -128,14 +110,12 @@ public class Paranoïa implements Listener {
         UUID uuid = player.getUniqueId();
 
         portal.put(uuid, player.getLocation());
-
     }
 
     @EventHandler
     public void onNether(PlayerChangedWorldEvent e) {
 
         try {
-
             Player player = e.getPlayer();
             Location loc = portal.get(player.getUniqueId());
 
@@ -151,18 +131,12 @@ public class Paranoïa implements Listener {
 
             if (Main.scenarios.contains("paranoia")) {
 
-                if (player.getWorld() == Bukkit.getWorld("world_nether")) {
-
+                if (player.getWorld() == Bukkit.getWorld("world_nether"))
                     sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f entered the §cNether§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-
-                }
-
             }
 
         } catch (NullPointerException ex) {
-
             System.out.println("Having trouble with the PlayerChangedWorldEvent...");
-
         }
     }
 
@@ -170,11 +144,9 @@ public class Paranoïa implements Listener {
 
         for(Player all : Bukkit.getOnlinePlayers()) {
 
-            if (!HideCommand.hideParanoia.containsKey(all.getUniqueId())) {
-
+            if (!HideCommand.hideParanoia.containsKey(all.getUniqueId()))
                 all.sendMessage(msg);
-
-            }
         }
     }
+
 }

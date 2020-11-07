@@ -22,22 +22,20 @@ public class FoodEvent implements Listener {
         Entity player = e.getEntity();
 
         if(player instanceof Player) {
-
             UUID uuid = player.getUniqueId();
 
-            if (Main.partie.contains("lancée")) {
+            if (Main.game.contains("running")) {
 
-                if (Main.justTeleported.contains(true) || Main.preparation.contains(true) || Main.fell.contains(true)) {
-
+                if (Main.justTeleported || Main.preparation || Main.fell) {
                     e.setCancelled(true);
 
-                } else if (Main.justTeleported.contains(false) || Main.preparation.contains(false) || Main.fell.contains(false)) {
+                } else {
 
-                    if (Main.joueurs.contains(player.getName())) {
+                    if (Main.players.contains(player.getName())) {
 
                         if (hunger.containsKey(uuid)) {
 
-                            long a = 25 * 1000;
+                            long a = 30 * 1000;
 
                             if (hunger.get(uuid) <= (System.currentTimeMillis() * 1000) - a) {
 
@@ -47,44 +45,29 @@ public class FoodEvent implements Listener {
 
                                 hunger.remove(uuid);
 
-                            } else {
-
+                            } else
                                 e.setCancelled(true);
-
-                            }
 
                         } else {
 
                             if (!ate.contains(uuid)) {
 
                                 e.setCancelled(true);
-
                                 hunger.put(uuid, System.currentTimeMillis() * 1000);
 
-                            } else {
-
+                            } else
                                 ate.remove(uuid);
-
-                            }
-
                         }
 
-                    } else if (!Main.joueurs.contains(player.getName())) {
+                    } else if (!Main.players.contains(player.getName())) {
 
                         e.setCancelled(true);
-
                     }
-
                 }
 
-            } else {
-
+            } else
                 e.setCancelled(true);
-
-            }
-
         }
-
     }
 
     @EventHandler
@@ -101,9 +84,7 @@ public class FoodEvent implements Listener {
             hunger.remove(player.getUniqueId());
 
             ate.add(uuid);
-
         }
-
     }
 
 }

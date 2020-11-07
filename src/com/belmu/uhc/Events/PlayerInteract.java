@@ -31,7 +31,7 @@ public class PlayerInteract implements Listener {
 
         if (it == null) return;
 
-        if(Main.spectateurs.contains(player.getName())) {
+        if(Main.spectators.contains(player.getName())) {
 
             if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
 
@@ -41,57 +41,36 @@ public class PlayerInteract implements Listener {
 
                         if (it.getItemMeta().getDisplayName().equalsIgnoreCase("§fSpectate§7 (Right Click)")) {
 
-
                             Inventory inv = specInventory();
-
                             e.setCancelled(true);
 
                             for (Player all : Bukkit.getOnlinePlayers()) {
 
-                                if (Main.joueurs.contains(all.getName())) {
+                                if (Main.players.contains(all.getName())) {
 
-                                    if (!Main.spectateurs.contains(all.getName())) {
-
+                                    if (!Main.spectators.contains(all.getName()))
                                         inv.addItem(UsefulMethods.getSkull(all.getName()));
-
-                                    }
-
                                 }
-
                             }
 
                             try {
-
                                 player.openInventory(inv);
 
                             } catch (NullPointerException exc) {
-
                                 player.sendMessage(Main.prefix + "§cThere is no player alive!");
-
                             }
 
-
-                        } else if (!it.getItemMeta().getDisplayName().equalsIgnoreCase("§fSpectate§7 (Right Click)")) {
-
+                        } else if (!it.getItemMeta().getDisplayName().equalsIgnoreCase("§fSpectate§7 (Right Click)"))
                             e.setCancelled(true);
 
-                        }
-
-                    } else if (!it.getItemMeta().hasDisplayName()) {
-
+                    } else if (!it.getItemMeta().hasDisplayName())
                         e.setCancelled(true);
 
-                    }
-
-                } else if (!it.hasItemMeta()) {
-
+                } else if (!it.hasItemMeta())
                     e.setCancelled(true);
-
-                }
-
             }
 
-        } else if(!Main.spectateurs.contains(player.getName())) {
+        } else if(!Main.spectators.contains(player.getName())) {
 
             if (it.hasItemMeta()) {
 
@@ -107,60 +86,41 @@ public class PlayerInteract implements Listener {
                             player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 160, 1));
                             player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 2400, 0));
 
-                            if(player.getHealth() < 20 &&  player.getHealth() > 0) {
-
+                            if(player.getHealth() < 20 &&  player.getHealth() > 0)
                                 player.setHealth(player.getHealth() + 4);
 
-                            }
-
-                            for (Player online : Bukkit.getOnlinePlayers()) {
-
-                                online.playSound(player.getLocation(), Sound.EAT, 1, Integer.MAX_VALUE);
-
-                            }
-
+                            for (Player all : Bukkit.getOnlinePlayers())
+                                all.playSound(player.getLocation(), Sound.EAT, 1, Integer.MAX_VALUE);
                         }
-
                     }
-
                 }
-
             }
-
         }
-
     }
 
     private Inventory specInventory() {
 
-        int size = Main.joueurs.size();
+        int size = Main.players.size();
 
         if(size <= 9 && size > 0) {
-
             return Bukkit.createInventory(null, 9, "Spectator Menu");
 
         } else if(size <= 18 && size > 9) {
-
             return Bukkit.createInventory(null, 18, "Spectator Menu");
 
-        } else if(Main.joueurs.size() <= 27 && size > 18) {
-
+        } else if(Main.players.size() <= 27 && size > 18) {
             return Bukkit.createInventory(null, 27, "Spectator Menu");
 
-        } else if(Main.joueurs.size() <= 36 && size > 27) {
-
+        } else if(Main.players.size() <= 36 && size > 27) {
             return Bukkit.createInventory(null, 36, "Spectator Menu");
 
-        } else if(Main.joueurs.size() <= 45 && size > 36) {
-
+        } else if(Main.players.size() <= 45 && size > 36) {
             return Bukkit.createInventory(null, 45, "Spectator Menu");
 
-        } else if(Main.joueurs.size() <= 54 && size > 45) {
-
+        } else if(Main.players.size() <= 54 && size > 45) {
             return Bukkit.createInventory(null, 54, "Spectator Menu");
 
         }
-
         return null;
     }
 
@@ -172,28 +132,19 @@ public class PlayerInteract implements Listener {
 
         if(target instanceof Player) {
 
-            if(Main.spectateurs.contains(player.getName())) {
-
+            if(Main.spectators.contains(player.getName())) {
                 Inventory i = Bukkit.createInventory(null, 54, target.getName() + "'s Inventory");
 
                 for(ItemStack c : ((Player) target).getInventory().getContents()) {
 
-                    if(c != null) {
-
+                    if(c != null)
                         i.addItem(c);
-
-                    }
-
                 }
 
                 for(ItemStack ac : ((Player) target).getInventory().getArmorContents()) {
 
-                    if(ac != null) {
-
+                    if(ac != null)
                         i.addItem(ac);
-
-                    }
-
                 }
 
                 DecimalFormat format = new DecimalFormat("#");
@@ -204,25 +155,20 @@ public class PlayerInteract implements Listener {
                 ItemMeta m = health.getItemMeta();
 
                 m.setDisplayName("§fHealth§7 :§c " + h + "§4❤");
-
                 health.setItemMeta(m);
 
                 ItemStack food = new ItemStack(Material.COOKED_BEEF, 1);
                 ItemMeta m2 = food.getItemMeta();
 
                 m2.setDisplayName("§fFood§7 :§e " + ((Player) target).getFoodLevel() + "§6✚");
-
                 food.setItemMeta(m2);
 
                 i.setItem(45, food);
                 i.setItem(46, health);
 
                 player.openInventory(i);
-
             }
-
         }
-
     }
 
 }

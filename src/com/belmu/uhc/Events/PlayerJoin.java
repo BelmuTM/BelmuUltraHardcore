@@ -2,10 +2,10 @@ package com.belmu.uhc.Events;
 
 import com.belmu.uhc.Main;
 import com.belmu.uhc.Scoreboard.GameScoreboard;
+import com.belmu.uhc.Teams.Teams;
 import com.belmu.uhc.Utils.UsefulMethods;
 import fr.minuskube.netherboard.Netherboard;
 import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -28,8 +28,9 @@ public class PlayerJoin implements Listener {
 
     private int titlechanged = 0;
 
+    @SuppressWarnings("deprecation")
     @EventHandler
-    public void onJoin(PlayerJoinEvent e) {
+    public void onPlayerJoin(PlayerJoinEvent e) {
 
         Player player = e.getPlayer();
         FileConfiguration cfg = Main.getInstance().getConfig();
@@ -38,7 +39,7 @@ public class PlayerJoin implements Listener {
 
         Netherboard.instance().removeBoard(player);
 
-        if(Main.startTeams.equals(true)) {
+        if(Main.startTeams) {
 
             ItemStack ch = new ItemStack(Material.MELON, 1);
             ItemMeta chM = ch.getItemMeta();
@@ -47,43 +48,29 @@ public class PlayerJoin implements Listener {
             ch.setItemMeta(chM);
 
             player.getInventory().setItem(0, ch);
-
         }
 
-        if (Main.spectateurs.contains(player.getName())) {
+        if(Main.game.contains("preparing")) {
 
-            try {
+            if(Main.getMode().equalsIgnoreCase("Teams")) {
 
-                for (String sj : Main.joueurs) {
+                if (Main.getTeamPicking().equalsIgnoreCase("Normal")) {
 
-                    Player play = Bukkit.getPlayerExact(sj);
+                    ItemStack ch = new ItemStack(Material.MELON, 1);
+                    ItemMeta chM = ch.getItemMeta();
 
-                    PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, ((CraftPlayer) player).getHandle());
-                    ((CraftPlayer) play).getHandle().playerConnection.sendPacket(packet);
+                    chM.setDisplayName("§fChoose Team§7 (Right Click)");
+                    ch.setItemMeta(chM);
 
+                    if(!Teams.playersToSpread.contains(player.getUniqueId()))
+                        Teams.playersToSpread.add(player.getUniqueId());
+
+                    player.getInventory().setItem(0, ch);
                 }
-
-            } catch (NullPointerException exc) {
-
             }
-
         }
 
-
-        if (Main.spectateurs.contains(player.getName())) {
-
-            player.setAllowFlight(true);
-            player.setFlying(true);
-
-            for(Player online : Bukkit.getOnlinePlayers()) {
-
-                online.hidePlayer(player);
-
-            }
-
-        }
-
-        if(Main.partie.contains("lancée")) {
+        if(Main.game.contains("running")) {
 
             GameScoreboard.createGameScoreboard(player);
 
@@ -93,27 +80,20 @@ public class PlayerJoin implements Listener {
                 public void run() {
 
                     try {
-
                         GameScoreboard.updateGameScoreboard(player);
 
                     } catch (NullPointerException exc) {
-
-                        System.out.println("Having troubles with Scoreboard...");
-
+                        Bukkit.broadcastMessage(Main.prefix + "§cError: Troubles occurred when loading scoreboard...");
                     }
 
                 }
             }.runTaskTimer(Main.getInstance(), 0, 10);
 
         } else {
-
             Location loc = new Location(Bukkit.getWorld("world"), 0, Main.height + 1.500, 0);
 
-            if(player.getLocation().getY() < Main.height) {
-
+            if(player.getLocation().getY() < Main.height)
                 player.teleport(loc);
-
-            }
 
             GameScoreboard.createLobbyScoreboard(player);
 
@@ -124,18 +104,13 @@ public class PlayerJoin implements Listener {
 
                     try {
 
-                        if(Main.partie.contains("lancée")) {
-
+                        if(Main.game.contains("running"))
                             this.cancel();
-
-                        }
 
                         GameScoreboard.updateLobbyScoreboard(player);
 
                     } catch (NullPointerException exc) {
-
-                        System.out.println("Having troubles with Scoreboard...");
-
+                        Bukkit.broadcastMessage(Main.prefix + "§cError: Troubles occurred when loading scoreboard...");
                     }
 
                 }
@@ -145,165 +120,99 @@ public class PlayerJoin implements Listener {
 
         if(Main.inCooldown.contains(player.getUniqueId())) {
 
-            Main.inCooldown.remove(player.getUniqueId());
-            e.setJoinMessage(Main.prefix + player.getName() + "§a has reconnected.");
+            if(!Main.players.contains(player.getName())) {
+
+                Main.inCooldown.remove(player.getUniqueId());
+                e.setJoinMessage(Main.prefix + player.getDisplayName() + "§7 has§a reconnected§7.");
+            }
 
         } else if(!Main.inCooldown.contains(player.getUniqueId())) {
 
+            String joinMsg = "§r§f joined the game";
+            String playersSize = " §r§7(§c" + Bukkit.getOnlinePlayers().size() + "§7/§c" + Bukkit.getMaxPlayers() + "§7)";
+
+            String finalJoinMsg = Main.prefix + player.getDisplayName() + joinMsg + playersSize;
+
             if (player.isOp()) {
 
-                if(!Main.spectateurs.contains(player.getName())) {
+                String opSpecName = "§7[S]§c[OP]§7 " + player.getName();
 
-                    if(!Main.partie.contains("lancée")) {
+                if(!Main.spectators.contains(player.getName())) {
 
-                        String opName = "§4[OP]§7 " + player.getName();
+                    if(!Main.game.contains("running")) {
+
+                        String opName = "§c[OP]§7 " + player.getName();
 
                         player.setDisplayName(opName);
                         player.setPlayerListName(player.getDisplayName());
 
-                        e.setJoinMessage(Main.prefix + player.getDisplayName() + "§f joined the game §7(§c" + Bukkit.getOnlinePlayers().size() + "§7/§c" + Bukkit.getMaxPlayers() + "§7)");
+                        e.setJoinMessage(finalJoinMsg);
 
-                    } else if(Main.partie.contains("lancée")) {
-
-                        String opSpecName = "§7§o[S]§4§o[OP]§7§o " + player.getName();
+                    } else if(Main.game.contains("running")) {
 
                         player.setDisplayName(opSpecName);
                         player.setPlayerListName(player.getDisplayName());
 
-                        e.setJoinMessage(Main.prefix + player.getDisplayName() + "§r§f joined the game §7(§c" + Bukkit.getOnlinePlayers().size() + "§7/§c" + Bukkit.getMaxPlayers() + "§7)");
-
+                        e.setJoinMessage(finalJoinMsg);
                     }
 
-                } else if(Main.spectateurs.contains(player.getName())) {
+                } else if(Main.spectators.contains(player.getName())) {
 
-                    if(Main.partie.contains("lancée")) {
+                    player.setDisplayName(opSpecName);
+                    player.setPlayerListName(player.getDisplayName());
 
-                        String opSpecName = "§7§o[S]§4§o[OP]§7§o " + player.getName();
-
-                        player.setDisplayName(opSpecName);
-                        player.setPlayerListName(player.getDisplayName());
-
-                        e.setJoinMessage(Main.prefix + player.getDisplayName() + "§r§f joined the game §7(§c" + Bukkit.getOnlinePlayers().size() + "§7/§c" + Bukkit.getMaxPlayers() + "§7)");
-
-                    }
-
+                    e.setJoinMessage(finalJoinMsg);
                 }
 
             } else {
+                String pSpecName = "§7[S] " + player.getName();
 
-                if(!Main.spectateurs.contains(player.getName())) {
+                if(!Main.spectators.contains(player.getName())) {
 
-                    if(!Main.partie.contains("lancée")) {
+                    if(!Main.game.contains("running")) {
 
                         String pName = "§7" + player.getName();
-
                         player.setDisplayName(pName);
-                        player.setPlayerListName(player.getDisplayName());
 
-                        e.setJoinMessage(Main.prefix + player.getDisplayName() + "§f joined the game §7(§c" + Bukkit.getOnlinePlayers().size() + "§7/§c" + Bukkit.getMaxPlayers() + "§7)");
-
-                    } else if(Main.partie.contains("lancée")) {
-
-                        String pSpecName = "§7§o[S] " + player.getName();
-
+                    } else if(Main.game.contains("running"))
                         player.setDisplayName(pSpecName);
-                        player.setPlayerListName(player.getDisplayName());
 
-                        e.setJoinMessage(Main.prefix + player.getDisplayName() + "§r§f joined the game §7(§c" + Bukkit.getOnlinePlayers().size() + "§7/§c" + Bukkit.getMaxPlayers() + "§7)");
+                } else if(Main.spectators.contains(player.getName())) {
 
-                    }
-
-                } else if(Main.spectateurs.contains(player.getName())) {
-
-                    if(Main.partie.contains("lancée")) {
-
-                        String pSpecName = "§7§o[S] " + player.getName();
-
+                    if(Main.game.contains("running"))
                         player.setDisplayName(pSpecName);
-                        player.setPlayerListName(player.getDisplayName());
-
-                        e.setJoinMessage(Main.prefix + player.getDisplayName() + "§r§f joined the game §7(§c" + Bukkit.getOnlinePlayers().size() + "§7/§c" + Bukkit.getMaxPlayers() + "§7)");
-
-                    }
-
                 }
 
+                player.setPlayerListName(player.getDisplayName());
+                e.setJoinMessage(finalJoinMsg);
             }
 
         }
 
-        if (!Main.joueurs.contains(player.getName())) {
+        if (!Main.players.contains(player.getName())) {
 
-            if (!Main.spectateurs.contains(player.getName())) {
+            if (!Main.spectators.contains(player.getName())) {
 
-                if (Main.partie.contains("lancée")) {
-
-                    Main.spectateurs.add(player.getName());
-
-                    player.getInventory().clear();
-                    player.setHealth(20);
-                    player.setGameMode(GameMode.ADVENTURE);
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 2), true);
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 2), true);
-                    player.setAllowFlight(true);
-                    player.setFlying(true);
-                    player.hidePlayer(player);
-
-                    for(Player online : Bukkit.getOnlinePlayers()) {
-
-                        online.hidePlayer(player);
-
-                    }
-
-                    ItemStack spec = new ItemStack(Material.COMPASS, 1);
-                    ItemMeta specM = spec.getItemMeta();
-
-                    specM.setDisplayName("§fSpectate§7 (Right Click)");
-                    spec.setItemMeta(specM);
-
-                    player.getInventory().setItem(0, spec);
-
-                    player.spigot().setCollidesWithEntities(false);
+                if (Main.game.contains("running")) {
+                    setSpectator(player);
 
                 } else {
+
                     UsefulMethods.clearEffects(player);
                     player.setHealth(20);
                     player.setFoodLevel(20);
                     player.getInventory().clear();
 
-                    for(ItemStack i : player.getInventory().getArmorContents()) {
+                    for(ItemStack i : player.getInventory().getArmorContents())
                         i.setType(Material.AIR);
-                    }
-                }
-            } else if (Main.spectateurs.contains(player.getName())) {
-
-                player.getInventory().clear();
-                player.setHealth(20);
-                player.setGameMode(GameMode.ADVENTURE);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 2), true);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 2), true);
-                player.setAllowFlight(true);
-                player.setFlying(true);
-                player.hidePlayer(player);
-
-                for(Player online : Bukkit.getOnlinePlayers()) {
-
-                    online.hidePlayer(player);
-
                 }
 
-                ItemStack spec = new ItemStack(Material.COMPASS, 1);
-                ItemMeta specM = spec.getItemMeta();
+            } else if (Main.spectators.contains(player.getName())) {
 
-                specM.setDisplayName("§fSpectate§7 (Right Click)");
-                spec.setItemMeta(specM);
-
-                player.getInventory().setItem(0, spec);
-
-                player.spigot().setCollidesWithEntities(false);
-
+                setSpectator(player);
             }
-        } else if (Main.joueurs.contains(player.getName())) {
+
+        } else if (Main.game.contains(player.getName())) {
 
             org.bukkit.scoreboard.ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
@@ -316,13 +225,9 @@ public class PlayerJoin implements Listener {
 
                         p.getPlayer().setDisplayName(t.getPrefix() + p.getPlayer().getName());
                         p.getPlayer().setPlayerListName(t.getPrefix() + p.getPlayer().getName());
-
                     }
-
                 }
-
             }
-
         }
 
         PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
@@ -348,28 +253,22 @@ public class PlayerJoin implements Listener {
                     Object footer = new ChatComponentText("§a" + ((CraftPlayer) player).getHandle().ping + "ms §7| §b@Belmu_");
                     if (titlechanged == 0) {
                         a.set(packet, header1);
-                        titlechanged = 1;
                     } else if (titlechanged == 1) {
                         a.set(packet, header2);
-                        titlechanged = 2;
                     } else if (titlechanged == 2) {
                         a.set(packet, header3);
-                        titlechanged = 3;
                     } else if (titlechanged == 3) {
                         a.set(packet, header4);
-                        titlechanged = 4;
                     } else if (titlechanged == 4) {
                         a.set(packet, header5);
-                        titlechanged = 5;
                     } else if (titlechanged == 5) {
                         a.set(packet, header6);
-                        titlechanged = 6;
                     } else if (titlechanged == 6) {
                         a.set(packet, header7);
-                        titlechanged = 7;
-                    } else if (titlechanged == 7) {
-                        titlechanged = 0;
                     }
+                    titlechanged += 1;
+                    if(titlechanged == 7) titlechanged = 0;
+
                     b.set(packet, footer);
 
                     if (Bukkit.getOnlinePlayers().size() == 0) return;
@@ -378,30 +277,55 @@ public class PlayerJoin implements Listener {
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
+
             }
         }.runTaskTimer(Main.getInstance(), 0, 15);
-
 
         if(!(cfg.contains(player.getName()))) {
 
             cfg.set("Players", player.getName());
             Main.getInstance().saveConfig();
-
         }
 
-        if(!Main.partie.contains("lancée")) {
+        if(!Main.game.contains("running")) {
+            World world = Bukkit.getWorld("world");
 
-            player.teleport(new Location(Bukkit.getWorld("world"), 0, Bukkit.getWorld("world").getHighestBlockYAt(0, 0) + 2.500, 0));
+            player.teleport(new Location(world, 0, world.getHighestBlockYAt(0, 0) + 2.5, 0));
             player.setGameMode(GameMode.ADVENTURE);
 
-            for(ItemStack i : player.getInventory().getArmorContents()) {
-
+            for(ItemStack i : player.getInventory().getArmorContents())
                 i.setType(Material.AIR);
-
-            }
-
         }
+    }
 
+    public void setSpectator(Player player) {
+
+        if(!Main.spectators.contains(player.getName()))
+            Main.spectators.add(player.getName());
+
+        player.getInventory().clear();
+        player.setHealth(20);
+        player.setGameMode(GameMode.ADVENTURE);
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 2), true);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 2), true);
+
+        player.setAllowFlight(true);
+        player.setFlying(true);
+
+        player.hidePlayer(player);
+
+        for(Player all : Bukkit.getOnlinePlayers())
+            all.hidePlayer(player);
+
+        ItemStack spec = new ItemStack(Material.COMPASS, 1);
+        ItemMeta specM = spec.getItemMeta();
+
+        specM.setDisplayName("§fSpectate§7 (Right Click)");
+        spec.setItemMeta(specM);
+
+        player.getInventory().setItem(0, spec);
+        player.spigot().setCollidesWithEntities(false);
     }
 
 }

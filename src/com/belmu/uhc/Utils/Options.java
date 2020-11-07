@@ -19,6 +19,6 @@ public class Options {
 
     public static int diamondLimit = 17;
 
-    public static int untilGameStarts = 150;
+    public static double untilGameStarts = 60;
 
 }

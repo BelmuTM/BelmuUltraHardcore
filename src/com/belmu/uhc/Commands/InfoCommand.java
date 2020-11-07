@@ -20,13 +20,11 @@ public class InfoCommand implements CommandExecutor {
                 if (player.isOp()) {
 
                     if (args.length == 0) {
-
                         player.sendMessage(Main.prefix + "§cWrong usage ! Try /info (message).");
 
                     } else {
 
                         StringBuilder x = new StringBuilder();
-
                         for (int i = 0; i < args.length; i++) {
 
                             x.append(args[i].replace("&", "§") + " ");
@@ -34,21 +32,15 @@ public class InfoCommand implements CommandExecutor {
                         }
 
                         Bukkit.broadcastMessage("§8[§cUHC§8]§7(§bInfo§7) " + player.getName() + "§8 »§f " + x.toString().trim());
-
                     }
 
-                } else {
-
+                } else
                     player.sendMessage(Main.prefix + "§cYou must be operator to do that.");
 
-                }
-
             }
-
         }
 
         return false;
-
     }
 
 }

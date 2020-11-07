@@ -6,6 +6,7 @@ import com.belmu.uhc.Utils.CountdownWithInt;
 import com.belmu.uhc.Utils.EasyCountdown;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,71 +16,75 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 public class PlayerQuit implements Listener {
 
+    int beforeElimination = 600;
+
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
 
         Player player = e.getPlayer();
+        World world = Bukkit.getWorld("world");
 
         Main.online.remove(player.getUniqueId());
+        String mainQuitMsg = Main.prefix + player.getDisplayName() + "§r§f has quit!";
 
-        if(Main.partie.contains("lancée")) {
+        if(Main.game.contains("running")) {
 
-            if(Main.joueurs.contains(player.getName())) {
+            if(Main.game.contains(player.getName())) {
+
+                if(Main.spectators.contains(player.getName())) {
+
+                    e.setQuitMessage(mainQuitMsg);
+
+                    Main.game.remove(player.getName());
+                    return;
+                }
 
                 Main.inCooldown.add(player.getUniqueId());
-                e.setQuitMessage(Main.prefix + "§7" + player.getName() + "§f has quit the game. §7(§75m§c left before§4 elimination§7)");
+                e.setQuitMessage(Main.prefix + "§7" + player.getName() + "§f has quit the game. §7(§7" + beforeElimination / 60 + "§f left before elimination§7)");
 
                 CountdownWithInt elimination = new CountdownWithInt(Main.getInstance(),
-                        600,
+                        beforeElimination,
                         () -> {
-
                         },
-
                         () -> {
 
                     if(Main.inCooldown.contains(player.getUniqueId())) {
 
-                        if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
+                        Main.players.remove(player.getName());
+                        Main.spectators.add(player.getName());
+                        Main.inCooldown.remove(player.getUniqueId());
+
+                        world.strikeLightningEffect(player.getLocation());
+
+                        for(Player all : Bukkit.getOnlinePlayers())
+                            all.playSound(all.getLocation(), Sound.AMBIENCE_THUNDER, 1.0f, Integer.MAX_VALUE);
+
+                        Bukkit.broadcastMessage(Main.prefix + "§7" + player.getDisplayName() + "§f has been eliminated for §cinactivity§f.");
+
+                        if(Main.getMode().equalsIgnoreCase("Teams")) {
 
                             ScoreboardManager m = Bukkit.getScoreboardManager();
                             Scoreboard s = m.getMainScoreboard();
 
                             s.getPlayerTeam(player).removePlayer(player);
-
                             if(s.getPlayerTeam(player).getPlayers().size() == 0) {
 
                                 EasyCountdown eliminationTeam = new EasyCountdown(Main.getInstance(),
                                         1D,
                                         () -> {
-
                                             Bukkit.broadcastMessage(Main.prefix + s.getPlayerTeam(player).getPrefix() + s.getPlayerTeam(player).getDisplayName() + "§f team has been eliminated!");
 
                                             Teams.inGameTeams.remove(PlayerDeath.playerTeam.get(player.getUniqueId()));
 
-                                            for (Player all : Bukkit.getOnlinePlayers()) {
-
+                                            for (Player all : Bukkit.getOnlinePlayers())
                                                 all.playSound(all.getLocation(), Sound.WITHER_DEATH, 1, Integer.MAX_VALUE);
-
-                                            }
-
                                         }
-
                                 );
                                 eliminationTeam.scheduleTimer();
 
                             }
-
-                        } else if(!Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
-
-                            Main.joueurs.remove(player.getName());
-                            Main.spectateurs.add(player.getName());
-
-                            Bukkit.getWorld("world").strikeLightningEffect(player.getLocation());
-
-                            Main.inCooldown.remove(player.getUniqueId());
-
                         }
-
                     }
                         },
                         (t) -> {
@@ -88,18 +93,15 @@ public class PlayerQuit implements Listener {
                 );
                 elimination.scheduleTimer();
 
-            } else if(!Main.joueurs.contains(player.getName())) {
+            } else if(!Main.players.contains(player.getName())) {
 
-                e.setQuitMessage(Main.prefix + player.getDisplayName() + "§r§f has quit!");
-
+                e.setQuitMessage(mainQuitMsg);
             }
 
-        } else if(!Main.partie.contains("lancée")) {
+        } else if(!Main.game.contains("running")) {
 
-            e.setQuitMessage(Main.prefix + player.getDisplayName() + "§r§f has quit!");
-
+            e.setQuitMessage(mainQuitMsg);
         }
-
     }
 
 }

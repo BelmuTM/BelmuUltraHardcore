@@ -14,7 +14,6 @@ public class Timber implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
-
         Block b = e.getBlock();
 
         if(!e.isCancelled()) {
@@ -29,29 +28,19 @@ public class Timber implements Listener {
                         new TreeCutter(b);
 
                         ItemStack item = e.getPlayer().getItemInHand();
-
                         for (Material tool : tools) {
 
-                            if (item.getType() == tool) {
-
+                            if (item.getType() == tool)
                                 item.setDurability((short) (item.getDurability() - 15));
 
-                            }
-
                         }
-
                     }
-
                 }
-
             }
-
         }
-
     }
 
     private Material[] tools = {
-
             Material.DIAMOND_AXE,
             Material.IRON_AXE,
             Material.WOOD_AXE,
@@ -83,7 +72,6 @@ public class Timber implements Listener {
             Material.GOLD_SPADE,
 
             Material.SHEARS,
-
     };
 
 }

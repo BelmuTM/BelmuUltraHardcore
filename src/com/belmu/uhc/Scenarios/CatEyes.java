@@ -12,14 +12,9 @@ public class CatEyes {
 
         if(Main.scenarios.contains("cateyes")) {
 
-            for (Player online : Bukkit.getOnlinePlayers()) {
-
-                online.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 2));
-
-            }
-
+            for (Player all : Bukkit.getOnlinePlayers())
+                all.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 2));
         }
-
     }
 
 }

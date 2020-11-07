@@ -13,8 +13,11 @@ public class HealCommand implements CommandExecutor {
 
         if (sender instanceof Player) {
             Player player = (Player) sender;
+
             if (cmd.getName().equalsIgnoreCase("heal")) {
+
                 if (player.isOp()) {
+
                     if (args.length == 0) {
                         player.setFoodLevel(20);
                         player.setHealth(20);
@@ -25,27 +28,29 @@ public class HealCommand implements CommandExecutor {
 
                         if (target != null) {
                             if (target != player) {
+
                                 player.sendMessage(Main.prefix + "§7" + target.getName() + "§a has been healed.");
                                 target.sendMessage(Main.prefix + "§aYou have been healed by §7 " + player.getName() + "§a.");
                                 target.setFoodLevel(20);
                                 target.setHealth(20);
+
                             } else {
                                 player.setFoodLevel(20);
                                 player.setHealth(20);
                                 player.sendMessage(Main.prefix + "§aHealed.");
                             }
-                        } else {
+                        } else
                             player.sendMessage(Main.prefix + "§cUnknown player.");
-                        }
                     }
-                    if (args.length > 1) {
+                    if (args.length > 1)
                         player.sendMessage(Main.prefix + "§cWrong usage. Try /heal");
-                    }
-                } else {
+
+                } else
                     player.sendMessage(Main.prefix + "§cYou must be operator to do that.");
-                }
+
             }
         }
+
         return false;
     }
 }

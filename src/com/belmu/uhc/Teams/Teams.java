@@ -22,6 +22,7 @@ public class Teams {
 
     public static List<Team> allTeams = new ArrayList<>();
     public static List<Team> inGameTeams = new ArrayList<>();
+    public static List<Team> teamsAtStart = new ArrayList<>();
 
     public static void initializeTeams() {
 
@@ -39,24 +40,19 @@ public class Teams {
                 t.setAllowFriendlyFire(false);
                 t.setNameTagVisibility(NameTagVisibility.ALWAYS);
                 t.setDisplayName(teamsList.teamName);
-
             }
 
-            if(!teams.contains(teamsList)) {
-
+            if(!teams.contains(teamsList))
                 teams.add(teamsList);
-
-            }
-
         }
-
     }
 
     public static List<UUID> playersToSpread = new ArrayList<>();
 
+    @SuppressWarnings("deprecation")
     public static void addPlayersToTeams(Player player) {
 
-        if (Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
+        if (Main.getMode().equalsIgnoreCase("Teams")) {
 
             ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
@@ -73,33 +69,30 @@ public class Teams {
                     if (playersToSpread.contains(uuid)) {
 
                         if (Main.online.size() > Options.pPerTeam) {
-
                             int divide = Main.online.size() / Options.pPerTeam;
 
                             int max = Math.round(divide - 1);
                             int min = 0;
 
                             Random r = new Random();
-                            int upper = ((max - min) + 1) + min; //((max - min) + 1) + min;
+                            int upper = ((max - min) + 1) + min;
 
                             Team team = s.getTeam(teams.get(r.nextInt(upper)).teamName);
 
                             if (team.getPlayers().size() < Options.pPerTeam) {
 
                                 this.cancel();
-
                                 team.addPlayer(player);
 
                                 playersToSpread.remove(uuid);
-
                                 player.setDisplayName(s.getPlayerTeam(player).getPrefix() + player.getName());
                                 player.setPlayerListName(s.getPlayerTeam(player).getPrefix() + player.getName());
 
-                                if (!inGameTeams.contains(s.getPlayerTeam(player))) {
-
+                                if (!inGameTeams.contains(s.getPlayerTeam(player)))
                                     inGameTeams.add(s.getPlayerTeam(player));
 
-                                }
+                                if (!teamsAtStart.contains(s.getPlayerTeam(player)))
+                                    teamsAtStart.add(s.getPlayerTeam(player));
 
                             }
 
@@ -114,50 +107,38 @@ public class Teams {
                             Team team = s.getTeam(teams.get(r.nextInt(upper)).teamName);
 
                             if (team.getPlayers().size() < Options.pPerTeam) {
-
                                 this.cancel();
 
                                 team.addPlayer(player);
-
                                 playersToSpread.remove(uuid);
 
                                 player.setDisplayName(s.getPlayerTeam(player).getPrefix() + player.getName());
                                 player.setPlayerListName(s.getPlayerTeam(player).getPrefix() + player.getName());
 
-                                if (!inGameTeams.contains(s.getPlayerTeam(player))) {
-
+                                if (!inGameTeams.contains(s.getPlayerTeam(player)))
                                     inGameTeams.add(s.getPlayerTeam(player));
 
-                                }
+                                if (!teamsAtStart.contains(s.getPlayerTeam(player)))
+                                    teamsAtStart.add(s.getPlayerTeam(player));
 
                             }
-
                         }
-
                     }
-
                 }
 
-            }.runTaskTimer(Main.getInstance(), 5, 5);
+            }.runTaskTimer(Main.getInstance(), 15, 5); // Valeur de la boucle (Elle démarre avec 15 ticks (3/4 de seconde) et effectue ce qu'il y a dedans tous les 5 ticks (1/4 de seconde)).
 
         }
-
     }
 
     public static Team getTeam(String teamName) {
 
         for(Team team : allTeams) {
 
-            if(team.getName().equalsIgnoreCase(teamName)) {
-
+            if(team.getName().equalsIgnoreCase(teamName))
                 return team;
-
-            }
-
         }
-
         return null;
-
     }
 
     public static List<Team> getAllTeams() {
@@ -165,18 +146,12 @@ public class Teams {
         ScoreboardManager m = Bukkit.getScoreboardManager();
         Scoreboard s = m.getMainScoreboard();
 
-        for(int i = 0; i < teams.size(); i++) {
+        for (TeamsList teamsList : teams) {
+            Team team = s.getTeam(teamsList.teamName);
 
-            Team team = s.getTeam(teams.get(i).teamName);
-
-            if(!allTeams.contains(team)) {
-
+            if (!allTeams.contains(team))
                 allTeams.add(team);
-
-            }
-
         }
-
         return allTeams;
     }
 

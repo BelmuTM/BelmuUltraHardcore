@@ -1,7 +1,6 @@
 package com.belmu.uhc;
 
 import com.belmu.uhc.Events.*;
-import com.belmu.uhc.Main;
 import com.belmu.uhc.Scenarios.*;
 import com.belmu.uhc.Teams.TeamChooser;
 import org.bukkit.Bukkit;
@@ -39,14 +38,12 @@ public class ListenerManager {
         reg(new VanillaPlus());
         reg(new TimeBomb());
         reg(new Netheribus());
-
     }
 
     private static void reg(Listener listener) {
 
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(listener, Main.getInstance());
-
     }
 
 }

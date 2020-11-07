@@ -3,7 +3,6 @@ package com.belmu.uhc.Teams;
 import com.belmu.uhc.Main;
 import com.belmu.uhc.Utils.Options;
 import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.HumanEntity;
@@ -27,6 +26,7 @@ import java.util.List;
 
 public class TeamChooser implements Listener {
 
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void onClick(InventoryClickEvent e) {
 
@@ -38,7 +38,6 @@ public class TeamChooser implements Listener {
         if (cur == null) return;
 
         if(p instanceof Player) {
-
             Player player = (Player) p;
 
             if (e.getInventory().getName().equals("Teams")) {
@@ -47,7 +46,6 @@ public class TeamChooser implements Listener {
                 e.setCancelled(true);
 
                 if (cur.getType() == Material.BANNER) {
-
                     BannerMeta banner = (BannerMeta) cur.getItemMeta();
 
                     for (TeamsList team : TeamsList.values()) {
@@ -66,7 +64,7 @@ public class TeamChooser implements Listener {
                                     player.sendMessage(Main.prefix + "§cYou are already in this team!");
                                     player.closeInventory();
 
-                                    Inventory inven = teamChooser();
+                                    Inventory inven = teamChooser(player);
                                     player.openInventory(inven);
 
                                     return;
@@ -77,54 +75,36 @@ public class TeamChooser implements Listener {
                                     player.sendMessage(Main.prefix + "§cThis team is full!");
                                     player.closeInventory();
 
-                                    Inventory inven = teamChooser();
+                                    Inventory inven = teamChooser(player);
                                     player.openInventory(inven);
 
                                     return;
                                 }
-
                             }
-
                             chosenTeam.addPlayer(player);
-
-
-                            if(Teams.playersToSpread.contains(player.getUniqueId())) {
-
-                                Teams.playersToSpread.remove(player.getUniqueId());
-
-                            }
+                            Teams.playersToSpread.remove(player.getUniqueId());
 
                             player.setDisplayName(chosenTeam.getPrefix() + player.getName());
                             player.setPlayerListName(chosenTeam.getPrefix() + player.getName());
 
-                            if (!Teams.inGameTeams.contains(chosenTeam)) {
-
+                            if (!Teams.inGameTeams.contains(chosenTeam))
                                 Teams.inGameTeams.add(chosenTeam);
-
-                            }
 
                             player.sendMessage(Main.prefix + "§7Successfully added you to " + chosenTeam.getPrefix() + chosenTeam.getName() + "§7.");
                             player.closeInventory();
 
-                            Inventory inven = teamChooser();
+                            Inventory inven = teamChooser(player);
                             player.openInventory(inven);
-
                         }
-
                     }
 
-                } else if (cur.getType() == Material.BARRIER) {
-
+                } else if (cur.getType() == Material.BARRIER)
                     player.closeInventory();
-
-                }
-
             }
-
         }
-
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void interact(PlayerInteractEvent e) {
 
@@ -144,17 +124,12 @@ public class TeamChooser implements Listener {
 
                         e.setCancelled(true);
 
-                        Inventory inv = teamChooser();
+                        Inventory inv = teamChooser(player);
                         player.openInventory(inv);
-
                     }
-
                 }
-
             }
-
         }
-
     }
 
     public static List<Team> getPossibleTeams() {
@@ -171,10 +146,12 @@ public class TeamChooser implements Listener {
 
         } else if(players < ppt) {
 
-            Options.pPerTeam = players;
+            Options.pPerTeam = 1;
             f = players;
-
         }
+
+        if(f % 2 != 0)
+            f = f + 1;
 
         DecimalFormat formatter = new DecimalFormat("#");
         String a = formatter.format(f);
@@ -182,36 +159,27 @@ public class TeamChooser implements Listener {
         int finalNumber = Integer.parseInt(a);
 
         List<TeamsList> teamsList = new ArrayList<>();
-        for(TeamsList teams : TeamsList.values()) {
-
+        for(TeamsList teams : TeamsList.values())
             teamsList.add(teams);
-
-        }
 
         for(int i = 0; i < finalNumber; i++) {
 
             Team team = Teams.getTeam(teamsList.get(i).teamName);
-
             possibleTeams.add(team);
-
         }
 
         return possibleTeams;
-
     }
 
-    public static Inventory teamChooser() {
-
+    @SuppressWarnings("deprecation")
+    public static Inventory teamChooser(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, "Teams");
 
         for (int i = 0; i < getPossibleTeams().size(); i++) {
 
             List<TeamsList> teamsList = new ArrayList<>();
-            for (TeamsList teams : TeamsList.values()) {
-
+            for(TeamsList teams : TeamsList.values())
                 teamsList.add(teams);
-
-            }
 
             ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
@@ -227,33 +195,30 @@ public class TeamChooser implements Listener {
             meta.setBaseColor(team.teamDyeColor);
 
             try {
-
                 chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + scoreboardTeam.getPlayers().size() + "/" + Options.pPerTeam + ")");
 
             } catch (NullPointerException npe) {
 
                 chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + 0 + "/" + Options.pPerTeam + ")");
-
             }
-
             List<String> lore = new ArrayList<>();
 
             if(scoreboardTeam.getPlayers() != null) {
 
-                for (OfflinePlayer p : scoreboardTeam.getPlayers()) {
-
-                    lore.add("§7» " + team.teamColor + p.getName() + "\n");
-
-                }
+                for (OfflinePlayer all : scoreboardTeam.getPlayers())
+                    lore.add("§7» " + team.teamColor + all.getName());
 
             }
 
+            if(s.getPlayerTeam(player) == scoreboardTeam) {
+
+                lore.add(" ");
+                lore.add("§cYou are already in this team!");
+            }
+
             chM.setLore(lore);
-
             ch.setItemMeta(chM);
-
             inv.setItem(i, ch);
-
         }
 
         ItemStack b = new ItemStack(Material.BARRIER, 1);
@@ -265,7 +230,6 @@ public class TeamChooser implements Listener {
         inv.setItem(22, b);
 
         return inv;
-
     }
 
 }

@@ -21,18 +21,15 @@ public class FinalHeal implements Listener {
 
                         for(Player all : Bukkit.getOnlinePlayers()) {
 
-                            if(Main.joueurs.contains(all.getName())) {
+                            if(Main.players.contains(all.getName())) {
 
                                 all.setHealth(20);
                                 all.setFoodLevel(20);
                                 all.playSound(all.getLocation(), Sound.VILLAGER_YES, 1, Integer.MAX_VALUE);
-
                             }
-
                         }
 
                         Bukkit.broadcastMessage(Main.prefix + "§aFinal Heal proceeded!");
-
                     },
                     (t) -> {
 
@@ -40,6 +37,6 @@ public class FinalHeal implements Listener {
             );
             heal.scheduleTimer();
         }
-
     }
+
 }

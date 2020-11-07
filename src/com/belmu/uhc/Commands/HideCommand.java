@@ -22,44 +22,34 @@ public class HideCommand implements CommandExecutor {
 
             if (cmd.getName().equalsIgnoreCase("h")) {
 
-                if(Main.partie.contains("lancée")) {
+                if(Main.game.contains("running")) {
 
                     if(Main.scenarios.contains("paranoia")) {
 
                         if (args.length == 0) {
-
                             UUID uuid = player.getUniqueId();
 
                             if (hideParanoia.containsKey(uuid)) {
-
                                 hideParanoia.remove(uuid);
                                 player.sendMessage(Main.prefix + "§cParanoïa§f messages are now§a ON§f.");
 
                             } else if (!hideParanoia.containsKey(uuid)) {
-
                                 hideParanoia.put(uuid, true);
                                 player.sendMessage(Main.prefix + "§cParanoïa§f messages are now§c OFF§f.");
-
                             }
 
-                        } else {
-
+                        } else
                             player.sendMessage(Main.prefix + "§cWrong usage. Try /h");
 
-                        }
-
-                    } else if(!Main.scenarios.contains("paranoia")) {
-
+                    } else if(!Main.scenarios.contains("paranoia"))
                         player.sendMessage(Main.prefix + "§cParanoïa isn't activated.");
 
-                    }
-                } else {
-
+                } else
                     player.sendMessage(Main.prefix + "§cGame hasn't started yet.");
-
-                }
             }
         }
+
         return false;
     }
+
 }

@@ -40,11 +40,8 @@ public class TreeCutter {
                         index += 1;
 
                     } catch (Exception e) {
-
                         cancel();
-
                     }
-
             }
         }, 0, 1);
 
@@ -77,7 +74,6 @@ public class TreeCutter {
 
                     if (b2.getX() > x1 + searchSquareSize || b2.getX() < x1 - searchSquareSize
                             || b2.getZ() > z1 + searchSquareSize || b2.getZ() < z1 - searchSquareSize)
-
                         break;
 
                     if (!comparisonBlockArray.contains(s)) {
@@ -86,15 +82,10 @@ public class TreeCutter {
                         blocks.add(b2);
 
                         this.runLoop(b2, x1, z1);
-
                     }
-
                 }
-
             }
-
         }
-
     }
 
     private void popLeaves(Block block) {
@@ -129,20 +120,13 @@ public class TreeCutter {
 
                                             if (finalTarget.getType() == Material.LEAVES) {
 
-                                                if (leafType(finalTarget) == TreeSpecies.GENERIC) {
-
+                                                if (leafType(finalTarget) == TreeSpecies.GENERIC)
                                                     UsefulMethods.dropTreeApple(target);
 
-                                                }
-
                                                 finalTarget.breakNaturally();
-
                                             }
-
                                         }
-
                                     }
-
                                 }
 
                             } else if(target.getType() == Material.LEAVES_2) {
@@ -157,34 +141,20 @@ public class TreeCutter {
 
                                             if (finalTarget.getType() == Material.LEAVES_2) {
 
-                                                if (leafType(finalTarget) == TreeSpecies.DARK_OAK) {
-
+                                                if (leafType(finalTarget) == TreeSpecies.DARK_OAK)
                                                     UsefulMethods.dropTreeApple(target);
 
-                                                }
-
                                                 finalTarget.breakNaturally();
-
                                             }
-
                                         }
-
                                     }
-
                                 }
-
                             }
-
                         }
-
                     }
-
                 }
-
             }
-
         }
-
     }
 
     private TreeSpecies leafType(Block block) {
@@ -195,45 +165,32 @@ public class TreeCutter {
             return w.getSpecies();
 
         } else if(block.getType() == Material.LEAVES_2) {
-
             return TreeSpecies.DARK_OAK;
 
-        } else {
-
+        } else
             return null;
-
-        }
-
     }
 
     private Location treeSize(TreeSpecies specie) {
-
         World world = Bukkit.getWorld("world");
 
         if(specie == TreeSpecies.GENERIC) {
-
             return new Location(world, 3, 8, 3);
 
         } else if(specie == TreeSpecies.REDWOOD) {
-
             return new Location(world, 4, 13, 3);
 
         } else if(specie == TreeSpecies.ACACIA) {
-
             return new Location(world, 5, 8, 5);
 
         } else if(specie == TreeSpecies.BIRCH) {
-
             return new Location(world, 2, 13, 2);
 
         } else if(specie == TreeSpecies.DARK_OAK) {
 
             return new Location(world, 3, 12, 3);
-
         }
-
         return new Location(world, 0, 0, 0);
-
     }
 
 }

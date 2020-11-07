@@ -16,6 +16,7 @@ public class CommandManager {
         cmd(new HideCommand(), "h");
         cmd(new ForcePvPCommand(), "forcepvp");
         cmd(new CoordinatesCommand(), "co");
+        cmd(new ScenariosCommand(), "scenarios");
 
     }
 

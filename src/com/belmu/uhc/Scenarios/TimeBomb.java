@@ -34,7 +34,6 @@ public class TimeBomb implements Listener {
             UsefulMethods.setBlock(chestLoc_2, Material.CHEST);
 
             Chest c = (Chest)world.getBlockAt(chestLoc_1).getState();
-
             e.getDrops().clear();
 
             if(Main.scenarios.contains("goldenhead")) {
@@ -47,48 +46,36 @@ public class TimeBomb implements Listener {
                 head.setItemMeta(headM);
 
                 c.getBlockInventory().addItem(head);
-
             }
 
 
             for(int i = 0; i < player.getInventory().getContents().length; i++) {
 
-                if(player.getInventory().getContents()[i] != null) {
-
+                if(player.getInventory().getContents()[i] != null)
                     c.getBlockInventory().addItem(player.getInventory().getContents()[i]);
-
-                }
-
             }
 
             for(int i = 0; i < player.getInventory().getArmorContents().length; i++) {
 
-                if(player.getInventory().getArmorContents()[i] != null) {
-
+                if(player.getInventory().getArmorContents()[i] != null)
                     c.getBlockInventory().addItem(player.getInventory().getArmorContents()[i]);
-
-                }
-
             }
 
             CraftArmorStand s = (CraftArmorStand) world.spawnEntity(standLoc, EntityType.ARMOR_STAND);
+            int time = 30;
 
             CountdownWithInt explode = new CountdownWithInt(Main.getInstance(),
-                    30,
+                    time,
 
                     () -> {
-
                         s.setGravity(false);
                         s.setVisible(false);
                         s.setCustomNameVisible(true);
-
                     },
 
                     () -> {
-
                         world.createExplosion(chestLoc_1, 6);
                         s.remove();
-
                     },
 
                     (t) -> {
@@ -98,21 +85,14 @@ public class TimeBomb implements Listener {
 
                             for(ItemStack items : c.getBlockInventory().getContents()) {
 
-                                if(items != null) {
-
+                                if(items != null)
                                     c.getBlockInventory().remove(items);
-
-                                }
-
                             }
-
                         }
-
                     }
-
             );
             explode.scheduleTimer();
-
         }
     }
+
 }

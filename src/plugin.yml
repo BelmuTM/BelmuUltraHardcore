@@ -3,7 +3,7 @@ name : BelmuUHC
 author : Belmu
 version : 1.0
 api-version : 1.8
-description : Plugin developed by Belmu. [UHC 1.8] | Twitter - @BelmuTM
+description : Plugin developed by Belmu. [Ultra Hardcore] | Twitter - @Belmu_
 commands :
   info :
     description : Info command.
@@ -26,3 +26,6 @@ commands :
     aliases : [fpvp]
   co :
     description : Coordinates command.
+  scenarios :
+    description : Scenarios command.
+    aliases : [sc]

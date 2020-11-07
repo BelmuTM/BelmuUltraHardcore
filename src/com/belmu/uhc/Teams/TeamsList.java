@@ -5,8 +5,8 @@ import org.bukkit.DyeColor;
 
 public enum TeamsList {
 
-    BLUE("blue", "§9✽ ", ChatColor.BLUE, DyeColor.BLUE),
-    RED("red", "§c❤ ", ChatColor.RED, DyeColor.RED),
+    BLUE("blue", "§9✽ ", ChatColor.BLUE, DyeColor.BLUE), //1
+    RED("red", "§c❤ ", ChatColor.RED, DyeColor.RED), //2
     GREEN("green", "§a✿ ", ChatColor.GREEN, DyeColor.GREEN),
     PURPLE("purple", "§5✪ ", ChatColor.DARK_PURPLE, DyeColor.PURPLE),
     PINK("pink", "§d⚔ ", ChatColor.LIGHT_PURPLE, DyeColor.PINK),

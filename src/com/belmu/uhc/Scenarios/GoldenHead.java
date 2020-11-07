@@ -38,8 +38,7 @@ public class GoldenHead implements Listener {
             recipe.setIngredient('#', Material.SKULL_ITEM, 3);
 
             Bukkit.addRecipe(recipe);
-
         }
-
     }
+
 }

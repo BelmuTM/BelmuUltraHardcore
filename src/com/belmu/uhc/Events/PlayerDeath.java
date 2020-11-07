@@ -43,25 +43,33 @@ public class PlayerDeath implements Listener {
     public static List<ItemStack[]> itemsInventory = new ArrayList<>();
     private static ItemStack[] itemStack =  itemsInventory.toArray(new ItemStack[itemsInventory.size()]);
 
-    public static ItemStack helmet = null;
-    public static ItemStack chestplate = null;
-    public static ItemStack leggings = null;
-    public static ItemStack boots = null;
+    public static ItemStack helmet;
+    public static ItemStack chestplate;
+    public static ItemStack leggings;
+    public static ItemStack boots;
 
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
+        FileConfiguration cfg = Main.getInstance().getConfig();
 
         Player target = e.getEntity();
         Player killer = target.getKiller();
+        UUID uuid = target.getUniqueId();
 
-        if(!Main.preparation.contains(true) || !Main.fell.contains(true)) {
+        World world = target.getWorld();
+        Location loc = target.getLocation();
 
-            UUID uuid = target.getUniqueId();
+        if(!Main.preparation || !Main.fell) {
 
-            World world = Bukkit.getWorld("world");
-            Location loc = target.getLocation();
+            try {
+                UsefulMethods.addKill(killer, 1);
 
-            FileConfiguration cfg = Main.getInstance().getConfig();
+            } catch (NullPointerException exc) {
+
+                cfg.set("Players" + "." + killer.getName() + ".kills", 0);
+                UsefulMethods.addKill(killer, 1);
+            }
 
             ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
             SkullMeta headM = (SkullMeta) head.getItemMeta();
@@ -70,7 +78,13 @@ public class PlayerDeath implements Listener {
             headM.setOwner(target.getName());
             head.setItemMeta(headM);
 
-            target.spigot().setCollidesWithEntities(false);
+            if (Main.scenarios.contains("goldenhead")) {
+                if (!Main.scenarios.contains("timebomb")) {
+
+                    Location headLoc = new Location(world, loc.getX() + 0.5, loc.getY() + 0.5, loc.getZ() + 0.5);
+                    UsefulMethods.drop(headLoc, head);
+                }
+            }
 
             xLoc = target.getLocation().getBlockX();
             yLoc = target.getLocation().getBlockY();
@@ -91,20 +105,13 @@ public class PlayerDeath implements Listener {
             armorInv.put(uuid, leggings);
             armorInv.put(uuid, boots);
 
-            if (Main.scenarios.contains("goldenhead")) {
-
-                if (!Main.scenarios.contains("timebomb")) {
-
-                    world.dropItem(new Location(world, target.getLocation().getX() + 0.500, target.getLocation().getY() + 0.500, target.getLocation().getZ() + 0.500), head);
-
-                }
-
-            }
-
-            Main.spectateurs.add(target.getName());
-            Main.joueurs.remove(target.getName());
+            Main.spectators.add(target.getName());
+            Main.players.remove(target.getName());
 
             world.strikeLightningEffect(loc);
+
+            for(Player all : Bukkit.getOnlinePlayers())
+                all.playSound(all.getLocation(), Sound.AMBIENCE_THUNDER, 1.0f, Integer.MAX_VALUE);
 
             target.setGameMode(GameMode.SPECTATOR);
             target.sendMessage(Main.prefix + "§aYou are now spectator!");
@@ -116,19 +123,19 @@ public class PlayerDeath implements Listener {
 
             target.hidePlayer(target);
 
-            for(Player online : Bukkit.getOnlinePlayers()) {
+            target.spigot().setCollidesWithEntities(false);
 
-                online.hidePlayer(target);
-
-            }
+            for(Player all : Bukkit.getOnlinePlayers())
+                all.hidePlayer(target);
 
             CountdownWithDouble timer = new CountdownWithDouble(Main.getInstance(),
-                    1,
+                    0.5D,
                     () -> {
                     },
                     () -> {
                         ItemStack spec = new ItemStack(Material.COMPASS, 1);
                         ItemMeta specM = spec.getItemMeta();
+
                         specM.setDisplayName("§fSpectate§7 (Right Click)");
                         spec.setItemMeta(specM);
                         target.getInventory().setItem(0, spec);
@@ -140,9 +147,8 @@ public class PlayerDeath implements Listener {
                         target.setFlying(true);
 
                         if(world.getBlockAt(target.getLocation()).getType() != Material.AIR) {
-
-                            target.teleport(new Location(world, loc.getBlockX() + 0.5, world.getHighestBlockYAt(loc.getBlockX(), loc.getBlockZ()), loc.getBlockZ() + 0.5));
-
+                            Location specLoc = new Location(world, loc.getBlockX() + 0.5, world.getHighestBlockYAt(loc.getBlockX(), loc.getBlockZ()), loc.getBlockZ() + 0.5);
+                            target.teleport(specLoc);
                         }
 
                     },
@@ -154,12 +160,11 @@ public class PlayerDeath implements Listener {
             String ti = "R.I.P.";
             String sub = "You are spectator";
             IChatBaseComponent chatTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + ti + "\",color:" + ChatColor.RED.name().toLowerCase() + ",\"bold\":true" + "}");
-
             PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, chatTitle);
+
             PacketPlayOutTitle length = new PacketPlayOutTitle(5, 60, 20);
 
             IChatBaseComponent chatSubTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + sub + "\",color:" + ChatColor.WHITE.name().toLowerCase() + "}");
-
             PacketPlayOutTitle subtitle = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, chatSubTitle);
 
             ((CraftPlayer) target).getHandle().playerConnection.sendPacket(subtitle);
@@ -179,159 +184,99 @@ public class PlayerDeath implements Listener {
             String z = format.format(zU);
 
             if (target.isOp()) {
-
-                String opSpecName = "§7§o[S]§4§o[OP]§7§o " + target.getName();
+                String opSpecName = "§7[S]§c[OP]§7 " + target.getName();
 
                 target.setDisplayName(opSpecName);
                 target.setPlayerListName(target.getDisplayName());
 
             } else {
-
-                String pSpecName = "§7§o[S] " + target.getName();
+                String pSpecName = "§7[S] " + target.getName();
 
                 target.setDisplayName(pSpecName);
                 target.setPlayerListName(target.getDisplayName());
-
             }
 
             ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
 
-            if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
+            String msg = e.getDeathMessage().replace(target.getName(), "§f" + target.getName() + "§f");
+            String paranoia = " §fat §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]";
+
+            if(Main.getMode().equalsIgnoreCase("Teams")) {
 
                 Team team = s.getPlayerTeam(target);
-
                 playerTeam.put(uuid, team);
 
                 if (killer instanceof Player && target instanceof Player) {
 
-                    String msg = e.getDeathMessage().replace(target.getName(), target.getName() + "§f");
                     String msg2 = msg.replace(killer.getName(), killer.getName() + "§f");
                     String finalMsg = msg2.replace(".", "");
 
                     if (Main.scenarios.contains("paranoia")) {
 
                         e.setDeathMessage("");
-                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + "§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
 
-                    } else if (!Main.scenarios.contains("paranoia")) {
-
+                    } else if (!Main.scenarios.contains("paranoia"))
                         e.setDeathMessage(Main.prefix + msg2);
 
-                    }
-
-                    try {
-
-                        int a = cfg.getInt("Players" + "." + killer.getName() + ".kills");
-                        UsefulMethods.addKill(killer, 1);
-
-                    } catch (NullPointerException exc) {
-
-                        cfg.set("Players" + "." + killer.getName() + ".kills", 0);
-                        UsefulMethods.addKill(killer, 1);
-
-                    }
-
                 } else {
-
-                    String msg = e.getDeathMessage().replace(target.getName(), target.getName() + "§f");
                     String finalMsg = msg.replace(".", "");
 
                     if (Main.scenarios.contains("paranoia")) {
 
                         e.setDeathMessage("");
-                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + " at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
 
-                    } else if (!Main.scenarios.contains("paranoia")) {
-
+                    } else if (!Main.scenarios.contains("paranoia"))
                         e.setDeathMessage(Main.prefix + "§f" + msg);
-
-                    }
-
                 }
 
                 team.removePlayer(target);
-
                 if(team.getPlayers().size() == 0) {
 
                     EasyCountdown eliminationTeam = new EasyCountdown(Main.getInstance(),
                             1D,
                             () -> {
-
                                 Bukkit.broadcastMessage(Main.prefix + team.getPrefix() + team.getDisplayName() + "§f team has been eliminated!");
-
                                 Teams.inGameTeams.remove(playerTeam.get(uuid));
 
-                                for (Player all : Bukkit.getOnlinePlayers()) {
-
+                                for (Player all : Bukkit.getOnlinePlayers())
                                     all.playSound(all.getLocation(), Sound.WITHER_DEATH, 1, Integer.MAX_VALUE);
-
-                                }
-
                             }
-
                     );
                     eliminationTeam.scheduleTimer();
-
                 }
 
-            } else if(!Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams")) {
+            } else if(Main.getMode().equalsIgnoreCase("Solo")) {
 
                 if (killer instanceof Player && target instanceof Player) {
 
-                    String msg = e.getDeathMessage().replace(target.getName(), "§7" + target.getName() + "§f");
                     String msg2 = msg.replace(killer.getName(), killer.getName() + "§f");
                     String finalMsg = msg2.replace(".", "");
 
                     if (Main.scenarios.contains("paranoia")) {
 
                         e.setDeathMessage("");
-                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + "§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
 
-                    } else if (!Main.scenarios.contains("paranoia")) {
-
+                    } else if (!Main.scenarios.contains("paranoia"))
                         e.setDeathMessage(Main.prefix + msg2);
-
-                    }
-
-                    try {
-
-                        int a = cfg.getInt("Players" + "." + killer.getName() + ".kills");
-                        UsefulMethods.addKill(killer, 1);
-
-                    } catch (NullPointerException exc) {
-
-                        cfg.set("Players" + "." + killer.getName() + ".kills", 0);
-                        UsefulMethods.addKill(killer, 1);
-
-                    }
 
                 } else {
 
-                    String msg = e.getDeathMessage().replace(target.getName(), "§7" + target.getName() + "§f");
                     String finalMsg = msg.replace(".", "");
 
                     if (Main.scenarios.contains("paranoia")) {
 
                         e.setDeathMessage("");
-                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + " at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
 
-                    } else if (!Main.scenarios.contains("paranoia")) {
-
+                    } else if (!Main.scenarios.contains("paranoia"))
                         e.setDeathMessage(Main.prefix + "§f" + msg);
-
-                    }
-
                 }
-
             }
-
-        } else {
-
-            target.setHealth(20);
-
         }
-
     }
 
 }

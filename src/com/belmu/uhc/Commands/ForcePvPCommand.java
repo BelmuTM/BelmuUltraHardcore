@@ -2,6 +2,7 @@ package com.belmu.uhc.Commands;
 
 import com.belmu.uhc.Main;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,53 +15,41 @@ public class ForcePvPCommand implements CommandExecutor {
         if (sender instanceof Player) {
 
             Player player = (Player) sender;
+            World world = Bukkit.getWorld("world");
+            World nether = Bukkit.getWorld("world_nether");
 
             if (cmd.getName().equalsIgnoreCase("forcepvp")) {
 
                 if (player.isOp()) {
 
-                    if(Main.partie.contains("lancée")) {
+                    if(Main.game.contains("running")) {
 
                         if (args.length == 0) {
 
-                            if (Bukkit.getWorld("world").getPVP() && Bukkit.getWorld("world_nether").getPVP()) {
-
+                            if (world.getPVP() && nether.getPVP()) {
                                 player.sendMessage(Main.prefix + "§cPvP is already activated.");
 
-                            } else if (!Bukkit.getWorld("world").getPVP() && !Bukkit.getWorld("world_nether").getPVP()) {
+                            } else if (!world.getPVP() && !nether.getPVP()) {
 
-                                Bukkit.getWorld("world").setPVP(true);
-                                Bukkit.getWorld("world_nether").setPVP(true);
-                                Bukkit.getWorld("world_the_end").setPVP(true);
+                                world.setPVP(true);
+                                nether.setPVP(true);
 
                                 Bukkit.broadcastMessage(Main.prefix + "§bPvP§c was forcibly §7activated§c.");
-
                             }
 
-                        } else {
-
+                        } else
                             player.sendMessage(Main.prefix + "§cWrong usage ! Try /forcepvp");
 
-                        }
-
-                    } else {
-
+                    } else
                         player.sendMessage(Main.prefix + "§cGame hasn't started yet.");
 
-                    }
-
-                } else {
-
+                } else
                     player.sendMessage(Main.prefix + "§cYou must be operator to do that.");
 
-                }
-
             }
-
         }
 
         return false;
-
     }
 
 }

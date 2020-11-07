@@ -25,13 +25,9 @@ public class NoCleanUp implements Listener {
 
                     killer.setHealth(killer.getHealth() + hearts);
                     killer.sendMessage(Main.prefix + "§a+§c " + (hearts / 2) + "§4❤");
-
                 }
-
             }
-
         }
-
     }
 
 }

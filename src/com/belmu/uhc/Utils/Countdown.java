@@ -5,23 +5,22 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.function.Consumer;
 
-public class CountdownWithInt implements Runnable {
+public class Countdown implements Runnable {
 
     private JavaPlugin plugin;
 
     private Integer assignedTaskId;
 
-    private int seconds;
-    private int secondsLeft;
+    private double seconds;
+    private double secondsLeft;
 
-    private Consumer<CountdownWithInt> everySecond;
+    private Consumer<Countdown> everySecond;
     private Runnable beforeTimer;
     private Runnable afterTimer;
 
-    public CountdownWithInt(JavaPlugin plugin, int seconds,
-                            Runnable beforeTimer, Runnable afterTimer,
-                            Consumer<CountdownWithInt> everySecond) {
-
+    public Countdown(JavaPlugin plugin, double seconds,
+                     Runnable beforeTimer, Runnable afterTimer,
+                     Consumer<Countdown> everySecond) {
         this.plugin = plugin;
 
         this.seconds = seconds;
@@ -30,7 +29,6 @@ public class CountdownWithInt implements Runnable {
         this.beforeTimer = beforeTimer;
         this.afterTimer = afterTimer;
         this.everySecond = everySecond;
-
     }
 
     @Override
@@ -48,8 +46,8 @@ public class CountdownWithInt implements Runnable {
         secondsLeft--;
     }
 
-    public int getTotalSeconds() { return seconds; }
-    public int getSecondsLeft() { return secondsLeft; }
+    public double getTotalSeconds() { return seconds; }
+    public double getSecondsLeft() { return secondsLeft; }
 
     public void scheduleTimer() {
         this.assignedTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, 0L, 20L);

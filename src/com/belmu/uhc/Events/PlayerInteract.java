@@ -1,6 +1,6 @@
 package com.belmu.uhc.Events;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,10 +20,19 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.text.DecimalFormat;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class PlayerInteract implements Listener {
 
+    public final UHC plugin;
+    public PlayerInteract(UHC plugin) {
+        this.plugin = plugin;
+    }
+
     @EventHandler
-    public void interact(PlayerInteractEvent e) {
+    public void onInteract(PlayerInteractEvent e) {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         Player player = e.getPlayer();
         Action action = e.getAction();
@@ -31,53 +40,38 @@ public class PlayerInteract implements Listener {
 
         if (it == null) return;
 
-        if(Main.spectators.contains(player.getName())) {
+        if(!plugin.players.contains(player.getUniqueId())) {
 
             if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-
                 if (it.hasItemMeta()) {
-
                     if (it.getItemMeta().hasDisplayName()) {
-
                         if (it.getItemMeta().getDisplayName().equalsIgnoreCase("§fSpectate§7 (Right Click)")) {
 
                             Inventory inv = specInventory();
                             e.setCancelled(true);
 
-                            for (Player all : Bukkit.getOnlinePlayers()) {
-
-                                if (Main.players.contains(all.getName())) {
-
-                                    if (!Main.spectators.contains(all.getName()))
-                                        inv.addItem(UsefulMethods.getSkull(all.getName()));
-                                }
+                            for(Player all : Bukkit.getOnlinePlayers()) {
+                                if(plugin.players.contains(all))
+                                    inv.addItem(usefulMethods.getSkull(all.getName()));
                             }
-
                             try {
                                 player.openInventory(inv);
-
                             } catch (NullPointerException exc) {
-                                player.sendMessage(Main.prefix + "§cThere is no player alive!");
+                                player.sendMessage(plugin.prefix + "§cThere is no player alive!");
                             }
-
                         } else if (!it.getItemMeta().getDisplayName().equalsIgnoreCase("§fSpectate§7 (Right Click)"))
                             e.setCancelled(true);
-
                     } else if (!it.getItemMeta().hasDisplayName())
                         e.setCancelled(true);
-
                 } else if (!it.hasItemMeta())
                     e.setCancelled(true);
             }
 
-        } else if(!Main.spectators.contains(player.getName())) {
+        } else if(plugin.players.contains(player.getUniqueId())) {
 
             if (it.hasItemMeta()) {
-
                 if(it.getItemMeta().hasLore()) {
-
                     if (it.getType() == Material.SKULL_ITEM) {
-
                         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
 
                             UsefulMethods.consumeItem(player, 1, it);
@@ -99,50 +93,45 @@ public class PlayerInteract implements Listener {
     }
 
     private Inventory specInventory() {
+        int size = plugin.players.size();
 
-        int size = Main.players.size();
-
-        if(size <= 9 && size > 0) {
+        if(size <= 9 && size > 0)
             return Bukkit.createInventory(null, 9, "Spectator Menu");
 
-        } else if(size <= 18 && size > 9) {
+        else if(size <= 18 && size > 9)
             return Bukkit.createInventory(null, 18, "Spectator Menu");
 
-        } else if(Main.players.size() <= 27 && size > 18) {
+        else if(plugin.players.size() <= 27 && size > 18)
             return Bukkit.createInventory(null, 27, "Spectator Menu");
 
-        } else if(Main.players.size() <= 36 && size > 27) {
+        else if(plugin.players.size() <= 36 && size > 27)
             return Bukkit.createInventory(null, 36, "Spectator Menu");
 
-        } else if(Main.players.size() <= 45 && size > 36) {
+        else if(plugin.players.size() <= 45 && size > 36)
             return Bukkit.createInventory(null, 45, "Spectator Menu");
 
-        } else if(Main.players.size() <= 54 && size > 45) {
+        else if(plugin.players.size() <= 54 && size > 45)
             return Bukkit.createInventory(null, 54, "Spectator Menu");
 
-        }
         return null;
     }
 
     @EventHandler
     public void onInteractEntity(PlayerInteractEntityEvent e) {
-
         Player player = e.getPlayer();
         Entity target = e.getRightClicked();
 
         if(target instanceof Player) {
 
-            if(Main.spectators.contains(player.getName())) {
+            if(!plugin.players.contains(player.getUniqueId())) {
                 Inventory i = Bukkit.createInventory(null, 54, target.getName() + "'s Inventory");
 
                 for(ItemStack c : ((Player) target).getInventory().getContents()) {
-
                     if(c != null)
                         i.addItem(c);
                 }
 
                 for(ItemStack ac : ((Player) target).getInventory().getArmorContents()) {
-
                     if(ac != null)
                         i.addItem(ac);
                 }

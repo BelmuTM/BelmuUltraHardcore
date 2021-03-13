@@ -1,6 +1,6 @@
 package com.belmu.uhc.Commands;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -10,7 +10,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class HideCommand implements CommandExecutor {
+
+    public final UHC plugin;
+    public HideCommand(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     public static final Map<UUID, Boolean> hideParanoia = new HashMap<>();
 
@@ -21,34 +29,28 @@ public class HideCommand implements CommandExecutor {
             Player player = (Player) sender;
 
             if (cmd.getName().equalsIgnoreCase("h")) {
-
-                if(Main.game.contains("running")) {
-
-                    if(Main.scenarios.contains("paranoia")) {
+                if(plugin.game.running) {
+                    if(plugin.scenarios.contains("paranoia")) {
 
                         if (args.length == 0) {
                             UUID uuid = player.getUniqueId();
 
                             if (hideParanoia.containsKey(uuid)) {
                                 hideParanoia.remove(uuid);
-                                player.sendMessage(Main.prefix + "§cParanoïa§f messages are now§a ON§f.");
+                                player.sendMessage(plugin.prefix + "§cParanoïa§f messages are now§a ON");
 
                             } else if (!hideParanoia.containsKey(uuid)) {
                                 hideParanoia.put(uuid, true);
-                                player.sendMessage(Main.prefix + "§cParanoïa§f messages are now§c OFF§f.");
+                                player.sendMessage(plugin.prefix + "§cParanoïa§f messages are now§c OFF");
                             }
-
                         } else
-                            player.sendMessage(Main.prefix + "§cWrong usage. Try /h");
-
-                    } else if(!Main.scenarios.contains("paranoia"))
-                        player.sendMessage(Main.prefix + "§cParanoïa isn't activated.");
-
+                            player.sendMessage(plugin.prefix + "§cWrong usage. Try /h");
+                    } else if(!plugin.scenarios.contains("paranoia"))
+                        player.sendMessage(plugin.prefix + "§cParanoïa isn't activated.");
                 } else
-                    player.sendMessage(Main.prefix + "§cGame hasn't started yet.");
+                    player.sendMessage(plugin.prefix + "§cGame hasn't started yet.");
             }
         }
-
         return false;
     }
 

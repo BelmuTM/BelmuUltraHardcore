@@ -1,6 +1,6 @@
 package com.belmu.uhc.Events;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -10,7 +10,15 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class PlayerClick implements Listener {
+
+    public final UHC plugin;
+    public PlayerClick(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {
@@ -35,7 +43,7 @@ public class PlayerClick implements Listener {
             }
 
         } else
-            if(Main.spectators.contains(player.getName())) e.setCancelled(true);
+            if(!plugin.players.contains(player.getUniqueId())) e.setCancelled(true);
     }
 
 }

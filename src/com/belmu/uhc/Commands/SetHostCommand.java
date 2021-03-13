@@ -1,13 +1,21 @@
 package com.belmu.uhc.Commands;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class SetHostCommand implements CommandExecutor {
+
+    public final UHC plugin;
+    public SetHostCommand(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     public boolean onCommand(CommandSender sender, Command cmd, String msg, String[] args) {
 
@@ -15,37 +23,30 @@ public class SetHostCommand implements CommandExecutor {
             Player player = (Player) sender;
 
             if (cmd.getName().equalsIgnoreCase("sethost")) {
-
                 if(args.length == 1) {
 
                     if (!player.isOp())
-                        player.sendMessage(Main.prefix + "§cYou must be operator to do that.");
+                        player.sendMessage(plugin.prefix + "§cYou must be operator to do that.");
 
                     Player target = Bukkit.getPlayer(args[0]);
-
                     if (target != null) {
 
-                        if(!Main.game.contains("preparing") || !Main.game.contains("running")) {
+                        if(!plugin.game.preparing || !plugin.game.running) {
 
-                            if (Main.getInstance().getConfig().get("Host") != null) {
-                                Main.getInstance().getConfig().set("Host", null);
+                            if (plugin.getConfig().get("Host") != null) {
+                                plugin.getConfig().set("Host", null);
                             }
-
-                            Main.getInstance().getConfig().set("Host", target.getName());
-                            player.sendMessage(Main.prefix + "§fHost has been successfully assigned to§7 " + target.getName() + "§f.");
+                            plugin.getConfig().set("Host", target.getName());
+                            player.sendMessage(plugin.prefix + "§fHost has been successfully assigned to§7 " + target.getName());
 
                         } else
-                            player.sendMessage(Main.prefix + "§cGame has already started.");
-
+                            player.sendMessage(plugin.prefix + "§cGame has already started.");
                     } else
-                        player.sendMessage(Main.prefix + "§cUnknown player.");
-
+                        player.sendMessage(plugin.prefix + "§cUnknown player.");
                 } else
-                    player.sendMessage(Main.prefix + "§cWrong usage. Try /sethost (player).");
-
+                    player.sendMessage(plugin.prefix + "§cWrong usage. Try /sethost (player)");
             }
         }
-
         return false;
     }
 

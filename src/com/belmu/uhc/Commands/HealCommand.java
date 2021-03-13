@@ -1,13 +1,21 @@
 package com.belmu.uhc.Commands;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class HealCommand implements CommandExecutor {
+
+    public final UHC plugin;
+    public HealCommand(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     public boolean onCommand(CommandSender sender, Command cmd, String msg, String[] args) {
 
@@ -15,13 +23,11 @@ public class HealCommand implements CommandExecutor {
             Player player = (Player) sender;
 
             if (cmd.getName().equalsIgnoreCase("heal")) {
-
                 if (player.isOp()) {
-
                     if (args.length == 0) {
                         player.setFoodLevel(20);
                         player.setHealth(20);
-                        player.sendMessage(Main.prefix + "§aHealed.");
+                        player.sendMessage(plugin.prefix + "§aHealed.");
                     }
                     if (args.length == 1) {
                         Player target = Bukkit.getPlayer(args[0]);
@@ -29,28 +35,24 @@ public class HealCommand implements CommandExecutor {
                         if (target != null) {
                             if (target != player) {
 
-                                player.sendMessage(Main.prefix + "§7" + target.getName() + "§a has been healed.");
-                                target.sendMessage(Main.prefix + "§aYou have been healed by §7 " + player.getName() + "§a.");
+                                player.sendMessage(plugin.prefix + "§7" + target.getName() + "§a has been healed");
+                                target.sendMessage(plugin.prefix + "§aYou have been healed by §7 " + player.getName());
                                 target.setFoodLevel(20);
                                 target.setHealth(20);
-
                             } else {
                                 player.setFoodLevel(20);
                                 player.setHealth(20);
-                                player.sendMessage(Main.prefix + "§aHealed.");
+                                player.sendMessage(plugin.prefix + "§aHealed");
                             }
                         } else
-                            player.sendMessage(Main.prefix + "§cUnknown player.");
+                            player.sendMessage(plugin.prefix + "§cUnknown player.");
                     }
                     if (args.length > 1)
-                        player.sendMessage(Main.prefix + "§cWrong usage. Try /heal");
-
+                        player.sendMessage(plugin.prefix + "§cWrong usage. Try /heal (player)");
                 } else
-                    player.sendMessage(Main.prefix + "§cYou must be operator to do that.");
-
+                    player.sendMessage(plugin.prefix + "§cYou must be operator to do that.");
             }
         }
-
         return false;
     }
 }

@@ -1,27 +1,19 @@
 package com.belmu.uhc.Events;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import com.belmu.uhc.Scenarios.Paranoïa;
-import com.belmu.uhc.Teams.Teams;
-import com.belmu.uhc.Utils.CountdownWithDouble;
-import com.belmu.uhc.Utils.EasyCountdown;
+import com.belmu.uhc.TeamsManager.Teams;
 import com.belmu.uhc.Utils.UsefulMethods;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutTitle;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
@@ -29,29 +21,27 @@ import org.bukkit.scoreboard.Team;
 import java.text.DecimalFormat;
 import java.util.*;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class PlayerDeath implements Listener {
 
-    public static final Map<UUID, ItemStack[]> inv = new HashMap<>();
-    public static final Map<UUID, ItemStack> armorInv = new HashMap<>();
+    public final UHC plugin;
+    public PlayerDeath(UHC plugin) {
+        this.plugin = plugin;
+    }
 
-    public static final Map<UUID, Team> playerTeam = new HashMap<>();
+    public static Map<UUID, ItemStack[]> inv = new HashMap<>();
+    public static Map<UUID, ItemStack[]> armorInv = new HashMap<>();
+    public static Map<UUID, Location> deadLocations = new HashMap<>();
 
-    public static int xLoc = 0;
-    public static int yLoc = 0;
-    public static int zLoc = 0;
-
-    public static List<ItemStack[]> itemsInventory = new ArrayList<>();
-    private static ItemStack[] itemStack =  itemsInventory.toArray(new ItemStack[itemsInventory.size()]);
-
-    public static ItemStack helmet;
-    public static ItemStack chestplate;
-    public static ItemStack leggings;
-    public static ItemStack boots;
+    public static Map<UUID, Team> playerTeam = new HashMap<>();
 
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
-        FileConfiguration cfg = Main.getInstance().getConfig();
+        FileConfiguration cfg = plugin.getConfig();
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         Player target = e.getEntity();
         Player killer = target.getKiller();
@@ -60,17 +50,15 @@ public class PlayerDeath implements Listener {
         World world = target.getWorld();
         Location loc = target.getLocation();
 
-        if(!Main.preparation || !Main.fell) {
-
-            try {
-                UsefulMethods.addKill(killer, 1);
-
-            } catch (NullPointerException exc) {
-
-                cfg.set("Players" + "." + killer.getName() + ".kills", 0);
-                UsefulMethods.addKill(killer, 1);
+        if(plugin.game.running) {
+            if(killer instanceof Player) {
+                try {
+                    usefulMethods.addKill(killer, 1);
+                } catch (NullPointerException exc) {
+                    cfg.set("Players" + "." + killer.getName() + ".kills", 0);
+                    usefulMethods.addKill(killer, 1);
+                }
             }
-
             ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
             SkullMeta headM = (SkullMeta) head.getItemMeta();
 
@@ -78,100 +66,26 @@ public class PlayerDeath implements Listener {
             headM.setOwner(target.getName());
             head.setItemMeta(headM);
 
-            if (Main.scenarios.contains("goldenhead")) {
-                if (!Main.scenarios.contains("timebomb")) {
+            if(plugin.scenarios.contains("goldenhead"))
+                if(!plugin.scenarios.contains("timebomb")) usefulMethods.drop(loc, head);
 
-                    Location headLoc = new Location(world, loc.getX() + 0.5, loc.getY() + 0.5, loc.getZ() + 0.5);
-                    UsefulMethods.drop(headLoc, head);
-                }
-            }
+            inv.put(uuid, target.getInventory().getContents());
+            armorInv.put(uuid, target.getInventory().getArmorContents());
 
-            xLoc = target.getLocation().getBlockX();
-            yLoc = target.getLocation().getBlockY();
-            zLoc = target.getLocation().getBlockZ();
-
-            ItemStack[] c = target.getInventory().getContents();
-            itemsInventory.add(c);
-
-            inv.put(uuid, itemStack);
-
-            helmet = target.getInventory().getHelmet();
-            chestplate = target.getInventory().getChestplate();
-            leggings = target.getInventory().getLeggings();
-            boots = target.getInventory().getBoots();
-
-            armorInv.put(uuid, helmet);
-            armorInv.put(uuid, chestplate);
-            armorInv.put(uuid, leggings);
-            armorInv.put(uuid, boots);
-
-            Main.spectators.add(target.getName());
-            Main.players.remove(target.getName());
+            deadLocations.put(target.getUniqueId(), loc);
 
             world.strikeLightningEffect(loc);
 
             for(Player all : Bukkit.getOnlinePlayers())
                 all.playSound(all.getLocation(), Sound.AMBIENCE_THUNDER, 1.0f, Integer.MAX_VALUE);
 
-            target.setGameMode(GameMode.SPECTATOR);
-            target.sendMessage(Main.prefix + "§aYou are now spectator!");
-            target.setHealth(20);
-            target.setFoodLevel(20);
+            usefulMethods.setSpectator(target);
 
-            target.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 2), true);
-            target.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 2), true);
+            String rip = "§cR.I.P.";
+            String spec = "§7You are spectator";
 
-            target.hidePlayer(target);
-
-            target.spigot().setCollidesWithEntities(false);
-
-            for(Player all : Bukkit.getOnlinePlayers())
-                all.hidePlayer(target);
-
-            CountdownWithDouble timer = new CountdownWithDouble(Main.getInstance(),
-                    0.5D,
-                    () -> {
-                    },
-                    () -> {
-                        ItemStack spec = new ItemStack(Material.COMPASS, 1);
-                        ItemMeta specM = spec.getItemMeta();
-
-                        specM.setDisplayName("§fSpectate§7 (Right Click)");
-                        spec.setItemMeta(specM);
-                        target.getInventory().setItem(0, spec);
-                        target.sendMessage(Main.prefix + "§7You got your spectator tool.");
-
-                        target.setFireTicks(0);
-                        target.setGameMode(GameMode.ADVENTURE);
-                        target.setAllowFlight(true);
-                        target.setFlying(true);
-
-                        if(world.getBlockAt(target.getLocation()).getType() != Material.AIR) {
-                            Location specLoc = new Location(world, loc.getBlockX() + 0.5, world.getHighestBlockYAt(loc.getBlockX(), loc.getBlockZ()), loc.getBlockZ() + 0.5);
-                            target.teleport(specLoc);
-                        }
-
-                    },
-                    (t) -> {
-                    }
-            );
-            timer.scheduleTimer();
-
-            String ti = "R.I.P.";
-            String sub = "You are spectator";
-            IChatBaseComponent chatTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + ti + "\",color:" + ChatColor.RED.name().toLowerCase() + ",\"bold\":true" + "}");
-            PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, chatTitle);
-
-            PacketPlayOutTitle length = new PacketPlayOutTitle(5, 60, 20);
-
-            IChatBaseComponent chatSubTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + sub + "\",color:" + ChatColor.WHITE.name().toLowerCase() + "}");
-            PacketPlayOutTitle subtitle = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, chatSubTitle);
-
-            ((CraftPlayer) target).getHandle().playerConnection.sendPacket(subtitle);
-            ((CraftPlayer) target).getHandle().playerConnection.sendPacket(length);
-
-            ((CraftPlayer) target).getHandle().playerConnection.sendPacket(title);
-            ((CraftPlayer) target).getHandle().playerConnection.sendPacket(length);
+            plugin.title.sendTitle(target, rip, ChatColor.BLACK, 5, 75, 5);
+            plugin.title.sendSubTitle(target, spec, ChatColor.BLACK, 5, 75, 5);
 
             DecimalFormat format = new DecimalFormat("#");
 
@@ -183,99 +97,84 @@ public class PlayerDeath implements Listener {
             String y = format.format(yU);
             String z = format.format(zU);
 
-            if (target.isOp()) {
-                String opSpecName = "§7[S]§c[OP]§7 " + target.getName();
+            String specName;
 
-                target.setDisplayName(opSpecName);
-                target.setPlayerListName(target.getDisplayName());
+            if(target.isOp()) specName = "§7[S]§c[OP]§7 " + target.getName();
+            else specName = "§7[S] " + target.getName();
 
-            } else {
-                String pSpecName = "§7[S] " + target.getName();
-
-                target.setDisplayName(pSpecName);
-                target.setPlayerListName(target.getDisplayName());
-            }
+            target.setDisplayName(specName);
+            target.setPlayerListName(target.getDisplayName());
 
             ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
 
-            String msg = e.getDeathMessage().replace(target.getName(), "§f" + target.getName() + "§f");
-            String paranoia = " §fat §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]";
+            String msg = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r§7");
+            String paranoia = " §7at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]";
 
-            if(Main.getMode().equalsIgnoreCase("Teams")) {
+            String deathMessage = null;
+
+            if(plugin.getMode().equalsIgnoreCase("Teams")) {
 
                 Team team = s.getPlayerTeam(target);
                 playerTeam.put(uuid, team);
 
-                if (killer instanceof Player && target instanceof Player) {
+                if(killer instanceof Player) {
 
-                    String msg2 = msg.replace(killer.getName(), killer.getName() + "§f");
+                    String msg2 = msg.replace(killer.getDisplayName(), killer.getDisplayName() + "§r§7");
                     String finalMsg = msg2.replace(".", "");
 
-                    if (Main.scenarios.contains("paranoia")) {
+                    if (plugin.scenarios.contains("paranoia")) {
+                        deathMessage = "";
+                        Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
 
-                        e.setDeathMessage("");
-                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
-
-                    } else if (!Main.scenarios.contains("paranoia"))
-                        e.setDeathMessage(Main.prefix + msg2);
+                    } else if (!plugin.scenarios.contains("paranoia"))
+                        deathMessage = plugin.prefix + msg2;
 
                 } else {
                     String finalMsg = msg.replace(".", "");
 
-                    if (Main.scenarios.contains("paranoia")) {
+                    if(plugin.scenarios.contains("paranoia")) {
+                        deathMessage = "";
+                        Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
 
-                        e.setDeathMessage("");
-                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
-
-                    } else if (!Main.scenarios.contains("paranoia"))
-                        e.setDeathMessage(Main.prefix + "§f" + msg);
+                    } else if(!plugin.scenarios.contains("paranoia"))
+                        deathMessage = plugin.prefix + "§f" + msg;
                 }
 
                 team.removePlayer(target);
                 if(team.getPlayers().size() == 0) {
 
-                    EasyCountdown eliminationTeam = new EasyCountdown(Main.getInstance(),
-                            1D,
-                            () -> {
-                                Bukkit.broadcastMessage(Main.prefix + team.getPrefix() + team.getDisplayName() + "§f team has been eliminated!");
-                                Teams.inGameTeams.remove(playerTeam.get(uuid));
+                    Bukkit.broadcastMessage(plugin.prefix + team.getPrefix() + team.getDisplayName() + "§f team has been eliminated!");
+                    Teams.inGameTeams.remove(playerTeam.get(uuid));
 
-                                for (Player all : Bukkit.getOnlinePlayers())
-                                    all.playSound(all.getLocation(), Sound.WITHER_DEATH, 1, Integer.MAX_VALUE);
-                            }
-                    );
-                    eliminationTeam.scheduleTimer();
+                    for (Player all : Bukkit.getOnlinePlayers())
+                        all.playSound(all.getLocation(), Sound.WITHER_DEATH, 1, Integer.MAX_VALUE);
                 }
 
-            } else if(Main.getMode().equalsIgnoreCase("Solo")) {
-
-                if (killer instanceof Player && target instanceof Player) {
+            } else if(plugin.getMode().equalsIgnoreCase("Solo")) {
+                if (killer instanceof Player) {
 
                     String msg2 = msg.replace(killer.getName(), killer.getName() + "§f");
                     String finalMsg = msg2.replace(".", "");
 
-                    if (Main.scenarios.contains("paranoia")) {
+                    if(plugin.scenarios.contains("paranoia")) {
+                        deathMessage = "";
+                        Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§7" + finalMsg + paranoia);
 
-                        e.setDeathMessage("");
-                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
-
-                    } else if (!Main.scenarios.contains("paranoia"))
-                        e.setDeathMessage(Main.prefix + msg2);
-
+                    } else if (!plugin.scenarios.contains("paranoia"))
+                        deathMessage = plugin.prefix + msg2;
                 } else {
-
                     String finalMsg = msg.replace(".", "");
 
-                    if (Main.scenarios.contains("paranoia")) {
+                    if (plugin.scenarios.contains("paranoia")) {
+                        deathMessage = "";
+                        Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§7" + finalMsg + paranoia);
 
-                        e.setDeathMessage("");
-                        Paranoïa.sendBroadcast(Main.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
-
-                    } else if (!Main.scenarios.contains("paranoia"))
-                        e.setDeathMessage(Main.prefix + "§f" + msg);
+                    } else if (!plugin.scenarios.contains("paranoia"))
+                        deathMessage = plugin.prefix + "§f" + msg;
                 }
             }
+            e.setDeathMessage(deathMessage);
         }
     }
 

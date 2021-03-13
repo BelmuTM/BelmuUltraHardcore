@@ -6,6 +6,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class PlayerCraft implements Listener {
 
     @SuppressWarnings("deprecation")

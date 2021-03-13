@@ -1,6 +1,6 @@
 package com.belmu.uhc.Scenarios;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -13,13 +13,21 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Arrays;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class GoldenHead implements Listener {
+
+    public final UHC plugin;
+    public GoldenHead(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onEnable(PluginEnableEvent e) {
 
-        if (Main.scenarios.contains("goldenhead")) {
+        if (plugin.scenarios.contains("goldenhead")) {
 
             ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
             SkullMeta headM = (SkullMeta) head.getItemMeta();

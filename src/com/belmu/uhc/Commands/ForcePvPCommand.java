@@ -1,6 +1,6 @@
 package com.belmu.uhc.Commands;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -8,12 +8,19 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class ForcePvPCommand implements CommandExecutor {
+
+    public final UHC plugin;
+    public ForcePvPCommand(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     public boolean onCommand(CommandSender sender, Command cmd, String msg, String[] args) {
 
         if (sender instanceof Player) {
-
             Player player = (Player) sender;
             World world = Bukkit.getWorld("world");
             World nether = Bukkit.getWorld("world_nether");
@@ -21,34 +28,27 @@ public class ForcePvPCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("forcepvp")) {
 
                 if (player.isOp()) {
-
-                    if(Main.game.contains("running")) {
-
+                    if(plugin.game.running) {
                         if (args.length == 0) {
 
                             if (world.getPVP() && nether.getPVP()) {
-                                player.sendMessage(Main.prefix + "§cPvP is already activated.");
+                                player.sendMessage(plugin.prefix + "§cPVP is already activated.");
 
                             } else if (!world.getPVP() && !nether.getPVP()) {
 
                                 world.setPVP(true);
                                 nether.setPVP(true);
 
-                                Bukkit.broadcastMessage(Main.prefix + "§bPvP§c was forcibly §7activated§c.");
+                                Bukkit.broadcastMessage(plugin.prefix + "§bPVP§c was forcibly §a§lactivated");
                             }
-
                         } else
-                            player.sendMessage(Main.prefix + "§cWrong usage ! Try /forcepvp");
-
+                            player.sendMessage(plugin.prefix + "§cWrong usage ! Try /forcepvp");
                     } else
-                        player.sendMessage(Main.prefix + "§cGame hasn't started yet.");
-
+                        player.sendMessage(plugin.prefix + "§cGame hasn't started yet.");
                 } else
-                    player.sendMessage(Main.prefix + "§cYou must be operator to do that.");
-
+                    player.sendMessage(plugin.prefix + "§cYou must be operator to do that.");
             }
         }
-
         return false;
     }
 

@@ -1,7 +1,7 @@
 package com.belmu.uhc.Scenarios;
 
-import com.belmu.uhc.Main;
-import com.belmu.uhc.Utils.Options;
+import com.belmu.uhc.UHC;
+import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -18,21 +18,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class DiamondLimit implements Listener {
+
+    public final UHC plugin;
+    public DiamondLimit(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     public static Map<UUID, Integer> dLimit = new HashMap<>();
 
     @EventHandler
     public void onBlockBreakEvent(BlockBreakEvent e) {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         Player player = e.getPlayer();
         Block block = e.getBlock();
         World world = player.getWorld();
 
-        if(Main.scenarios.contains("diamondlimit")) {
-
+        if(plugin.scenarios.contains("diamondlimit")) {
             if (player.getGameMode() == GameMode.SURVIVAL) {
-
                 if (block.getType() == Material.DIAMOND_ORE) {
 
                     UUID uuid = player.getUniqueId();
@@ -45,7 +52,7 @@ public class DiamondLimit implements Listener {
                             e.setCancelled(true);
 
                             block.setType(Material.AIR);
-                            UsefulMethods.sendPacket(player, "§cYou have reached your diamond limit! (§b" + Options.diamondLimit + "§c)");
+                            usefulMethods.sendPacket(player, "§cYou have reached your diamond limit! (§b" + Options.diamondLimit + "§c)");
 
                             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(block.getLocation(), EntityType.EXPERIENCE_ORB);
                             orb.setExperience(2);

@@ -1,11 +1,13 @@
 package com.belmu.uhc.Events;
 
-import com.belmu.uhc.Main;
-import com.belmu.uhc.Utils.Options;
+import com.belmu.uhc.UHC;
+import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.*;
+import org.bukkit.block.Skull;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,55 +15,53 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 
 import java.text.DecimalFormat;
 import java.util.Random;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class CancelledEvents implements Listener {
 
-    @EventHandler(priority=EventPriority.HIGH)
+    public final UHC plugin;
+    public CancelledEvents(UHC plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
     public void onWeatherChange(WeatherChangeEvent event) {
         boolean rain = event.toWeatherState();
-
         if(rain) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onThunderChange(ThunderChangeEvent event) {
+        boolean storm = event.toThunderState();
+        if(storm) event.setCancelled(true);
     }
 
     @EventHandler
     public void onPlayerRegainHealth(EntityRegainHealthEvent e) {
         Entity player = e.getEntity();
 
-        if(Main.game.contains("running")) {
+        if (player instanceof Player) {
+            EntityRegainHealthEvent.RegainReason r = e.getRegainReason();
 
-            if(player instanceof Player) {
-
-                EntityRegainHealthEvent.RegainReason r = e.getRegainReason();
-
-                if (r == EntityRegainHealthEvent.RegainReason.SATIATED || r == EntityRegainHealthEvent.RegainReason.EATING)
-                    e.setCancelled(true);
-            }
+            if (r == EntityRegainHealthEvent.RegainReason.SATIATED || r == EntityRegainHealthEvent.RegainReason.EATING)
+                e.setCancelled(true);
         }
     }
 
-    @EventHandler(priority= EventPriority.HIGH)
-    public void onThunderChange(ThunderChangeEvent event) {
-        boolean storm = event.toThunderState();
-
-        if(storm) event.setCancelled(true);
-    }
-
     @EventHandler
-    public void bed(PlayerBedEnterEvent e) {
-
+    public void onBed(PlayerBedEnterEvent e) {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
+        usefulMethods.sendPacket(e.getPlayer(), "§cYou can not sleep!");
         e.setCancelled(true);
-        UsefulMethods.sendPacket(e.getPlayer(), "§cYou can not sleep!");
     }
 
     private String[] cmds = {
@@ -73,34 +73,32 @@ public class CancelledEvents implements Listener {
             "ver",
             "tell",
             "me",
-            "tps",
+            "tps"
     };
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
         Player player = e.getPlayer();
 
         if(cmdCancelled(player, e.getMessage())) {
             e.setCancelled(true);
-            player.sendMessage(Main.prefix + "§cYou must be operator to do that!");
+            player.sendMessage(plugin.prefix + "§cYou must be operator to do that!");
 
         } else if (!cmdCancelled(player, e.getMessage())) {
 
             if(e.getMessage().equalsIgnoreCase("/reload") || e.getMessage().equalsIgnoreCase("/rl")) {
-
-                UsefulMethods.kickAll("§7§m                              " + "\n§cServer is reloading...\n" + "§7§m                              ");
+                String space = "                              ";
+                usefulMethods.kickAll("§7§m" + space + "\n§cServer is reloading...\n" + "§7§m" + space);
             }
         }
     }
 
     private boolean cmdCancelled(Player player, String message) {
-
         for(String cmd : cmds) {
-
             if (message.equalsIgnoreCase("/" + cmd) && !player.isOp()
                     || message.equalsIgnoreCase("/bukkit:" + cmd) && !player.isOp()
                     || message.equalsIgnoreCase("/minecraft:" + cmd) && !player.isOp()) {
-
                 return true;
             }
         }
@@ -110,60 +108,47 @@ public class CancelledEvents implements Listener {
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
         Player player = e.getPlayer();
-
-        if(!Main.game.contains("running") || Main.spectators.contains(player.getName())) e.setCancelled(true);
+        if(!isAble(player)) e.setCancelled(true);
     }
 
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
         Player player = e.getPlayer();
 
-        if(!Main.game.contains("running") || Main.spectators.contains(player.getName())) {
+        if(!isAble(player)) {
             e.setCancelled(true);
-
         } else {
-
-            if (e.getBlock().getType() == Material.SKULL) {
+            if (e.getBlock().getType() == Material.SKULL && ((Skull) e.getBlock()).getOwner().equalsIgnoreCase("LegendaryJulien") ) {
                 e.setCancelled(true);
                 return;
             }
 
-            if(e.getBlock().getY() > 120) {
-
+            if(e.getBlock().getY() > Options.heightLimit) {
                 e.setCancelled(true);
-                UsefulMethods.sendPacket(player, "§cYou have reached the height limit! (§b120§c)");
+                usefulMethods.sendPacket(player, "§cYou have reached the height limit! (§b" + Options.heightLimit + "§c)");
             }
-        }
-    }
-
-    @EventHandler
-    public void entityDamage(EntityDamageEvent e) {
-        Entity dmgd = e.getEntity();
-
-        if(dmgd instanceof Player) {
-
-            Player player = (Player) e.getEntity();
-
-            if (!Main.game.contains("running") || Main.spectators.contains(player.getName())) e.setCancelled(true);
-            if(Main.fell || Main.preparation || Main.justTeleported) e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent e) {
-
         Player player = e.getPlayer();
-        if(!Main.players.contains(player.getName())) e.setCancelled(true);
+        if(!isAble(player)) e.setCancelled(true);
     }
 
     @EventHandler
-    public void target(EntityTargetLivingEntityEvent e) {
+    public void onPickup(PlayerPickupItemEvent e) {
+        Player player = e.getPlayer();
+        if(!isAble(player)) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onTarget(EntityTargetLivingEntityEvent e) {
         Entity player = e.getTarget();
 
         if(player instanceof Player) {
-
-            if (!Main.game.contains("running") || Main.spectators.contains(player.getName())) {
-
+            if(!isAble((Player) player)) {
                 e.setTarget(null);
                 e.setCancelled(true);
             }
@@ -171,70 +156,52 @@ public class CancelledEvents implements Listener {
     }
 
     @EventHandler
-    public void pickup(PlayerPickupItemEvent e) {
-        Player player = e.getPlayer();
+    public void onEntityDamage(EntityDamageEvent e) {
 
-        if(!Main.game.contains("running") || Main.spectators.contains(player.getName())) e.setCancelled(true);
+        if(e.getEntityType() == EntityType.PLAYER) {
+            Player player = (Player) e.getEntity();
+            if(plugin.game.fell || !isAble(player)) e.setCancelled(true);
+        }
     }
 
     @SuppressWarnings("deprecation")
     @EventHandler
-    public void damage(EntityDamageByEntityEvent e) {
+    public void onDamageByEntity(EntityDamageByEntityEvent e) {
         Entity damager = e.getDamager();
         Entity dmgd = e.getEntity();
 
-        if (!Main.game.contains("running")) {
+        if(!plugin.game.running || plugin.game.teleported) e.setCancelled(true);
+
+        if(!isAble((Player) damager)) {
             e.setCancelled(true);
             return;
         }
 
-        if (Main.spectators.contains(damager.getName())) {
-            e.setCancelled(true);
-            return;
-        }
-
-        if(dmgd instanceof Player && damager instanceof Player) {
-
-            if(Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(Bukkit.getOfflinePlayer(dmgd.getUniqueId())) == Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(Bukkit.getOfflinePlayer(damager.getUniqueId()))) {
-
+        if(dmgd instanceof Player) {
+            if(!isAble((Player) damager) || !isAble((Player) dmgd)) {
                 e.setCancelled(true);
-                damager.sendMessage(Main.prefix + "§c You can't hit your teammate!");
+                return;
+            }
+
+            if(plugin.getMode().equals("Teams")) {
+                if(Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(Bukkit.getOfflinePlayer(dmgd.getUniqueId())) == Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(Bukkit.getOfflinePlayer(damager.getUniqueId()))) {
+
+                    e.setCancelled(true);
+                    damager.sendMessage(plugin.prefix + " §cYou can't hit your teammate!");
+                }
             }
         }
 
         if (damager instanceof Arrow) {
-
             Arrow arrow = (Arrow) damager;
             if (arrow.getShooter() instanceof Player) {
 
                 if(dmgd instanceof Player) {
-
                     DecimalFormat format = new DecimalFormat("#");
                     Double health = ((Player) dmgd).getHealth();
                     String output = format.format(health);
 
-                    ((Player) arrow.getShooter()).sendMessage(Main.prefix + "§7" + dmgd.getName() + "§f is now at§c " + output + "§4❤");
-
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onAchievement(PlayerAchievementAwardedEvent e) {
-        e.setCancelled(true);
-    }
-
-    @EventHandler(priority=EventPriority.HIGHEST)
-    public void onChunkUnload(ChunkUnloadEvent e) {
-        Chunk chunk = e.getChunk();
-
-        if(Main.preparation) {
-
-            if(chunk.getX() > 0 && chunk.getX() < (Options.borderScale / 2) && chunk.getZ() > 0 && chunk.getZ() < (Options.borderScale / 2)) {
-
-                if(chunk.getX() > 0 && chunk.getX() < -(Options.borderScale / 2) && chunk.getZ() > 0 && chunk.getZ() < -(Options.borderScale / 2)) {
-                    chunk.load();
+                    ((Player) arrow.getShooter()).sendMessage(plugin.prefix + "§7" + dmgd.getName() + "§f is now at§c " + output + "§4❤");
                 }
             }
         }
@@ -244,22 +211,25 @@ public class CancelledEvents implements Listener {
     public void onInteract(PlayerInteractEvent e) {
         Player player = e.getPlayer();
 
-        if(e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if(e.getAction() == Action.RIGHT_CLICK_BLOCK) if(!isAble(player)) e.setCancelled(true);
+    }
 
-            if(Main.spectators.contains(player.getName())) e.setCancelled(true);
-        }
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        if(plugin.game.teleported)
+            e.setTo(e.getFrom());
     }
 
     @EventHandler
     public void onPortal(PlayerChangedWorldEvent e) {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         Player player = e.getPlayer();
         World world = player.getWorld();
         World overWorld = Bukkit.getWorld("world");
 
         if(world == overWorld) {
-
-            if (UsefulMethods.isOutsideOfBorder(player)) {
+            if(usefulMethods.isOutsideOfBorder(player)) {
 
                 int upperX = (int) overWorld.getWorldBorder().getSize();
                 Random randomX = new Random();
@@ -272,7 +242,7 @@ public class CancelledEvents implements Listener {
                 int y = overWorld.getHighestBlockYAt(x, z);
 
                 player.teleport(new Location(overWorld, x, y, z));
-                player.sendMessage(Main.prefix + "§7§oYou have been teleported to a random point cause your nether portal was outside the border.");
+                player.sendMessage(plugin.prefix + "§7§oYou have been teleported to a random location because your nether portal was outside the border.");
             }
         }
     }
@@ -280,6 +250,10 @@ public class CancelledEvents implements Listener {
     @EventHandler
     public void onEnd(PlayerPortalEvent e) {
         if(e.getCause() == PlayerTeleportEvent.TeleportCause.END_PORTAL) e.setCancelled(true);
+    }
+
+    public boolean isAble(Player player) {
+        return plugin.game.running && !plugin.game.teleported && plugin.players.contains(player.getUniqueId());
     }
 
 }

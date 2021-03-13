@@ -1,6 +1,6 @@
 package com.belmu.uhc.Scenarios;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import com.belmu.uhc.Utils.TreeCutter;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -10,29 +10,33 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class Timber implements Listener {
+
+    public final UHC plugin;
+    public Timber(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
         Block b = e.getBlock();
 
         if(!e.isCancelled()) {
-
-            if (Main.scenarios.contains("timber")) {
+            if (plugin.scenarios.contains("timber")) {
 
                 if (b.getType().equals(Material.LOG) || b.getType().equals(Material.LOG_2)) {
-
                     if(e.getPlayer().getGameMode() == GameMode.SURVIVAL) {
-
                         e.setCancelled(true);
-                        new TreeCutter(b);
+                        new TreeCutter(b, plugin);
 
                         ItemStack item = e.getPlayer().getItemInHand();
-                        for (Material tool : tools) {
+                        for(Material tool : tools) {
 
                             if (item.getType() == tool)
                                 item.setDurability((short) (item.getDurability() - 15));
-
                         }
                     }
                 }
@@ -72,6 +76,7 @@ public class Timber implements Listener {
             Material.GOLD_SPADE,
 
             Material.SHEARS,
+            Material.FLINT_AND_STEEL
     };
 
 }

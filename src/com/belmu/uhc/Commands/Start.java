@@ -1,14 +1,13 @@
 package com.belmu.uhc.Commands;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.Core.Options;
+import com.belmu.uhc.UHC;
 import com.belmu.uhc.Scenarios.DiamondLimit;
 import com.belmu.uhc.Scenarios.FinalHeal;
 import com.belmu.uhc.Scenarios.Netheribus;
-import com.belmu.uhc.Scoreboard.GameScoreboard;
-import com.belmu.uhc.Teams.Teams;
 import com.belmu.uhc.Utils.*;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutTitle;
+import com.belmu.uhc.TeamsManager.*;
+import fr.minuskube.netherboard.Netherboard;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,221 +22,181 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.Map;
+import java.util.UUID;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class Start implements CommandExecutor {
+
+    public final UHC plugin;
+    public Start(UHC plugin) {
+        this.plugin = plugin;
+    }
+
+    public double untilStartSec;
+    public double untilStartCt;
+
+    public boolean preparing;
+    public boolean running;
+    public boolean teleported;
+    public boolean fell;
+    public boolean border;
 
     @SuppressWarnings("deprecation")
     public boolean onCommand(CommandSender sender, Command cmd, String msg, String[] args) {
 
         if (sender instanceof Player) {
             Player player = (Player) sender;
+            UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
             if (cmd.getName().equalsIgnoreCase("start")) {
+                if(player.isOp()) {
 
-                if (player.isOp()) {
-
-                    if (args.length == 0) {
-                        FileConfiguration cfg = Main.getInstance().getConfig();
+                    if(args.length == 0) {
+                        FileConfiguration cfg = plugin.getConfig();
 
                         if(cfg.get("Host") != null) {
-
                             if(cfg.get("Host").equals(player.getName())) {
 
-                                if (Main.game.contains("running") || Main.start.contains("preparing")) {
-                                    player.sendMessage(Main.prefix + "§cGame has already started.");
-
+                                if(running || preparing) {
+                                    player.sendMessage(plugin.prefix + "§cGame has already started.");
                                 } else {
                                     World world = Bukkit.getWorld("world");
                                     World nether = Bukkit.getWorld("world_nether");
 
-                                    String victory = "§6VI§eC§fT§eO§6RY";
-                                    IChatBaseComponent chatVictory = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + victory + "\",color:" + ChatColor.YELLOW.name().toLowerCase() + "}");
-
-                                    PacketPlayOutTitle titleVictory = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, chatVictory);
-                                    PacketPlayOutTitle length = new PacketPlayOutTitle(0, 20, 0);
-
-                                    String defeat = "§4DE§cFE§4AT";
-                                    IChatBaseComponent chatDefeat = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + defeat + "\",color:" + ChatColor.YELLOW.name().toLowerCase() + "}");
-
-                                    PacketPlayOutTitle titleDefeat = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, chatDefeat);
-
                                     String bar_1 = "§8§m                                                       \n";
                                     String bar_2 = "\n§8§m                                                       ";
-                                    int time = 60;
 
-                                    String kickallMessage = Main.prefix + "§cKicking all the players in§b " + (time / 60) + " minutes§c!";
-                                    String thxForPlaying = "§7§m                              " + "\n§cThanks for Playing!\n" + "§7§m                              ";
                                     String sortError = "§cError: Failed to sort kills.";
+                                    /*
+                                    WIN CHECK
+                                     */
+                                    new BukkitRunnable() {
 
-                                    if(Main.getMode().equalsIgnoreCase("Solo")) {
+                                        @Override
+                                        public void run() {
 
-                                        new BukkitRunnable() {
+                                            if(running) {
+                                                if(plugin.getMode().equalsIgnoreCase("Solo")) {
+                                                    if(plugin.players.size() == 1 && Bukkit.getOnlinePlayers().size() > 1) {
 
-                                            @Override
-                                            public void run() {
+                                                        Player winner = Bukkit.getPlayer(plugin.players.get(0));
 
-                                                if (Main.players.size() == 1 && Main.online.size() > 1) {
-
-                                                    if(Main.game.contains("running")) {
-                                                        this.cancel();
-
-                                                        CountdownWithDouble gtimer = new CountdownWithDouble(Main.getInstance(),
-                                                                0.25,
-                                                                () -> {
-                                                                },
-                                                                () -> {
-
-                                                                    StringBuilder a = new StringBuilder();
-
-                                                                    for(int i = 0; i < 4; i++) {
-
-                                                                        try {
-
-                                                                            Map<Player, Integer> sortedKills = UsefulMethods.sortedKills();
-
-                                                                            Player p = (Player) sortedKills.keySet().toArray()[i];
-                                                                            int kills = sortedKills.get(i);
-
-                                                                            a.append("§7» " + p.getName() + "§7: §c" + kills + "§f kills" + "\n");
-
-                                                                        } catch (ArrayIndexOutOfBoundsException aioobe) {
-                                                                            Bukkit.broadcastMessage(Main.prefix + sortError);
-                                                                        }
-                                                                    }
-
-                                                                    Player winner = Bukkit.getPlayer(Main.players.get(0));
-
-                                                                    ((CraftPlayer) winner).getHandle().playerConnection.sendPacket(titleVictory);
-                                                                    ((CraftPlayer) winner).getHandle().playerConnection.sendPacket(length);
-
-                                                                    Bukkit.broadcastMessage(bar_1 + "§c§l                UHC Solo" + "\n" + "§7            Thanks for playing!" + "\n " + "\n " + "          §cWinner :§7 " + winner + a.toString().trim() + bar_2);
-
-                                                                    for (Player all : Bukkit.getOnlinePlayers())
-                                                                        all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1, Integer.MAX_VALUE);
-
-                                                                    CountdownWithDouble kickall = new CountdownWithDouble(Main.getInstance(),
-                                                                            time,
-                                                                            () -> Bukkit.broadcastMessage(kickallMessage),
-
-                                                                            () -> {
-                                                                                UsefulMethods.kickAll(thxForPlaying);
-
-                                                                                EasyCountdown shutdown = new EasyCountdown(Main.getInstance(),
-                                                                                        2.30D,
-                                                                                        UsefulMethods::deleteWorlds
-
-                                                                                );
-                                                                                shutdown.scheduleTimer();
-
-                                                                            },
-                                                                            (t) -> {
-                                                                            }
-                                                                    );
-                                                                    kickall.scheduleTimer();
-                                                                },
-                                                                (t) -> {
-                                                                }
-                                                        );
-                                                        gtimer.scheduleTimer();
-                                                    }
-
-                                                }
-
-                                            }
-                                        }.runTaskTimer(Main.getInstance(), 0, 100);
-
-                                    } else if(Main.getMode().equalsIgnoreCase("Teams")) {
-
-                                        new BukkitRunnable() {
-
-                                            @Override
-                                            public void run() {
-
-                                                if (Teams.inGameTeams.size() == 1 && Main.online.size() > 1) {
-
-                                                    if(Main.game.contains("running")) {
-
-                                                        if(Teams.teamsAtStart.size() != Teams.inGameTeams.size()) {
+                                                        if(plugin.game.running) {
                                                             this.cancel();
 
-                                                            CountdownWithDouble gtimer = new CountdownWithDouble(Main.getInstance(),
+                                                            Countdown gtimer = new Countdown(plugin,
                                                                     0.25,
-                                                                    () -> {
-                                                                    },
+                                                                    () -> {},
                                                                     () -> {
                                                                         StringBuilder a = new StringBuilder();
+                                                                        for(int i = 0; i < 4; i++) {
 
-                                                                        for (int i = 0; i < 4; i++) {
                                                                             try {
-                                                                                Map<Player, Integer> sortedKills = UsefulMethods.sortedKills();
+                                                                                Map<Player, Integer> sortedKills = usefulMethods.sortedKills();
 
                                                                                 Player p = (Player) sortedKills.keySet().toArray()[i];
-                                                                                int kills = sortedKills.get(i);
+                                                                                int kills = sortedKills.get(p);
 
-                                                                                a.append("§7» " + p.getName() + "§7: §c" + kills + "§f kills" + "\n");
+                                                                                a.append("§7» ").append(p.getName()).append("§7: §c")
+                                                                                        .append(kills).append("§f kills").append("\n");
 
                                                                             } catch (ArrayIndexOutOfBoundsException aioobe) {
-                                                                                Bukkit.broadcastMessage(Main.prefix + sortError);
+                                                                                Bukkit.broadcastMessage(plugin.prefix + sortError);
                                                                             }
                                                                         }
-                                                                        Team lastTeam = Teams.inGameTeams.get(0);
-
-                                                                        for(OfflinePlayer winners : lastTeam.getPlayers()) {
-
-                                                                            ((CraftPlayer) winners).getHandle().playerConnection.sendPacket(titleDefeat);
-                                                                            ((CraftPlayer) winners).getHandle().playerConnection.sendPacket(length);
+                                                                        for(UUID uuid : plugin.players) {
+                                                                            Player player = Bukkit.getPlayer(uuid);
+                                                                            plugin.title.winTitle(player, player == winner);
                                                                         }
 
-                                                                        Bukkit.broadcastMessage(bar_1 + "§c§l               UHC Teams" + "\n" + "§7            Thanks for playing!" + "\n " + "          §cWinner : "
-                                                                                + lastTeam.getPrefix() + lastTeam.getDisplayName() + "§7 Team" + a.toString().trim() + bar_2);
+                                                                        Bukkit.broadcastMessage(bar_1 + "§c§l                UHC Solo" + "\n" + "§7            Thanks for playing!" + "\n " + "\n " +
+                                                                                "          §cWinner :§7 " + winner.getName() + a.toString().trim() + bar_2);
 
-                                                                        for (Player all : Bukkit.getOnlinePlayers())
+                                                                        for(Player all : Bukkit.getOnlinePlayers())
                                                                             all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1, Integer.MAX_VALUE);
 
-                                                                        CountdownWithDouble kickall = new CountdownWithDouble(Main.getInstance(),
-                                                                                time,
-                                                                                () -> Bukkit.broadcastMessage(kickallMessage),
-
-                                                                                () -> {
-                                                                                    UsefulMethods.kickAll(thxForPlaying);
-
-                                                                                    EasyCountdown shutdown = new EasyCountdown(Main.getInstance(),
-                                                                                            2.30D,
-                                                                                                UsefulMethods::deleteWorlds
-
-                                                                                    );
-                                                                                    shutdown.scheduleTimer();
-                                                                                },
-                                                                                (t) -> {
-                                                                                }
-                                                                        );
-                                                                        kickall.scheduleTimer();
+                                                                        endGame();
                                                                     },
-                                                                    (t) -> {
-                                                                    }
+                                                                    (t) -> {}
                                                             );
                                                             gtimer.scheduleTimer();
+                                                        }
+                                                    }
+                                                } else if (plugin.getMode().equalsIgnoreCase("Teams")) {
 
+                                                    if(Teams.inGameTeams.size() == 1 && Bukkit.getOnlinePlayers().size() > 1) {
+                                                        if(plugin.game.running) {
+
+                                                            if(Teams.teamsAtStart.size() != Teams.inGameTeams.size()) {
+                                                                this.cancel();
+
+                                                                Countdown gtimer = new Countdown(plugin,
+                                                                        0.25,
+                                                                        () -> {},
+                                                                        () -> {
+                                                                            StringBuilder a = new StringBuilder();
+
+                                                                            for (int i = 0; i < 4; i++) {
+                                                                                try {
+                                                                                    Map<Player, Integer> sortedKills = usefulMethods.sortedKills();
+
+                                                                                    Player p = (Player) sortedKills.keySet().toArray()[i];
+                                                                                    int kills = sortedKills.get(p);
+
+                                                                                    a.append("§7» ").append(p.getName()).append("§7: §c").append(kills).append("§f kills").append("\n");
+
+                                                                                } catch (ArrayIndexOutOfBoundsException aioobe) {
+                                                                                    Bukkit.broadcastMessage(plugin.prefix + sortError);
+                                                                                }
+                                                                            }
+                                                                            Team lastTeam = Teams.inGameTeams.get(0);
+
+                                                                            for(UUID uuid : plugin.players) {
+                                                                                Player player = Bukkit.getPlayer(uuid);
+                                                                                for (OfflinePlayer winners : lastTeam.getPlayers())
+                                                                                    plugin.title.winTitle(player, player == winners);
+                                                                            }
+                                                                            Bukkit.broadcastMessage(bar_1 + "§c§l               UHC Teams" + "\n" + "§7            Thanks for playing!" + "\n " + "          §cWinner : "
+                                                                                    + lastTeam.getPrefix() + lastTeam.getDisplayName() + "§7 Team" + a.toString().trim() + bar_2);
+
+                                                                            for (Player all : Bukkit.getOnlinePlayers())
+                                                                                all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1, Integer.MAX_VALUE);
+
+                                                                            endGame();
+                                                                        },
+                                                                        (t) -> {}
+                                                                );
+                                                                gtimer.scheduleTimer();
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
-                                        }.runTaskTimer(Main.getInstance(), 0, 100);
+                                        }
+                                    }.runTaskTimer(plugin, 40, 40);
 
-                                    }
-                                    Main.start.add("preparing");
+                                    preparing = true;
+                                    int a = Bukkit.getOnlinePlayers().size();
 
-                                    double preparationTime = Bukkit.getOnlinePlayers().size() * 1.7D;
+                                    if(plugin.getMode().equalsIgnoreCase("Solo")) {
+                                        if(a > 0 && 4 >= a) untilStartCt = 20;
+                                        else if(a > 4 && 8 >= a) untilStartCt = 30;
+                                        else if(a > 8 && 12 >= a) untilStartCt = 40;
+                                        else untilStartCt = 60;
 
-                                    CountdownWithDouble untilStart = new CountdownWithDouble(Main.getInstance(),
-                                            Options.untilGameStarts,
+                                    } else untilStartCt = Options.untilGameStarts;
+
+                                    Countdown untilStart = new Countdown(plugin,
+                                            untilStartCt,
 
                                             () -> {
-                                                Bukkit.broadcastMessage(Main.prefix + "§7Teleporting players in§c " + (Options.untilGameStarts / 60) + "§7 minutes!");
+                                                Bukkit.broadcastMessage(plugin.prefix + "§7Game is currently §apreparing §8§o(§7§o" + (int) untilStartCt + "s§8§o)");
 
-                                                if(Main.getMode().equalsIgnoreCase("Teams")) {
+                                                if(plugin.getMode().equalsIgnoreCase("Teams")) {
 
-                                                    if (Main.getTeamPicking().equalsIgnoreCase("Normal")) {
+                                                    if(plugin.getTeamPicking().equalsIgnoreCase("Normal")) {
 
                                                         ItemStack ch = new ItemStack(Material.MELON, 1);
                                                         ItemMeta chM = ch.getItemMeta();
@@ -245,274 +204,229 @@ public class Start implements CommandExecutor {
                                                         chM.setDisplayName("§fChoose Team§7 (Right Click)");
                                                         ch.setItemMeta(chM);
 
-                                                        for (Player online : Bukkit.getOnlinePlayers()) {
-
+                                                        for(Player online : Bukkit.getOnlinePlayers()) {
                                                             Teams.playersToSpread.add(online.getUniqueId());
                                                             online.getInventory().setItem(0, ch);
                                                         }
-
-                                                        Main.startTeams = true;
                                                     }
                                                     Scoreboard s = Bukkit.getScoreboardManager().getMainScoreboard();
 
                                                     for(Team team : s.getTeams())
                                                         try {
-                                                            team.getPlayers().clear();
-
+                                                            if(!team.getPlayers().isEmpty()) {
+                                                                for(OfflinePlayer p : team.getPlayers()) {
+                                                                    team.removePlayer(p);
+                                                                }
+                                                            }
                                                         } catch(Exception e) {
-                                                            Bukkit.broadcastMessage(Main.prefix + "§cError: Failed to clear players from teams.");
+                                                            Bukkit.broadcastMessage(plugin.prefix + "§cError: Failed to clear players from teams.");
                                                         }
                                                 }
-
                                                 for (Player online : Bukkit.getOnlinePlayers())
                                                     online.playSound(online.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
-
                                             },
 
                                             () -> {
 
-                                                CountdownWithDouble prep = new CountdownWithDouble(Main.getInstance(),
-                                                        preparationTime,
+                                                if (plugin.getMode().equalsIgnoreCase("Teams")) {
+                                                    if (plugin.getTeamPicking().equalsIgnoreCase("Random")) {
 
-                                                        () -> {
+                                                        for (Player online : Bukkit.getOnlinePlayers())
+                                                            Teams.addPlayersToTeams(online);
+                                                    } else {
 
-                                                            for(Player all : Bukkit.getOnlinePlayers())
-                                                                UsefulMethods.sendPacket(all, "§a§oGenerating chunks... §7§o(Estimated time: " + preparationTime + "s)");
+                                                        if (!Teams.playersToSpread.isEmpty()) {
+                                                            for (int i = 0; i < Teams.playersToSpread.size(); i++) {
 
-                                                            if(Main.getMode().equalsIgnoreCase("Teams")) {
-
-                                                                if (Main.getTeamPicking().equalsIgnoreCase("Random")) {
-
-                                                                    for (Player online : Bukkit.getOnlinePlayers())
-                                                                        Teams.addPlayersToTeams(online);
-
-                                                                } else {
-                                                                    Main.startTeams = false;
-
-                                                                    if (!Teams.playersToSpread.isEmpty()) {
-
-                                                                        for (int i = 0; i < Teams.playersToSpread.size(); i++) {
-
-                                                                            Player toSpread = Bukkit.getPlayer(Teams.playersToSpread.get(i));
-                                                                            Teams.addPlayersToTeams(toSpread);
-                                                                        }
-                                                                    }
-                                                                }
+                                                                Player toSpread = Bukkit.getPlayer(Teams.playersToSpread.get(i));
+                                                                Teams.addPlayersToTeams(toSpread);
                                                             }
-                                                            Main.game.add("running");
-                                                            Main.start.clear();
-                                                            Main.preparation = true;
+                                                        }
+                                                    }
+                                                }
+                                                for(Player all : Bukkit.getOnlinePlayers()) {
+                                                    plugin.players.add(all.getUniqueId());
 
-                                                            EasyCountdown oof = new EasyCountdown(Main.getInstance(),
-                                                                    1.0D,
-                                                                    UsefulMethods::prepareTp
-                                                            );
-                                                            oof.scheduleTimer();
+                                                    usefulMethods.sendPacket(all, "§7Loading game...");
+                                                    all.playSound(all.getLocation(), Sound.CHICKEN_EGG_POP, 1, Integer.MAX_VALUE);
+                                                }
+                                                preparing = true;
+                                                usefulMethods.prepareTp();
 
-                                                            for (Player all : Bukkit.getOnlinePlayers()) {
+                                                new BukkitRunnable() {
 
-                                                                Main.players.add(all.getName());
-                                                                all.playSound(all.getLocation(), Sound.CHICKEN_EGG_POP, 1, Integer.MAX_VALUE);
-                                                            }
+                                                    @Override
+                                                    public void run() {
 
-                                                        },
+                                                        if(plugin.getMode().equalsIgnoreCase("Teams")
+                                                                && usefulMethods.tpLocationTeams.size() == Teams.inGameTeams.size() && Teams.playersToSpread.isEmpty()
+                                                        || plugin.getMode().equalsIgnoreCase("Solo")
+                                                                && usefulMethods.tpLocation.size() == plugin.players.size()) {
+                                                            this.cancel();
 
-                                                        () -> {
-                                                            Main.preparation = false;
+                                                            running = true;
 
-                                                            CountdownWithInt gtimer = new CountdownWithInt(Main.getInstance(),
-                                                                    Main.timer,
+                                                            Countdown gtimer = new Countdown(plugin,
+                                                                    plugin.timer,
 
                                                                     () -> {
+                                                                        int a = plugin.platformSize;
+                                                                        int b = plugin.height;
 
-                                                                        Location loc3 = new Location(world, Main.platformSize, Main.height + 1, -Main.platformSize);
-                                                                        Location loc4 = new Location(world, -Main.platformSize, Main.height + 1, Main.platformSize);
+                                                                        Location loc3 = new Location(world, a, b + 1, -a);
+                                                                        Location loc4 = new Location(world, -a, b + 1, a);
+                                                                        usefulMethods.setBlocksRegion(loc3, loc4, Material.AIR);
 
-                                                                        UsefulMethods.setBlocksRegion(loc3, loc4, Material.AIR);
+                                                                        Location loc1 = new Location(world, a, b, -a);
+                                                                        Location loc2 = new Location(world, -a, b, a);
+                                                                        usefulMethods.setBlocksRegion(loc1, loc2, Material.AIR);
 
-                                                                        Location loc1 = new Location(world, Main.platformSize, Main.height, -Main.platformSize);
-                                                                        Location loc2 = new Location(world, -Main.platformSize, Main.height, Main.platformSize);
-
-                                                                        UsefulMethods.setBlocksRegion(loc1, loc2, Material.AIR);
-
-                                                                        UsefulMethods.tp();
-                                                                        UsefulMethods.start();
+                                                                        usefulMethods.tp();
+                                                                        usefulMethods.start(plugin.timer);
                                                                     },
 
                                                                     () -> {
-                                                                        for (Player all : Bukkit.getOnlinePlayers()) {
+                                                                        teleported = false;
 
+                                                                        for (Player all : Bukkit.getOnlinePlayers()) {
                                                                             all.getInventory().clear();
                                                                             all.setGameMode(GameMode.SURVIVAL);
+
+                                                                            CraftPlayer cp = ((CraftPlayer) all);
+                                                                            cp.getHandle().triggerHealthUpdate();
                                                                         }
                                                                         world.setTime(0);
                                                                         world.getWorldBorder().setSize(Options.borderScale);
                                                                         world.getWorldBorder().setCenter(0, 0);
                                                                         world.getWorldBorder().setWarningDistance(25);
 
-                                                                        for (Player all : Bukkit.getOnlinePlayers()) {
-                                                                            all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
-                                                                            all.sendMessage(Main.prefix + "§aGood luck!");
-
-                                                                            GameScoreboard.createGameScoreboard(all);
-
-                                                                            new BukkitRunnable() {
-
-                                                                                @Override
-                                                                                public void run() {
-
-                                                                                    try {
-                                                                                        GameScoreboard.updateGameScoreboard(all);
-
-                                                                                    } catch (NullPointerException exc) {
-                                                                                        Bukkit.broadcastMessage(Main.prefix + "§cError: Troubles occurred when loading scoreboard...");
-                                                                                    }
-
-                                                                                }
-                                                                            }.runTaskTimer(Main.getInstance(), 0, 10);
+                                                                        for(Player all : Bukkit.getOnlinePlayers()) {
+                                                                            all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1, Integer.MAX_VALUE);
+                                                                            all.sendMessage(plugin.prefix + "§aGood luck!");
 
                                                                             DiamondLimit.dLimit.put(all.getUniqueId(), 0);
 
-                                                                            GameScoreboard.initializeHealth(all);
+                                                                            plugin.gameScoreboard.initializeHealth(all);
+
+                                                                            all.setScoreboard(Netherboard.instance().getBoard(all).getScoreboard());
                                                                             all.setHealth(all.getHealth());
+
+                                                                            CraftPlayer cp = ((CraftPlayer) all);
+                                                                            cp.getHandle().triggerHealthUpdate();
                                                                         }
-                                                                        Netheribus.startNetheribus();
-                                                                        FinalHeal.finalHeal(Options.finalHealSeconds);
+                                                                        Netheribus netheribus = new Netheribus(plugin);
+                                                                        FinalHeal finalHeal = new FinalHeal(plugin);
 
-                                                                        GameScoreboard.startScoreboardTimer();
+                                                                        finalHeal.execute(Options.finalHealSeconds);
+                                                                        netheribus.execute();
 
-                                                                        if(Main.scenarios.contains("paranoia"))
-                                                                            Bukkit.broadcastMessage(Main.prefix + "§2Tip :§a Use /h to hide the§c Paranoïa§a alerts.");
+                                                                        plugin.gameScoreboard.startTimer();
+                                                                        plugin.gameScoreboard.createGameScoreboard(player);
+                                                                        new BukkitRunnable() {
 
-                                                                        if(Main.getInstance().getConfig().get("UHC" + "." + "Mode").equals("Teams"))
-                                                                            Bukkit.broadcastMessage(Main.prefix + "§2Tip :§a Type ! before your message to talk in the global chat.");
+                                                                            @Override
+                                                                            public void run() {
+                                                                                for(Player all : Bukkit.getOnlinePlayers()) plugin.gameScoreboard.updateGameScoreboard(all);
+                                                                                if(!running || !preparing) this.cancel();
+                                                                            }
+                                                                        }.runTaskTimer(plugin, 5, 15);
 
-                                                                        CountdownWithInt monsters = new CountdownWithInt(Main.getInstance(),
+                                                                        if(plugin.scenarios.contains("paranoia"))
+                                                                            Bukkit.broadcastMessage(plugin.prefix + "§2Tip :§a Use /h to hide the§c Paranoïa§a alerts");
+
+                                                                        if(plugin.getConfig().get("UHC" + "." + "Mode").equals("Teams"))
+                                                                            Bukkit.broadcastMessage(plugin.prefix + "§2Tip :§a Type ! before your message to talk in the global chat");
+
+                                                                        Countdown monsters = new Countdown(plugin,
                                                                                 Options.monstersSpawn,
-                                                                                () -> Bukkit.broadcastMessage(Main.prefix + "§cMonsters§f will spawn in§7 " + (Options.monstersSpawn / 60) + " minutes§c."),
+                                                                                () -> Bukkit.broadcastMessage(plugin.prefix + "§cMonsters§f will spawn in§7 " + Math.round((float) Options.monstersSpawn / 60) + " minute(s)"),
 
                                                                                 () -> {
                                                                                     world.setMonsterSpawnLimit(70);
-                                                                                    Bukkit.broadcastMessage(Main.prefix + "§cMonsters§f will now §7spawn§f.");
+                                                                                    Bukkit.broadcastMessage(plugin.prefix + "§cMonsters§f will now §7spawn");
                                                                                 },
-                                                                                (t) -> {
-
-                                                                                }
+                                                                                (t) -> {}
                                                                         );
                                                                         monsters.scheduleTimer();
 
-                                                                        CountdownWithInt border = new CountdownWithInt(Main.getInstance(),
+                                                                        Countdown borderCd = new Countdown(plugin,
                                                                                 Options.borderSeconds,
-                                                                                () -> {
-                                                                                },
+                                                                                () -> {},
                                                                                 () -> {
                                                                                     world.getWorldBorder().setSize(250, Options.borderShrinkingSeconds);
                                                                                     world.getWorldBorder().setCenter(0, 0);
                                                                                     world.getWorldBorder().setWarningDistance(25);
 
-                                                                                    for (Player all : Bukkit.getOnlinePlayers()) {
-
+                                                                                    for(Player all : Bukkit.getOnlinePlayers()) {
                                                                                         all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1, Integer.MAX_VALUE);
-                                                                                        all.sendMessage(Main.prefix + "§bBorder§c is shrinking!");
+                                                                                        all.sendMessage(plugin.prefix + "§bBorder§c is shrinking!");
                                                                                     }
-                                                                                    Main.border.add("yes");
+                                                                                    border = true;
                                                                                 },
-                                                                                (t) -> {
-
-                                                                                }
+                                                                                (t) -> {}
                                                                         );
-                                                                        border.scheduleTimer();
+                                                                        borderCd.scheduleTimer();
 
-                                                                        CountdownWithInt pvp = new CountdownWithInt(Main.getInstance(),
-
+                                                                        Countdown pvp = new Countdown(plugin,
                                                                                 Options.pvpSeconds,
+                                                                                () -> {},
                                                                                 () -> {
-                                                                                },
-                                                                                () -> {
-
                                                                                     if(!world.getPVP() && !nether.getPVP()) {
-
-                                                                                        for (Player all : Bukkit.getOnlinePlayers()) {
+                                                                                        for(Player all : Bukkit.getOnlinePlayers()) {
 
                                                                                             all.playSound(all.getLocation(), Sound.SUCCESSFUL_HIT, 1, Integer.MAX_VALUE);
-                                                                                            all.sendMessage(Main.prefix + "§bGrace period§c ended!");
+                                                                                            all.sendMessage(plugin.prefix + "§bGrace period§c ended!");
                                                                                         }
                                                                                         world.setPVP(true);
                                                                                         nether.setPVP(true);
                                                                                     }
-
                                                                                 },
                                                                                 (t) -> {
-                                                                                    int s = t.getSecondsLeft();
-
+                                                                                    int s = (int) t.getSecondsLeft();
                                                                                     if(!world.getPVP() && !nether.getPVP()) {
 
-                                                                                        if (s == 600 || s == 300 || s == 60) {
+                                                                                        if(s == 600 || s == 300 || s == 60) {
+                                                                                            Bukkit.broadcastMessage(plugin.prefix + "§bPVP §cwill be activated in §7" + s / 60 + " minute(s)");
 
-                                                                                            Bukkit.broadcastMessage(Main.prefix + "§cPvP will be activated in §7" + s / 60 + " minutes");
-
-                                                                                            for (Player all : Bukkit.getOnlinePlayers())
+                                                                                            for(Player all : Bukkit.getOnlinePlayers())
                                                                                                 all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
 
-                                                                                        } else if (s <= 5) {
+                                                                                        } else if(s <= 5) {
+                                                                                            Bukkit.broadcastMessage(plugin.prefix + "§bPVP §cwill be activated in §7" + s + "s");
 
-                                                                                            Bukkit.broadcastMessage(Main.prefix + "§cPvP will be activated in §7" + s + " seconds");
-
-                                                                                            for (Player all : Bukkit.getOnlinePlayers())
+                                                                                            for(Player all : Bukkit.getOnlinePlayers())
                                                                                                 all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
-
                                                                                         }
                                                                                     }
                                                                                 }
                                                                         );
                                                                         pvp.scheduleTimer();
-
                                                                     },
                                                                     (t) -> {
 
-                                                                        for (Player all : Bukkit.getOnlinePlayers()) {
-
-                                                                            String sec = "§8» §c" + t.getSecondsLeft() + "s§8 «";
+                                                                        for(Player all : Bukkit.getOnlinePlayers()) {
                                                                             String text = "§4Start";
-                                                                            IChatBaseComponent chatTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + text + "\",color:" + ChatColor.YELLOW.name().toLowerCase() + "}");
+                                                                            String sec = "§8» §c" + t.getSecondsLeft() + "s§8 «";
 
-                                                                            PacketPlayOutTitle title = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, chatTitle);
-
-                                                                            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(title);
-                                                                            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(length);
-
-                                                                            IChatBaseComponent chatSubTitle = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + sec + "\",color:" + ChatColor.GREEN.name().toLowerCase() + "}");
-                                                                            PacketPlayOutTitle subtitle = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, chatSubTitle);
-
-                                                                            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(subtitle);
-                                                                            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(length);
+                                                                            plugin.title.sendTitle(all, text, ChatColor.BLACK, 0, 30, 0);
+                                                                            plugin.title.sendSubTitle(all, sec, ChatColor.BLACK, 0, 30, 0);
 
                                                                             all.playSound(all.getLocation(), Sound.CLICK, 1, Integer.MAX_VALUE);
-
-                                                                            all.sendMessage(Main.prefix + "§7Game starts in§c " + t.getSecondsLeft() + "s");
-
+                                                                            all.sendMessage(plugin.prefix + "§7Game starts in§c " + (int) t.getSecondsLeft() + "s");
                                                                         }
                                                                     }
                                                             );
                                                             gtimer.scheduleTimer();
-
-                                                        },
-                                                        (t) -> {
-
-                                                            if(t.getSecondsLeft() < 5)
-                                                                Bukkit.broadcastMessage(Main.prefix + "§7 Teleporting players in§c " + Math.round(t.getSecondsLeft()) + "§7s!");
-
                                                         }
-                                                );
-                                                prep.scheduleTimer();
-
+                                                    }
+                                                }.runTaskTimer(plugin, 0, 10);
                                             },
 
                                             (t) -> {
+                                                untilStartSec = t.getSecondsLeft();
 
-                                                if(t.getSecondsLeft() == 60)  {
-
-                                                    Bukkit.broadcastMessage(Main.prefix + "§7Teleporting players in§c " + ((int) t.getSecondsLeft() / 60) + "§7 minutes!");
+                                                if(t.getSecondsLeft() % 60 == 0)  {
+                                                    Bukkit.broadcastMessage(plugin.prefix + "§7Teleporting players in §c" + Math.round(t.getSecondsLeft() / 60) + " §7minute(s)!");
 
                                                     for (Player online : Bukkit.getOnlinePlayers())
                                                         online.playSound(online.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
@@ -522,16 +436,43 @@ public class Start implements CommandExecutor {
                                     untilStart.scheduleTimer();
                                 }
                             } else
-                                player.sendMessage(Main.prefix + "§cYou must be host to do that.");
+                                player.sendMessage(plugin.prefix + "§cYou must be host to do that.");
                         } else
-                            player.sendMessage(Main.prefix + "§cPlease define host before doing that.");
+                            player.sendMessage(plugin.prefix + "§cPlease define host before doing that.");
                     } else
-                        player.sendMessage(Main.prefix + "§cWrong usage. Try /start");
+                        player.sendMessage(plugin.prefix + "§cWrong usage. Try /start");
                 } else
-                    player.sendMessage(Main.prefix + "§cYou must be operator to do that.");
+                    player.sendMessage(plugin.prefix + "§cYou must be operator to do that.");
             }
         }
         return false;
+    }
+
+    public void endGame() {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
+
+        int time = 60;
+        String kickallMessage = plugin.prefix + "§cKicking all the players in§b " + (time / 60) + " minute(s)§c!";
+        String thxForPlaying = "§7§m                              " + "\n§cThanks for Playing!\n" + "§7§m                              ";
+
+        running = false;
+        border = false;
+
+        Countdown kickall = new Countdown(plugin,
+                time,
+                () -> Bukkit.broadcastMessage(kickallMessage),
+                () -> {
+                    usefulMethods.kickAll(thxForPlaying);
+
+                    EasyCountdown shutdown = new EasyCountdown(plugin,
+                            2.30D,
+                            usefulMethods::deleteWorlds
+                    );
+                    shutdown.scheduleTimer();
+                },
+                (t) -> {}
+        );
+        kickall.scheduleTimer();
     }
 
 }

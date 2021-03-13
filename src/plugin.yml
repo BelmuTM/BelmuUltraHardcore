@@ -1,4 +1,4 @@
-main : com.belmu.uhc.Main
+main : com.belmu.uhc.UHC
 name : BelmuUHC
 author : Belmu
 version : 1.0
@@ -16,8 +16,6 @@ commands :
   sethost :
     description : Host command.
     aliases : [sh]
-  menu :
-    description : Menu command.
   h :
     description : Hide command.
     aliases : [hide]

@@ -1,12 +1,15 @@
 package com.belmu.uhc.Utils;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.material.Tree;
 
 import java.util.*;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class TreeCutter {
 
     private List<String> comparisonBlockArray = new ArrayList<>();
@@ -14,7 +17,9 @@ public class TreeCutter {
 
     private List<Block> blocks = new ArrayList<>();
 
-    public TreeCutter(Block startBlock) {
+    public final UHC plugin;
+    public TreeCutter(Block startBlock, UHC plugin) {
+        this.plugin = plugin;
 
         runLoop(startBlock, startBlock.getX(), startBlock.getZ());
         int blocksSize = blocks.size();
@@ -25,7 +30,7 @@ public class TreeCutter {
             @Override
             public void run() {
 
-                if (!Main.getInstance().isEnabled()) {
+                if (!plugin.isEnabled()) {
                     cancel();
                     return;
                 }
@@ -36,7 +41,7 @@ public class TreeCutter {
                     try {
 
                         Block block = blocks.get(index);
-                        Bukkit.getScheduler().runTask(Main.getInstance(), block::breakNaturally);
+                        Bukkit.getScheduler().runTask(plugin, block::breakNaturally);
                         index += 1;
 
                     } catch (Exception e) {
@@ -89,13 +94,12 @@ public class TreeCutter {
     }
 
     private void popLeaves(Block block) {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         if(block.getType() == Material.LOG || block.getType() == Material.LOG_2) {
 
             for (int y = -6; y < 12 + 1; y++) {
-
                 for (int x = -5; x < 5 + 1; x++) {
-
                     for (int z = -5; z < 5 + 1; z++) {
 
                         Block target = block.getRelative(x, y, z);
@@ -111,9 +115,7 @@ public class TreeCutter {
                             if(target.getType() == Material.LEAVES) {
 
                                 for (int mX = -fX; mX < fX + 1; mX++) {
-
                                     for (int mY = -fY; mY < fY + 1; mY++) {
-
                                         for (int mZ = -fZ; mZ < fZ + 1; mZ++) {
 
                                             Block finalTarget = block.getRelative(mX, mY, mZ);
@@ -121,7 +123,7 @@ public class TreeCutter {
                                             if (finalTarget.getType() == Material.LEAVES) {
 
                                                 if (leafType(finalTarget) == TreeSpecies.GENERIC)
-                                                    UsefulMethods.dropTreeApple(target);
+                                                    usefulMethods.dropTreeApple(target);
 
                                                 finalTarget.breakNaturally();
                                             }
@@ -142,7 +144,7 @@ public class TreeCutter {
                                             if (finalTarget.getType() == Material.LEAVES_2) {
 
                                                 if (leafType(finalTarget) == TreeSpecies.DARK_OAK)
-                                                    UsefulMethods.dropTreeApple(target);
+                                                    usefulMethods.dropTreeApple(target);
 
                                                 finalTarget.breakNaturally();
                                             }

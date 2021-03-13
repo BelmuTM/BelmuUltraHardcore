@@ -1,39 +1,40 @@
 package com.belmu.uhc.Scenarios;
 
-import com.belmu.uhc.Main;
-import com.belmu.uhc.Utils.CountdownWithDouble;
+import com.belmu.uhc.UHC;
+import com.belmu.uhc.Utils.Countdown;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class FinalHeal implements Listener {
 
-    public static void finalHeal(int seconds) {
+    public final UHC plugin;
+    public FinalHeal(UHC plugin) {
+        this.plugin = plugin;
+    }
 
-        if(Main.scenarios.contains("finalheal")) {
+    public void execute(int seconds) {
+        if(plugin.scenarios.contains("finalheal")) {
 
-            CountdownWithDouble heal = new CountdownWithDouble(Main.getInstance(),
+            Countdown heal = new Countdown(plugin,
                     seconds,
+                    () -> {},
                     () -> {
-                    },
-                    () -> {
-
                         for(Player all : Bukkit.getOnlinePlayers()) {
 
-                            if(Main.players.contains(all.getName())) {
-
+                            if(plugin.players.contains(all)) {
                                 all.setHealth(20);
                                 all.setFoodLevel(20);
                                 all.playSound(all.getLocation(), Sound.VILLAGER_YES, 1, Integer.MAX_VALUE);
                             }
                         }
-
-                        Bukkit.broadcastMessage(Main.prefix + "§aFinal Heal proceeded!");
+                        Bukkit.broadcastMessage(plugin.prefix + "§aFinal Heal §eproceeded!");
                     },
-                    (t) -> {
-
-                    }
+                    (t) -> {}
             );
             heal.scheduleTimer();
         }

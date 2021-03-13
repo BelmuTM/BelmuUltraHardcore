@@ -1,7 +1,7 @@
-package com.belmu.uhc.Teams;
+package com.belmu.uhc.TeamsManager;
 
-import com.belmu.uhc.Main;
-import com.belmu.uhc.Utils.Options;
+import com.belmu.uhc.UHC;
+import com.belmu.uhc.Core.Options;
 import org.bukkit.Bukkit;
 
 import org.bukkit.entity.Player;
@@ -16,7 +16,15 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class Teams {
+
+    public final UHC plugin;
+    public Teams(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     public static List<TeamsList> teams = new ArrayList<>();
 
@@ -30,7 +38,6 @@ public class Teams {
         Scoreboard s = m.getMainScoreboard();
 
         for(TeamsList teamsList : TeamsList.values()) {
-
             if(s.getTeam(teamsList.teamName) == null) {
 
                 Team t = s.registerNewTeam(teamsList.teamName);
@@ -41,7 +48,6 @@ public class Teams {
                 t.setNameTagVisibility(NameTagVisibility.ALWAYS);
                 t.setDisplayName(teamsList.teamName);
             }
-
             if(!teams.contains(teamsList))
                 teams.add(teamsList);
         }
@@ -52,7 +58,7 @@ public class Teams {
     @SuppressWarnings("deprecation")
     public static void addPlayersToTeams(Player player) {
 
-        if (Main.getMode().equalsIgnoreCase("Teams")) {
+        if (UHC.getInstance().getMode().equalsIgnoreCase("Teams")) {
 
             ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
@@ -65,11 +71,10 @@ public class Teams {
 
                 @Override
                 public void run() {
-
                     if (playersToSpread.contains(uuid)) {
 
-                        if (Main.online.size() > Options.pPerTeam) {
-                            int divide = Main.online.size() / Options.pPerTeam;
+                        if (Bukkit.getOnlinePlayers().size() > Options.pPerTeam) {
+                            int divide = Bukkit.getOnlinePlayers().size() / Options.pPerTeam;
 
                             int max = Math.round(divide - 1);
                             int min = 0;
@@ -80,7 +85,6 @@ public class Teams {
                             Team team = s.getTeam(teams.get(r.nextInt(upper)).teamName);
 
                             if (team.getPlayers().size() < Options.pPerTeam) {
-
                                 this.cancel();
                                 team.addPlayer(player);
 
@@ -93,12 +97,11 @@ public class Teams {
 
                                 if (!teamsAtStart.contains(s.getPlayerTeam(player)))
                                     teamsAtStart.add(s.getPlayerTeam(player));
-
                             }
 
                         } else {
 
-                            int max = Main.online.size();
+                            int max = Bukkit.getOnlinePlayers().size();
                             int min = 0;
 
                             Random r = new Random();
@@ -120,21 +123,18 @@ public class Teams {
 
                                 if (!teamsAtStart.contains(s.getPlayerTeam(player)))
                                     teamsAtStart.add(s.getPlayerTeam(player));
-
                             }
                         }
                     }
                 }
 
-            }.runTaskTimer(Main.getInstance(), 15, 5); // Valeur de la boucle (Elle démarre avec 15 ticks (3/4 de seconde) et effectue ce qu'il y a dedans tous les 5 ticks (1/4 de seconde)).
-
+            }.runTaskTimer(UHC.getInstance(), 15, 5);
         }
     }
 
     public static Team getTeam(String teamName) {
 
         for(Team team : allTeams) {
-
             if(team.getName().equalsIgnoreCase(teamName))
                 return team;
         }
@@ -148,7 +148,6 @@ public class Teams {
 
         for (TeamsList teamsList : teams) {
             Team team = s.getTeam(teamsList.teamName);
-
             if (!allTeams.contains(team))
                 allTeams.add(team);
         }

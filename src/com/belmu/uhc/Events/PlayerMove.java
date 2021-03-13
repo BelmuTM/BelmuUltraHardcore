@@ -1,6 +1,6 @@
 package com.belmu.uhc.Events;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -13,59 +13,26 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class PlayerMove implements Listener {
+
+    public final UHC plugin;
+    public PlayerMove(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-
         Player player = e.getPlayer();
         World world = Bukkit.getWorld("world");
+        Location loc = new Location(world, 0, plugin.height + 1.500, 0);
 
-        Location loc = new Location(world, 0, Main.height + 1.500, 0);
-
-        if(!Main.game.contains("running")) {
-
-            if (player.getLocation().getY() < Main.height) player.teleport(loc);
-
-        } else {
-
-            if(Main.preparation) {
-
-                if (player.getLocation().getY() < Main.height) player.teleport(loc);
-            }
-        }
-
-        if(Main.getMode().equalsIgnoreCase("Solo")) {
-
-            if (Main.justTeleported) {
-
-                if (UsefulMethods.tpLocation.containsKey(player.getUniqueId())) {
-
-                    Location tpLoc = UsefulMethods.tpLocation.get(player.getUniqueId());
-                    Location pLoc = player.getLocation();
-
-                    if (pLoc.getX() != tpLoc.getX() && pLoc.getZ() != tpLoc.getZ()) player.teleport(tpLoc);
-                }
-            }
-
-        } else if(Main.getMode().equalsIgnoreCase("Teams")) {
-
-            if (Main.justTeleported) {
-
-                ScoreboardManager m = Bukkit.getScoreboardManager();
-                Scoreboard s = m.getMainScoreboard();
-
-                Team team = s.getPlayerTeam(player);
-
-                if (UsefulMethods.tpLocationTeams.containsKey(team)) {
-
-                    Location tpLoc = UsefulMethods.tpLocationTeams.get(team);
-                    Location pLoc = player.getLocation();
-
-                    if (pLoc.getX() != tpLoc.getX() && pLoc.getZ() != tpLoc.getZ()) player.teleport(tpLoc);
-                }
-            }
-        }
+        if(!plugin.game.running && !plugin.game.teleported)
+            if (player.getLocation().getY() < plugin.height) player.teleport(loc);
+        else
+            if(plugin.game.preparing && !plugin.game.teleported) if(player.getLocation().getY() < plugin.height) player.teleport(loc);
     }
 
 }

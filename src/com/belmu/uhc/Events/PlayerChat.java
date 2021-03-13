@@ -1,8 +1,10 @@
 package com.belmu.uhc.Events;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,37 +12,46 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class PlayerChat implements Listener {
+
+    public final UHC plugin;
+    public PlayerChat(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
-
         Player player = e.getPlayer();
-        String msg = e.getMessage();
+        String msg = e.getMessage().replaceAll("<3", "§c❤§r").replaceAll("gg", "§agg§r")
+                .replaceAll("ez", "Y'all are good players!");
 
-        if(Main.getMode().equalsIgnoreCase("Solo")) {
+        for(Player all : Bukkit.getOnlinePlayers())
+            if(StringUtils.containsIgnoreCase(msg.toLowerCase(), all.getName().toLowerCase())) {
+                Player mentioned = Bukkit.getPlayer(all.getName());
 
-            if (player.isOp()) {
-                e.setFormat(player.getDisplayName() + "§8 »§f " + e.getMessage());
+                if(mentioned != player) {
+                    msg = msg.replaceAll("(?i)" + mentioned.getName(), "§e@" + mentioned.getName() + "§r");
+                    mentioned.playSound(all.getLocation(), Sound.NOTE_PLING, 1f, Integer.MAX_VALUE);
+                }
+            }
 
-            } else
-                e.setFormat(player.getDisplayName() + "§8 »§7 " + e.getMessage());
+        e.setMessage(msg);
 
-        } else if(Main.getMode().equalsIgnoreCase("Teams")) {
+        if(plugin.getMode().equalsIgnoreCase("Solo")) {
+            e.setFormat(player.getDisplayName() + "§8 »§f " + e.getMessage());
 
-            if(Main.game.contains("lancée")) {
+        } else if(plugin.getMode().equalsIgnoreCase("Teams")) {
 
-                if(!Main.spectators.contains(player.getName())) {
+            if(plugin.game.running) {
+                if(plugin.players.contains(player.getUniqueId())) {
 
-                    if (msg.startsWith("!")) {
-                        String finalMsg = msg.replace("!", "");
-
-                        if(player.isOp()) {
-                            e.setFormat("§7[Global] " + player.getDisplayName() + "§8 »§f " + finalMsg);
-
-                        } else
-                            e.setFormat("§7[Global] " + player.getDisplayName() + "§8 »§7 " + finalMsg);
+                    if(msg.startsWith("!")) {
+                        String finalMsg = msg.substring(2);
+                        e.setFormat("§7[Global] " + player.getDisplayName() + "§8 »§f " + finalMsg);
 
                     } else {
                         ScoreboardManager m = Bukkit.getScoreboardManager();
@@ -50,34 +61,29 @@ public class PlayerChat implements Listener {
 
                             if (p instanceof Player) {
                                 e.setCancelled(true);
-
-                                if(player.isOp()) {
-                                    ((Player) p).sendMessage("§7[Team] " + player.getDisplayName() + "§8 »§f " + msg);
-
-                                } else
-                                    ((Player) p).sendMessage("§7[Team] " + player.getDisplayName() + "§8 »§7 " + msg);
+                                ((Player) p).sendMessage("§7[Team] " + player.getDisplayName() + "§8 »§f " + msg);
                             }
                         }
                     }
-
-                } else if(Main.spectators.contains(player.getName())) {
-
-                    if (player.isOp()) {
-                        e.setFormat(player.getDisplayName() + "§8 »§f " + e.getMessage());
-
-                    } else
-                        e.setFormat(player.getDisplayName() + "§8 »§7 " + e.getMessage());
-                }
-
-            } else {
-
-                if (player.isOp()) {
+                } else if(!plugin.players.contains(player.getUniqueId()))
                     e.setFormat(player.getDisplayName() + "§8 »§f " + e.getMessage());
-
-                } else
-                    e.setFormat(player.getDisplayName() + "§8 »§7 " + e.getMessage());
-            }
+            } else
+                e.setFormat(player.getDisplayName() + "§8 »§f " + e.getMessage());
         }
+    }
+
+    public static boolean containsIgnoreCase(String str, String searchStr)     {
+        if(str == null || searchStr == null) return false;
+
+        final int length = searchStr.length();
+        if (length == 0)
+            return true;
+
+        for (int i = str.length() - length; i >= 0; i--) {
+            if (str.regionMatches(true, i, searchStr, 0, length))
+                return true;
+        }
+        return false;
     }
 
 }

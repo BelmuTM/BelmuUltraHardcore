@@ -1,8 +1,8 @@
 package com.belmu.uhc.Scenarios;
 
 import com.belmu.uhc.Commands.HideCommand;
-import com.belmu.uhc.Main;
-import com.belmu.uhc.Utils.Options;
+import com.belmu.uhc.UHC;
+import com.belmu.uhc.Core.Options;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,18 +22,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@SuppressWarnings("ALL")
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class Paranoïa implements Listener {
 
-    private final Map<UUID, Location> portal = new HashMap<>();
+    public final UHC plugin;
+    public Paranoïa(UHC plugin) {
+        this.plugin = plugin;
+    }
 
+    private final Map<UUID, Location> portal = new HashMap<>();
     public static String prefix = "§7[§cParanoïa§7] ";
 
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
-
         Player player = e.getPlayer();
-        FileConfiguration cfg = Main.getInstance().getConfig();
+        FileConfiguration cfg = plugin.getConfig();
 
         Material type = e.getBlock().getType();
         Block block = e.getBlock();
@@ -42,30 +47,28 @@ public class Paranoïa implements Listener {
         int y = block.getY();
         int z = block.getZ();
 
-        if (Main.scenarios.contains("paranoia")) {
-
+        if (plugin.scenarios.contains("paranoia")) {
             if (!e.isCancelled()) {
 
                 if (type == Material.EMERALD_ORE)
-                    sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f mined an §aEmerald§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                    sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f mined an §aEmerald§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
 
                 if (type == Material.GOLD_ORE)
-                    sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f mined a §6Gold§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                    sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f mined a §6Gold§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
 
                 if (type == Material.DIAMOND_ORE) {
 
-                    if(!Main.scenarios.contains("diamondlimit")) {
-                        sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f mined a §bDiamond§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                    if(!plugin.scenarios.contains("diamondlimit")) {
+                        sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f mined a §bDiamond§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
 
-                    } else if(Main.scenarios.contains("diamondlimit")) {
+                    } else if(plugin.scenarios.contains("diamondlimit")) {
 
                         int a = cfg.getInt("Players" + "." + player.getName() + "." + "diamond");
                         if(a >= (Options.diamondLimit - 1)) {
 
                             return;
                         } else
-                            sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f mined a §bDiamond§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-
+                            sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f mined a §bDiamond§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
                     }
                 }
             }
@@ -92,20 +95,19 @@ public class Paranoïa implements Listener {
 
         if(player instanceof Player) {
 
-            if (Main.scenarios.contains("paranoia")) {
+            if (plugin.scenarios.contains("paranoia")) {
 
                 if (type == Material.GOLDEN_APPLE)
-                    sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f crafted a §eGolden Apple§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                    sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f crafted a §eGolden Apple§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
 
                 if (type == Material.BREWING_STAND_ITEM)
-                    sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f crafted a §dBrewing Stand§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                    sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f crafted a §dBrewing Stand§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
             }
         }
     }
 
     @EventHandler
     public void onPortal(PlayerPortalEvent e) {
-
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
 
@@ -129,10 +131,10 @@ public class Paranoïa implements Listener {
             String y = format.format(yU);
             String z = format.format(zU);
 
-            if (Main.scenarios.contains("paranoia")) {
+            if (plugin.scenarios.contains("paranoia")) {
 
                 if (player.getWorld() == Bukkit.getWorld("world_nether"))
-                    sendBroadcast(Main.prefix + prefix + "§7" + player.getName() + "§f entered the §cNether§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                    sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f entered the §cNether§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
             }
 
         } catch (NullPointerException ex) {
@@ -143,7 +145,6 @@ public class Paranoïa implements Listener {
     public static void sendBroadcast(String msg) {
 
         for(Player all : Bukkit.getOnlinePlayers()) {
-
             if (!HideCommand.hideParanoia.containsKey(all.getUniqueId()))
                 all.sendMessage(msg);
         }

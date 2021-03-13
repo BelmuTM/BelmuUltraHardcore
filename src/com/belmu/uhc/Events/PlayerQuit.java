@@ -1,9 +1,10 @@
 package com.belmu.uhc.Events;
 
-import com.belmu.uhc.Main;
-import com.belmu.uhc.Teams.Teams;
-import com.belmu.uhc.Utils.CountdownWithInt;
+import com.belmu.uhc.UHC;
+import com.belmu.uhc.Utils.Countdown;
 import com.belmu.uhc.Utils.EasyCountdown;
+import com.belmu.uhc.Core.Options;
+import com.belmu.uhc.TeamsManager.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -14,94 +15,77 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class PlayerQuit implements Listener {
 
-    int beforeElimination = 600;
+    public final UHC plugin;
+    public PlayerQuit(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-
         Player player = e.getPlayer();
         World world = Bukkit.getWorld("world");
 
-        Main.online.remove(player.getUniqueId());
-        String mainQuitMsg = Main.prefix + player.getDisplayName() + "§r§f has quit!";
+        String playerSize = " §r§7(§c" + (Bukkit.getOnlinePlayers().size() - 1) + "§7/§c" + Bukkit.getMaxPlayers() + "§7)";
+        String mainQuitMsg = plugin.prefix + player.getDisplayName() + "§r§f has quit the game" + playerSize;
 
-        if(Main.game.contains("running")) {
+        if(plugin.game.running) {
+            if(plugin.players.contains(player.getUniqueId())) {
 
-            if(Main.game.contains(player.getName())) {
+                plugin.inCooldown.add(player.getUniqueId());
+                mainQuitMsg = plugin.prefix + "§7" + player.getName() + " §fhas quit the game §7(§c" + Math.round((float) Options.beforeElimination / 60) + "m §fleft before elimination§7)";
 
-                if(Main.spectators.contains(player.getName())) {
-
-                    e.setQuitMessage(mainQuitMsg);
-
-                    Main.game.remove(player.getName());
-                    return;
-                }
-
-                Main.inCooldown.add(player.getUniqueId());
-                e.setQuitMessage(Main.prefix + "§7" + player.getName() + "§f has quit the game. §7(§7" + beforeElimination / 60 + "§f left before elimination§7)");
-
-                CountdownWithInt elimination = new CountdownWithInt(Main.getInstance(),
-                        beforeElimination,
+                Countdown elimination = new Countdown(plugin,
+                        Options.beforeElimination,
+                        () -> {},
                         () -> {
-                        },
-                        () -> {
+                        if(plugin.inCooldown.contains(player.getUniqueId())) {
 
-                    if(Main.inCooldown.contains(player.getUniqueId())) {
+                            plugin.players.remove(player.getUniqueId());
+                            plugin.inCooldown.remove(player.getUniqueId());
 
-                        Main.players.remove(player.getName());
-                        Main.spectators.add(player.getName());
-                        Main.inCooldown.remove(player.getUniqueId());
+                            world.strikeLightningEffect(player.getLocation());
 
-                        world.strikeLightningEffect(player.getLocation());
+                            for(Player all : Bukkit.getOnlinePlayers())
+                                all.playSound(all.getLocation(), Sound.AMBIENCE_THUNDER, 1.0f, Integer.MAX_VALUE);
 
-                        for(Player all : Bukkit.getOnlinePlayers())
-                            all.playSound(all.getLocation(), Sound.AMBIENCE_THUNDER, 1.0f, Integer.MAX_VALUE);
+                            Bukkit.broadcastMessage(plugin.prefix + "§7" + player.getDisplayName() + "§f has been eliminated for §c§linactivity");
 
-                        Bukkit.broadcastMessage(Main.prefix + "§7" + player.getDisplayName() + "§f has been eliminated for §cinactivity§f.");
+                            if(plugin.getMode().equalsIgnoreCase("Teams")) {
 
-                        if(Main.getMode().equalsIgnoreCase("Teams")) {
+                                ScoreboardManager m = Bukkit.getScoreboardManager();
+                                Scoreboard s = m.getMainScoreboard();
 
-                            ScoreboardManager m = Bukkit.getScoreboardManager();
-                            Scoreboard s = m.getMainScoreboard();
+                                s.getPlayerTeam(player).removePlayer(player);
+                                if(s.getPlayerTeam(player).getPlayers() == null) {
 
-                            s.getPlayerTeam(player).removePlayer(player);
-                            if(s.getPlayerTeam(player).getPlayers().size() == 0) {
-
-                                EasyCountdown eliminationTeam = new EasyCountdown(Main.getInstance(),
+                                    EasyCountdown eliminationTeam = new EasyCountdown(plugin,
                                         1D,
                                         () -> {
-                                            Bukkit.broadcastMessage(Main.prefix + s.getPlayerTeam(player).getPrefix() + s.getPlayerTeam(player).getDisplayName() + "§f team has been eliminated!");
+                                            Bukkit.broadcastMessage(plugin.prefix + s.getPlayerTeam(player).getPrefix() + s.getPlayerTeam(player).getDisplayName() + "§f team has been eliminated!");
 
                                             Teams.inGameTeams.remove(PlayerDeath.playerTeam.get(player.getUniqueId()));
 
                                             for (Player all : Bukkit.getOnlinePlayers())
                                                 all.playSound(all.getLocation(), Sound.WITHER_DEATH, 1, Integer.MAX_VALUE);
                                         }
-                                );
-                                eliminationTeam.scheduleTimer();
-
+                                    );
+                                    eliminationTeam.scheduleTimer();
+                                }
                             }
                         }
-                    }
-                        },
-                        (t) -> {
-
-                        }
+                    },
+                        (t) -> {}
                 );
                 elimination.scheduleTimer();
-
-            } else if(!Main.players.contains(player.getName())) {
-
-                e.setQuitMessage(mainQuitMsg);
             }
-
-        } else if(!Main.game.contains("running")) {
-
-            e.setQuitMessage(mainQuitMsg);
         }
+        e.setQuitMessage(mainQuitMsg);
     }
 
 }

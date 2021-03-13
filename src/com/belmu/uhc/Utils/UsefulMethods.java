@@ -1,9 +1,12 @@
 package com.belmu.uhc.Utils;
 
-import com.belmu.uhc.Main;
-import com.belmu.uhc.Teams.Teams;
+import com.belmu.uhc.Core.Options;
+import com.belmu.uhc.TeamsManager.Teams;
+import com.belmu.uhc.UHC;
+import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
 import org.bukkit.Material;
@@ -17,8 +20,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
@@ -29,15 +34,22 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class UsefulMethods {
 
-    public static void clearEffects(Player player) {
+    public final UHC plugin;
+    public UsefulMethods(UHC plugin) {
+        this.plugin = plugin;
+    }
+
+    public void clearEffects(Player player) {
         for (PotionEffect effect : player.getActivePotionEffects())
             player.removePotionEffect(effect.getType());
     }
 
-    public static boolean isOutsideOfBorder(Entity p) {
-
+    public boolean isOutsideOfBorder(Entity p) {
         WorldBorder border = p.getWorld().getWorldBorder();
         Location loc = p.getLocation();
         Location center = border.getCenter();
@@ -48,31 +60,30 @@ public class UsefulMethods {
         return ((x > size || (-x) > size) || (z > size || (-z) > size));
     }
 
-    public static void startUpdate(final Furnace tile, final int increase) {
+    public void startUpdate(final Furnace tile, final int increase) {
 
         new BukkitRunnable() {
             public void run() {
-
-                if (tile.getCookTime() > 0 || tile.getBurnTime() > 0) {
+                if(tile.getCookTime() > 0 || tile.getBurnTime() > 0) {
                     tile.setCookTime((short) (tile.getCookTime() + increase));
                     tile.update();
 
                 } else this.cancel();
 
             }
-        }.runTaskTimer(Main.getInstance(), 1L, 1L);
+        }.runTaskTimer(plugin, 1L, 1L);
     }
 
     public static boolean consumeItem(Player player, int count, ItemStack mat) {
         Map<Integer, ? extends ItemStack> i = player.getInventory().all(mat);
 
         int found = 0;
-        for (ItemStack stack : i.values())
+        for(ItemStack stack : i.values())
             found += stack.getAmount();
-        if (count > found)
+        if(count > found)
             return false;
 
-        for (Integer index : i.keySet()) {
+        for(Integer index : i.keySet()) {
             ItemStack stack = i.get(index);
 
             int removed = Math.min(count, stack.getAmount());
@@ -92,7 +103,7 @@ public class UsefulMethods {
     }
 
     @SuppressWarnings("deprecation")
-    public static ItemStack getSkull(String name) {
+    public ItemStack getSkull(String name) {
 
         ItemStack skull = new ItemStack(397, 1, (short) 3);
         SkullMeta skullmeta = (SkullMeta) skull.getItemMeta();
@@ -104,17 +115,17 @@ public class UsefulMethods {
         return skull;
     }
 
-    public static void addKill(Player p, int count) {
-        FileConfiguration cfg = Main.getInstance().getConfig();
+    public void addKill(Player p, int count) {
+        FileConfiguration cfg = plugin.getConfig();
 
         int i = cfg.getInt("Players" + "." + p.getName() + ".kills");
         cfg.set("Players" + "." + p.getName() + "." + "kills", count + i);
 
-        Main.getInstance().saveConfig();
+        plugin.saveConfig();
     }
 
     @SuppressWarnings("deprecation")
-    public static void setBlocksRegion(Location loc1, Location loc2, Material material) {
+    public void setBlocksRegion(Location loc1, Location loc2, Material material) {
 
         int minX = Math.min(loc1.getBlockX(), loc2.getBlockX());
         int minY = Math.min(loc1.getBlockY(), loc2.getBlockY());
@@ -124,9 +135,7 @@ public class UsefulMethods {
         int maxZ = Math.max(loc1.getBlockZ(), loc2.getBlockZ());
 
         for (int x = minX; x <= maxX; x++) {
-
             for (int y = minY; y <= maxY; y++) {
-
                 for (int z = minZ; z <= maxZ; z++) {
 
                     Block block = Bukkit.getWorld("world").getBlockAt(x, y, z);
@@ -139,7 +148,7 @@ public class UsefulMethods {
         }
     }
 
-    public static void setBlocksRegionAsBorder(Location center, int size, Material material) {
+    public void setBlocksRegionAsBorder(Location center, int size, Material material) {
 
         World world = Bukkit.getWorld("world");
         int x = center.getBlockX();
@@ -148,22 +157,22 @@ public class UsefulMethods {
 
         Location loc3 = new Location(world, x + size, y, z - size);
         Location loc4 = new Location(world, x + size, y, z + size);
-        UsefulMethods.setBlocksRegion(loc3, loc4, material);
+        setBlocksRegion(loc3, loc4, material);
 
         Location loc5 = new Location(world, x - size, y, z - size);
         Location loc6 = new Location(world, x - size, y, z + size);
-        UsefulMethods.setBlocksRegion(loc5, loc6, material);
+        setBlocksRegion(loc5, loc6, material);
 
         Location loc7 = new Location(world, x - size, y, z - size);
         Location loc8 = new Location(world, x + size, y, z - size);
-        UsefulMethods.setBlocksRegion(loc7, loc8, material);
+        setBlocksRegion(loc7, loc8, material);
 
         Location loc9 = new Location(world, x + size, y, z + size);
         Location loc10 = new Location(world, x - size, y, z + size);
-        UsefulMethods.setBlocksRegion(loc9, loc10, material);
+        setBlocksRegion(loc9, loc10, material);
     }
 
-    public static void setBlock(Location loc, Material material) {
+    public void setBlock(Location loc, Material material) {
         int x = loc.getBlockX();
         int y = loc.getBlockY();
         int z = loc.getBlockZ();
@@ -172,72 +181,62 @@ public class UsefulMethods {
         block.setType(material);
     }
 
-    public static void drop(Location loc, ItemStack item) {
+    public void drop(Location loc, ItemStack item) {
 
         World world = Bukkit.getWorld("world");
         world.dropItemNaturally(new Location(world, loc.getX() + 0.5, loc.getBlockY() + 0.5, loc.getBlockZ() + 0.5), item);
     }
 
-    public static Item dropCutClean(Location loc, ItemStack item) {
+    public Item dropCutClean(Location loc, ItemStack item) {
 
         World world = Bukkit.getWorld("world");
         return world.dropItemNaturally(new Location(world, loc.getX() + 0.5, loc.getBlockY() + 0.5, loc.getBlockZ() + 0.5), item);
     }
 
-    public static void dropApple(Player player, Block block) {
+    public void dropApple(Player player, Block block) {
 
         if (player.getItemInHand().getType() != Material.SHEARS) {
-
             int upper = 7;
             Random random = new Random();
 
             if (random.nextInt(upper) == 1) {
-
                 Location loc = block.getLocation();
                 ItemStack apple = new ItemStack(Material.APPLE, 1);
 
-                UsefulMethods.drop(loc, apple);
+                drop(loc, apple);
             }
         }
     }
 
-    public static void dropTreeApple(Block block) {
+    public void dropTreeApple(Block block) {
 
         int upper = 16;
         Random random = new Random();
-
         if (random.nextInt(upper) == 1) {
-
             Location loc = block.getLocation();
             ItemStack apple = new ItemStack(Material.APPLE, 1);
 
-            UsefulMethods.drop(loc, apple);
+            drop(loc, apple);
         }
-
     }
 
-    public static final Map<UUID, Location> tpLocation = new HashMap<>();
-    public static final Map<Team, Location> tpLocationTeams = new HashMap<>();
+    public final Map<UUID, Location> tpLocation = new HashMap<>();
+    public final Map<Team, Location> tpLocationTeams = new HashMap<>();
 
-    public static void prepareTp() {
-
-        ScoreboardManager m = Bukkit.getScoreboardManager();
-        Scoreboard s = m.getMainScoreboard();
-
+    public void prepareTp() {
         World world = Bukkit.getWorld("world");
 
-        if(Main.getMode().equalsIgnoreCase("Solo")) {
+        if(plugin.getMode().equalsIgnoreCase("Solo")) {
 
-            for (int i = 0, total = Main.online.size(); i < total; i++) {
-
-                Player p = Bukkit.getPlayer(Main.online.get(i));
+            for (int i = 0, total = plugin.players.size(); i < total; i++) {
+                Player p = Bukkit.getPlayer(plugin.players.get(i));
 
                 double angle = (2 * Math.PI * i) / total;
                 int distance = Options.borderScale / 3;
 
                 double x = Math.cos(angle) * distance;
                 double z = Math.sin(angle) * distance;
-                double y = Main.height;
+                double y = plugin.height;
 
                 Location blockLoc_1 = new Location(world, x - 1, y, z + 1);
                 Location blockLoc_2 = new Location(world, x + 1, y, z - 1);
@@ -245,40 +244,25 @@ public class UsefulMethods {
                 setBlocksRegion(blockLoc_1, blockLoc_2, Material.STAINED_GLASS);
 
                 Location teleportLocation = new Location(world, x + 0.500D, y + 1.00D, z + 0.500D);
-                Location chunkLocation =  new Location(world, x, y, z);
+
+                Vector diff = new Location(world, 0, teleportLocation.getY(), 0).toVector().subtract(teleportLocation.toVector());
+                diff.normalize();
+                teleportLocation.setDirection(diff);
 
                 tpLocation.put(p.getUniqueId(), teleportLocation);
-
-                new BukkitRunnable() {
-
-                    @Override
-                    public void run() {
-
-                        if(Main.game.contains("preparing")) {
-
-                            Chunk chunk = world.getChunkAt(chunkLocation);
-                            chunk.load();
-
-                            if(chunk.isLoaded()) this.cancel();
-
-                        } else this.cancel();
-                    }
-                }.runTaskTimer(Main.getInstance(), 20, 50);
-
             }
 
-        } else if(Main.getMode().equalsIgnoreCase("Teams")) {
+        } else if(plugin.getMode().equalsIgnoreCase("Teams")) {
 
             for (int i = 0, total = Teams.inGameTeams.size(); i < total; i++) {
-
-                Team team = s.getTeam(Teams.teams.get(i).teamName);
+                Team team = Teams.inGameTeams.get(i);
 
                 double angle = (2 * Math.PI * i) / total;
                 int distance = Options.borderScale / 3;
 
                 double x = Math.cos(angle) * distance;
                 double z = Math.sin(angle) * distance;
-                double y = Main.height;
+                double y = plugin.height;
 
                 Location blockLoc_1 = new Location(world, x - 1, y, z + 1);
                 Location blockLoc_2 = new Location(world, x + 1, y, z - 1);
@@ -286,38 +270,20 @@ public class UsefulMethods {
                 setBlocksRegion(blockLoc_1, blockLoc_2, Material.STAINED_GLASS);
 
                 Location teleportLocation = new Location(world, x + 0.500D, y + 1.00D, z + 0.500D);
-                Location chunkLocation =  new Location(world, x, y, z);
+
+                Vector diff = new Location(world, 0, teleportLocation.getY(), 0).toVector().subtract(teleportLocation.toVector());
+                diff.normalize();
+                teleportLocation.setDirection(diff);
 
                 tpLocationTeams.put(team, teleportLocation);
-
-                new BukkitRunnable() {
-
-                    @Override
-                    public void run() {
-
-                        if(Main.game.contains("preparing")) {
-
-                            Chunk chunk = world.getChunkAt(chunkLocation);
-                            chunk.load();
-
-                            if(chunk.isLoaded()) this.cancel();
-
-                        } else this.cancel();
-
-                    }
-                }.runTaskTimer(Main.getInstance(), 20, 50);
             }
         }
     }
 
     @SuppressWarnings("deprecation")
-    public static void tp() {
-
-        ScoreboardManager m = Bukkit.getScoreboardManager();
-        Scoreboard s = m.getMainScoreboard();
-
+    public void tp() {
+        Scoreboard s = Bukkit.getScoreboardManager().getMainScoreboard();
         World world = Bukkit.getWorld("world");
-        String errorChunk = "§cError: Couldn't load chunk at ";
 
         for (Player all : Bukkit.getOnlinePlayers()) {
             UUID uuid = all.getUniqueId();
@@ -328,54 +294,32 @@ public class UsefulMethods {
             all.setTotalExperience(0);
             all.setLevel(0);
 
-            if(Main.getMode().equalsIgnoreCase("Solo")) {
+            if(plugin.getMode().equalsIgnoreCase("Solo")) {
 
                 if (tpLocation.containsKey(uuid)) {
-
                     int x = tpLocation.get(uuid).getBlockX();
                     int z = tpLocation.get(uuid).getBlockZ();
-                    Chunk chunk = world.getChunkAt(x, z);
 
-                    if (chunk.isLoaded()) {
-                        all.teleport(tpLocation.get(uuid));
-
-                        EasyCountdown interval = new EasyCountdown(Main.getInstance(),
-                                0.35D,
-                                () -> Main.justTeleported = true
-                        );
-                        interval.scheduleTimer();
-
-                    } else
-                        Bukkit.broadcastMessage(Main.prefix + errorChunk + "§4X:" + chunk.getX() + " Z:" + chunk.getZ() + "§c.");
+                    all.teleport(tpLocation.get(uuid));
+                    plugin.game.teleported = true;
                 }
 
-            } else if(Main.getMode().equalsIgnoreCase("Teams")) {
+            } else if(plugin.getMode().equalsIgnoreCase("Teams")) {
 
                 Team team = s.getPlayerTeam(all);
 
                 if (tpLocationTeams.containsKey(team)) {
-
                     int x = tpLocationTeams.get(team).getBlockX();
                     int z = tpLocationTeams.get(team).getBlockZ();
-                    Chunk chunk = world.getChunkAt(x, z);
 
-                    if (chunk.isLoaded()) {
-                        all.teleport(tpLocationTeams.get(team));
-
-                        EasyCountdown interval = new EasyCountdown(Main.getInstance(),
-                                0.35D,
-                                () -> Main.justTeleported = true
-                        );
-                        interval.scheduleTimer();
-
-                    } else
-                        Bukkit.broadcastMessage(Main.prefix + errorChunk + "§4X:" + chunk.getX() + " Z:" + chunk.getZ() + "§c.");
+                    all.teleport(tpLocationTeams.get(team));
+                    plugin.game.teleported = true;
                 }
             }
         }
     }
 
-    public static void breakPlatforms(Location loc1, Location loc2) {
+    public void breakPlatforms(Location loc1, Location loc2) {
 
         World world = Bukkit.getWorld("world");
         int minX = Math.min(loc1.getBlockX(), loc2.getBlockX());
@@ -397,62 +341,63 @@ public class UsefulMethods {
     }
 
     @SuppressWarnings("deprecation")
-    public static void start() {
+    public void start(double timer) {
         World world = Bukkit.getWorld("world");
 
         for (Player all : Bukkit.getOnlinePlayers()) {
 
-            if(Main.getMode().equalsIgnoreCase("Solo")) {
+            if(plugin.getMode().equalsIgnoreCase("Solo")) {
                 UUID uuid = all.getUniqueId();
 
                 int x = tpLocation.get(uuid).getBlockX();
                 int z = tpLocation.get(uuid).getBlockZ();
-                int y = Main.height;
+                int y = plugin.height;
 
                 Location loc1 = new Location(world, x + 6, y + 6, z - 6);
                 Location loc2 = new Location(world, x - 6, y - 6, z + 6);
 
-                EasyCountdown stop = new EasyCountdown(Main.getInstance(),
-                        Main.timer - 1,
+                EasyCountdown stop = new EasyCountdown(plugin,
+                        plugin.timer - 1,
                         () -> {
                             if(all.getLocation() != tpLocation.get(uuid))
                                 all.teleport(tpLocation.get(uuid));
                         }
                 );
                 stop.scheduleTimer();
-                yeet(loc1, loc2);
+                yeet(loc1, loc2, timer);
 
-            } else if(Main.getMode().equalsIgnoreCase("Teams")) {
+            } else if(plugin.getMode().equalsIgnoreCase("Teams")) {
                 ScoreboardManager m = Bukkit.getScoreboardManager();
                 Scoreboard s = m.getMainScoreboard();
 
                 Team team = s.getPlayerTeam(all);
 
-                int x = tpLocationTeams.get(team).getBlockX();
-                int z = tpLocationTeams.get(team).getBlockZ();
-                int y = Main.height;
+                if (tpLocationTeams.containsKey(team)) {
 
-                Location loc1 = new Location(world, x + 6, y + 6, z - 6);
-                Location loc2 = new Location(world, x - 6, y - 6, z + 6);
+                    int x = tpLocationTeams.get(team).getBlockX();
+                    int z = tpLocationTeams.get(team).getBlockZ();
+                    int y = plugin.height;
 
-                EasyCountdown stop = new EasyCountdown(Main.getInstance(),
-                        Main.timer - 1,
-                        () -> {
-                            if(all.getLocation() != tpLocationTeams.get(team))
-                                all.teleport(tpLocationTeams.get(team));
+                    Location loc1 = new Location(world, x + 6, y + 6, z - 6);
+                    Location loc2 = new Location(world, x - 6, y - 6, z + 6);
 
-                        }
-                );
-                stop.scheduleTimer();
-                yeet(loc1, loc2);
+                    EasyCountdown stop = new EasyCountdown(plugin,
+                            plugin.timer - 1,
+                            () -> {
+                                if (all.getLocation() != tpLocationTeams.get(team))
+                                    all.teleport(tpLocationTeams.get(team));
+
+                            }
+                    );
+                    stop.scheduleTimer();
+                    yeet(loc1, loc2, timer);
+                }
             }
         }
     }
 
-    public static String calculateRelativeDirectionFromPlayerTo(Player player, Location loc) {
-
+    public String calculateRelativeDirectionFromPlayerTo(Player player, Location loc) {
         Location pLoc = player.getLocation();
-
         Vector vector = pLoc.toVector().subtract(loc.toVector());
         vector.normalize();
 
@@ -469,42 +414,32 @@ public class UsefulMethods {
             if (rotation < 0)
                 rotation += 360.0;
 
-            if (0 <= rotation && rotation < 22.5) {
+            if (0 <= rotation && rotation < 22.5)
                 return "⬇"; //N
-
-            } else if (22.5 <= rotation && rotation < 67.5) {
+            else if (22.5 <= rotation && rotation < 67.5)
                 return "⬊"; //NE
-
-            } else if (67.5 <= rotation && rotation < 112.5) {
+            else if (67.5 <= rotation && rotation < 112.5)
                 return "➡"; //E
-
-            } else if (112.5 <= rotation && rotation < 157.5) {
+            else if (112.5 <= rotation && rotation < 157.5)
                 return "⬈"; //NE
-
-            } else if (157.5 <= rotation && rotation < 202.5) {
+            else if (157.5 <= rotation && rotation < 202.5)
                 return "⬆"; //S
-
-            } else if (202.5 <= rotation && rotation < 247.5) {
+            else if (202.5 <= rotation && rotation < 247.5)
                 return "⬉"; //SW
-
-            } else if (247.5 <= rotation && rotation < 292.5) {
+            else if (247.5 <= rotation && rotation < 292.5)
                 return "⬅"; //W
-
-            } else if (292.5 <= rotation && rotation < 337.5) {
+            else if (292.5 <= rotation && rotation < 337.5)
                 return "⬋"; //NW
-
-            } else if (337.5 <= rotation && rotation < 360.0) {
+            else if (337.5 <= rotation && rotation < 360.0)
                 return "⬇"; //N
-
-            } else
-                return null;
-
+            else
+                return "N/A";
         }
-        return "None";
+        return "N/A";
     }
 
-    public static int getKills(Player player) {
-        FileConfiguration cfg = Main.getInstance().getConfig();
+    public int getKills(Player player) {
+        FileConfiguration cfg = plugin.getConfig();
 
         if(cfg.get("Players" + "." + player.getName() + ".kills") != null) {
             return cfg.getInt("Players" + "." + player.getName() + ".kills");
@@ -517,20 +452,18 @@ public class UsefulMethods {
         return 0;
     }
 
-    public static void sendPacket(Player p, String text) {
+    public void sendPacket(Player p, String text) {
         PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + text + "\"}"), (byte) 2);
         ((CraftPlayer)p).getHandle().playerConnection.sendPacket(packet);
     }
 
-    public static Map<Player, Integer> sortedKills() {
+    public Map<Player, Integer> sortedKills() {
 
         Map<Player, Integer> unsortedKills = new HashMap<>();
 
-        for(String names : Main.players) {
-
-            Player p = Bukkit.getPlayer(names);
-            unsortedKills.put(p, Main.getInstance().getConfig().getInt("Players" + "." + p.getName() + ".kills"));
-        }
+        for(UUID uuid : plugin.players)
+            unsortedKills.put(Bukkit.getPlayer(uuid),
+                    plugin.getConfig().getInt("Players" + "." + Bukkit.getPlayer(uuid).getName() + ".kills"));
 
         Map<Player, Integer> sortedKills = new HashMap<>();
 
@@ -542,8 +475,7 @@ public class UsefulMethods {
         return sortedKills;
     }
 
-   public static void deleteWorlds() {
-
+    public void deleteWorlds() {
         World world = Bukkit.getWorld("world");
         World nether = Bukkit.getWorld("world_nether");
 
@@ -559,29 +491,62 @@ public class UsefulMethods {
         Bukkit.getServer().shutdown();
     }
 
-    public static void kickAll(String message) {
+    public void kickAll(String message) {
         for (Player all : Bukkit.getOnlinePlayers())
             all.kickPlayer(message);
     }
 
-    public static void yeet(Location loc1, Location loc2) {
+    public void yeet(Location loc1, Location loc2, double timer) {
 
-        EasyCountdown yeet = new EasyCountdown(Main.getInstance(),
-                Main.timer,
+        EasyCountdown yeet = new EasyCountdown(plugin,
+                timer,
                 () -> {
                     breakPlatforms(loc1, loc2);
 
-                    Main.justTeleported = false;
-                    Main.fell = true;
+                    plugin.game.teleported = false;
+                    plugin.game.fell = true;
 
-                    EasyCountdown fell = new EasyCountdown(Main.getInstance(),
+                    EasyCountdown fell = new EasyCountdown(plugin,
                             10,
-                            () -> Main.fell = false
+                            () -> plugin.game.fell = false
                     );
                     fell.scheduleTimer();
                 }
         );
         yeet.scheduleTimer();
+    }
+
+    public void setSpectator(Player player) {
+        PacketPlayOutPlayerInfo tablistInfo = new PacketPlayOutPlayerInfo
+                (PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, (EntityPlayer) ((CraftPlayer) player).getHandle());
+
+        plugin.players.remove(player.getUniqueId());
+
+        player.getInventory().clear();
+        player.setHealth(20);
+        player.setFoodLevel(20);
+        player.setGameMode(GameMode.ADVENTURE);
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 2), true);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 2), true);
+
+        player.setAllowFlight(true);
+        player.setFlying(true);
+
+        player.hidePlayer(player);
+
+        for (Player all : Bukkit.getOnlinePlayers()) {
+            all.hidePlayer(player);
+            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(tablistInfo);
+        }
+        ItemStack spec = new ItemStack(Material.COMPASS, 1);
+        ItemMeta specM = spec.getItemMeta();
+
+        specM.setDisplayName("§fSpectate §7(Right Click)");
+        spec.setItemMeta(specM);
+
+        player.getInventory().setItem(0, spec);
+        player.spigot().setCollidesWithEntities(false);
     }
 
 }

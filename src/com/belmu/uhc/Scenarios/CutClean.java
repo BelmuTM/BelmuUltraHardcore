@@ -1,6 +1,6 @@
 package com.belmu.uhc.Scenarios;
 
-import com.belmu.uhc.Main;
+import com.belmu.uhc.UHC;
 import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -14,10 +14,19 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Random;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class CutClean implements Listener {
+
+    public final UHC plugin;
+    public CutClean(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onBreak(BlockBreakEvent e){
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         Player player = e.getPlayer();
         Block block = e.getBlock();
@@ -34,7 +43,7 @@ public class CutClean implements Listener {
         ItemStack torch = new ItemStack(Material.TORCH, 4);
         ItemStack glass = new ItemStack(Material.GLASS, 1);
 
-        if(Main.scenarios.contains("cutclean")) {
+        if(plugin.scenarios.contains("cutclean")) {
 
             if (!e.isCancelled()) {
 
@@ -47,7 +56,7 @@ public class CutClean implements Listener {
                         block.setType(Material.AIR);
                         e.setCancelled(true);
 
-                        UsefulMethods.drop(loc, gold);
+                        usefulMethods.drop(loc, gold);
 
                         if(random.nextInt(upper) == 1) {
 
@@ -60,7 +69,7 @@ public class CutClean implements Listener {
                         block.setType(Material.AIR);
                         e.setCancelled(true);
 
-                        UsefulMethods.drop(loc, iron);
+                        usefulMethods.drop(loc, iron);
 
                         if(random.nextInt(upper) == 1) {
 
@@ -73,14 +82,14 @@ public class CutClean implements Listener {
                         block.setType(Material.AIR);
                         e.setCancelled(true);
 
-                        UsefulMethods.drop(loc, flint);
+                        usefulMethods.drop(loc, flint);
                     }
 
                     if(type == Material.COAL_ORE) {
                         block.setType(Material.AIR);
                         e.setCancelled(true);
 
-                        UsefulMethods.drop(loc, torch);
+                        usefulMethods.drop(loc, torch);
 
                         if(random.nextInt(upper) == 1) {
 
@@ -93,7 +102,7 @@ public class CutClean implements Listener {
                         block.setType(Material.AIR);
                         e.setCancelled(true);
 
-                        UsefulMethods.drop(loc, glass);
+                        usefulMethods.drop(loc, glass);
 
                         if(random.nextInt(upper) == 1) {
 
@@ -116,16 +125,16 @@ public class CutClean implements Listener {
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e) {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         Entity entity = e.getEntity();
         Player player = e.getEntity().getKiller();
 
-        if(Main.scenarios.contains("cutclean")) {
+        if(plugin.scenarios.contains("cutclean")) {
 
             if(entity instanceof Pig) {
 
                 for(ItemStack i : e.getDrops()) {
-
                     if(i.getType() == Material.PORK)
                         i.setType(Material.GRILLED_PORK);
                 }
@@ -134,19 +143,14 @@ public class CutClean implements Listener {
             if(entity instanceof Sheep) {
 
                 for(ItemStack i : e.getDrops()) {
-
-                    if(i.getType() == Material.MUTTON) {
-
+                    if(i.getType() == Material.MUTTON)
                         i.setType(Material.COOKED_MUTTON);
-
-                    }
                 }
             }
 
             if(entity instanceof Rabbit) {
 
                 for(ItemStack i : e.getDrops()) {
-
                     if(i.getType() == Material.RABBIT)
                         i.setType(Material.COOKED_RABBIT);
                 }
@@ -155,7 +159,6 @@ public class CutClean implements Listener {
             if(entity instanceof Cow) {
 
                 for(ItemStack i : e.getDrops()) {
-
                     if(i.getType() == Material.RAW_BEEF)
                         i.setType(Material.COOKED_BEEF);
                 }
@@ -174,7 +177,7 @@ public class CutClean implements Listener {
                                 int upper = ((max - 2) + 1) + 2;
 
                                 ItemStack leather = new ItemStack(Material.LEATHER, r.nextInt(upper));
-                                UsefulMethods.dropCutClean(entity.getLocation(), leather);
+                                usefulMethods.dropCutClean(entity.getLocation(), leather);
 
                                 return;
                             }
@@ -186,7 +189,7 @@ public class CutClean implements Listener {
                 int upper = ((3 - 2) + 1) + 2; //((max - min) + 1) + min;
 
                 ItemStack leather = new ItemStack(Material.LEATHER, r.nextInt(upper));
-                Item item = UsefulMethods.dropCutClean(entity.getLocation(), leather);
+                Item item = usefulMethods.dropCutClean(entity.getLocation(), leather);
 
                 item.setPickupDelay(0);
             }
@@ -194,7 +197,6 @@ public class CutClean implements Listener {
             if(entity instanceof Chicken) {
 
                 for(ItemStack i : e.getDrops()) {
-
                     if(i.getType() == Material.RAW_CHICKEN)
                         i.setType(Material.COOKED_CHICKEN);
                 }
@@ -214,19 +216,18 @@ public class CutClean implements Listener {
                                 int upper = ((max - 2) + 1) + 2; //((max - min) + 1) + min;
 
                                 ItemStack feather = new ItemStack(Material.FEATHER, r.nextInt(upper));
-                                UsefulMethods.dropCutClean(entity.getLocation(), feather);
+                                usefulMethods.dropCutClean(entity.getLocation(), feather);
 
                                 return;
                             }
                         }
                     }
                 }
-
                 Random r = new Random();
                 int upper = ((3 - 2) + 1) + 2; //((max - min) + 1) + min;
 
                 ItemStack feather = new ItemStack(Material.FEATHER, r.nextInt(upper));
-                UsefulMethods.dropCutClean(entity.getLocation(), feather);
+                usefulMethods.dropCutClean(entity.getLocation(), feather);
             }
         }
     }

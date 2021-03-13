@@ -1,7 +1,7 @@
-package com.belmu.uhc.Teams;
+package com.belmu.uhc.TeamsManager;
 
-import com.belmu.uhc.Main;
-import com.belmu.uhc.Utils.Options;
+import com.belmu.uhc.UHC;
+import com.belmu.uhc.Core.Options;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -22,13 +22,23 @@ import org.bukkit.scoreboard.Team;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author Belmu (https://github.com/BelmuTM/)
+ */
 public class TeamChooser implements Listener {
+
+    public final UHC plugin;
+    public TeamChooser(UHC plugin) {
+        this.plugin = plugin;
+    }
 
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onClick(InventoryClickEvent e) {
+
 
         Inventory inv = e.getClickedInventory();
         ItemStack cur = e.getCurrentItem();
@@ -61,7 +71,7 @@ public class TeamChooser implements Listener {
 
                                 if (chosenTeam.getPlayers().contains(player)) {
 
-                                    player.sendMessage(Main.prefix + "§cYou are already in this team!");
+                                    player.sendMessage(plugin.prefix + "§cYou are already in this team!");
                                     player.closeInventory();
 
                                     Inventory inven = teamChooser(player);
@@ -72,7 +82,7 @@ public class TeamChooser implements Listener {
 
                                 if (chosenTeam.getPlayers().size() >= Options.pPerTeam) {
 
-                                    player.sendMessage(Main.prefix + "§cThis team is full!");
+                                    player.sendMessage(plugin.prefix + "§cThis team is full!");
                                     player.closeInventory();
 
                                     Inventory inven = teamChooser(player);
@@ -90,21 +100,19 @@ public class TeamChooser implements Listener {
                             if (!Teams.inGameTeams.contains(chosenTeam))
                                 Teams.inGameTeams.add(chosenTeam);
 
-                            player.sendMessage(Main.prefix + "§7Successfully added you to " + chosenTeam.getPrefix() + chosenTeam.getName() + "§7.");
+                            player.sendMessage(plugin.prefix + "§7Successfully added you to " + chosenTeam.getPrefix() + chosenTeam.getName() + "§7.");
                             player.closeInventory();
 
                             Inventory inven = teamChooser(player);
                             player.openInventory(inven);
                         }
                     }
-
                 } else if (cur.getType() == Material.BARRIER)
                     player.closeInventory();
             }
         }
     }
 
-    @SuppressWarnings("deprecation")
     @EventHandler
     public void interact(PlayerInteractEvent e) {
 
@@ -115,11 +123,8 @@ public class TeamChooser implements Listener {
         if (it == null) return;
 
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-
             if (it.hasItemMeta()) {
-
                 if (it.getItemMeta().hasDisplayName()) {
-
                     if (it.getItemMeta().getDisplayName().equalsIgnoreCase("§fChoose Team§7 (Right Click)")) {
 
                         e.setCancelled(true);
@@ -141,9 +146,7 @@ public class TeamChooser implements Listener {
         int f = 0;
 
         if(players >= ppt) {
-
             f = players / ppt;
-
         } else if(players < ppt) {
 
             Options.pPerTeam = 1;
@@ -158,16 +161,12 @@ public class TeamChooser implements Listener {
 
         int finalNumber = Integer.parseInt(a);
 
-        List<TeamsList> teamsList = new ArrayList<>();
-        for(TeamsList teams : TeamsList.values())
-            teamsList.add(teams);
-
+        List<TeamsList> teamsList = new ArrayList<>(Arrays.asList(TeamsList.values()));
         for(int i = 0; i < finalNumber; i++) {
 
             Team team = Teams.getTeam(teamsList.get(i).teamName);
             possibleTeams.add(team);
         }
-
         return possibleTeams;
     }
 
@@ -177,9 +176,7 @@ public class TeamChooser implements Listener {
 
         for (int i = 0; i < getPossibleTeams().size(); i++) {
 
-            List<TeamsList> teamsList = new ArrayList<>();
-            for(TeamsList teams : TeamsList.values())
-                teamsList.add(teams);
+            List<TeamsList> teamsList = new ArrayList<>(Arrays.asList(TeamsList.values()));
 
             ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
@@ -196,9 +193,7 @@ public class TeamChooser implements Listener {
 
             try {
                 chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + scoreboardTeam.getPlayers().size() + "/" + Options.pPerTeam + ")");
-
             } catch (NullPointerException npe) {
-
                 chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + 0 + "/" + Options.pPerTeam + ")");
             }
             List<String> lore = new ArrayList<>();
@@ -207,7 +202,6 @@ public class TeamChooser implements Listener {
 
                 for (OfflinePlayer all : scoreboardTeam.getPlayers())
                     lore.add("§7» " + team.teamColor + all.getName());
-
             }
 
             if(s.getPlayerTeam(player) == scoreboardTeam) {
@@ -215,12 +209,10 @@ public class TeamChooser implements Listener {
                 lore.add(" ");
                 lore.add("§cYou are already in this team!");
             }
-
             chM.setLore(lore);
             ch.setItemMeta(chM);
             inv.setItem(i, ch);
         }
-
         ItemStack b = new ItemStack(Material.BARRIER, 1);
         ItemMeta bM = b.getItemMeta();
 
@@ -228,7 +220,6 @@ public class TeamChooser implements Listener {
         b.setItemMeta(bM);
 
         inv.setItem(22, b);
-
         return inv;
     }
 

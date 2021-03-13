@@ -452,10 +452,9 @@ public class Start implements CommandExecutor {
         UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         int time = 60;
-        String kickallMessage = plugin.prefix + "§cKicking all the players in§b " + (time / 60) + " minute(s)§c!";
+        String kickallMessage = plugin.prefix + "§cKicking all the players in§b " + (time / 60) + " minute(s)";
         String thxForPlaying = "§7§m                              " + "\n§cThanks for Playing!\n" + "§7§m                              ";
 
-        running = false;
         border = false;
 
         Countdown kickall = new Countdown(plugin,

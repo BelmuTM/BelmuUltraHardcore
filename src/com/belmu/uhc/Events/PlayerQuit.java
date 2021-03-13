@@ -5,9 +5,11 @@ import com.belmu.uhc.Utils.Countdown;
 import com.belmu.uhc.Utils.EasyCountdown;
 import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.TeamsManager.*;
+import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -71,7 +73,7 @@ public class PlayerQuit implements Listener {
 
                                             Teams.inGameTeams.remove(PlayerDeath.playerTeam.get(player.getUniqueId()));
 
-                                            for (Player all : Bukkit.getOnlinePlayers())
+                                            for(Player all : Bukkit.getOnlinePlayers())
                                                 all.playSound(all.getLocation(), Sound.WITHER_DEATH, 1, Integer.MAX_VALUE);
                                         }
                                     );
@@ -83,6 +85,12 @@ public class PlayerQuit implements Listener {
                         (t) -> {}
                 );
                 elimination.scheduleTimer();
+            } else {
+                PacketPlayOutPlayerInfo tablistInfo = new PacketPlayOutPlayerInfo
+                        (PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ((CraftPlayer) player).getHandle());
+
+                for(Player all : Bukkit.getOnlinePlayers())
+                    ((CraftPlayer) all).getHandle().playerConnection.sendPacket(tablistInfo);
             }
         }
         e.setQuitMessage(mainQuitMsg);

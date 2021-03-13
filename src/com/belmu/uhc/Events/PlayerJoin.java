@@ -61,36 +61,36 @@ public class PlayerJoin implements Listener {
             }
         }
 
+        if(player.isOp()) {
+            String opName = "§c[OP]§7 " + player.getName();
+            String opSpecName = "§7[S]§c[OP]§7 " + player.getName();
+
+            if(!plugin.players.contains(player.getUniqueId())) {
+                if(!plugin.game.running) name = opName;
+                else name = opSpecName;
+
+            } else name = opName;
+        } else {
+            String pName = "§7" + player.getName();
+            String pSpecName = "§7[S] " + player.getName();
+
+            if(!plugin.players.contains(player.getUniqueId())) {
+                if(!plugin.game.running) name = pName;
+                else name = pSpecName;
+
+            } else name = pName;
+        }
+
         if(plugin.players.contains(player.getUniqueId()) && plugin.inCooldown.contains(player.getUniqueId())) {
-            joinMessage = plugin.prefix + player.getDisplayName() + " §7has §areconnected";
+            joinMessage = plugin.prefix + player.getDisplayName() + " §fhas §areconnected";
 
         } else {
             String joinMsg = "§r§f joined the game";
             String playerSize = " §r§7(§c" + Bukkit.getOnlinePlayers().size() + "§7/§c" + Bukkit.getMaxPlayers() + "§7)";
             joinMessage = plugin.prefix + player.getDisplayName() + joinMsg + playerSize;
-
-            if(player.isOp()) {
-                String opName = "§c[OP]§7 " + player.getName();
-                String opSpecName = "§7[S]§c[OP]§7 " + player.getName();
-
-                if(!plugin.players.contains(player.getUniqueId())) {
-                    if(!plugin.game.running) name = opName;
-                    else name = opSpecName;
-
-                } else name = opName;
-            } else {
-                String pName = "§7" + player.getName();
-                String pSpecName = "§7[S] " + player.getName();
-
-                if(!plugin.players.contains(player.getUniqueId())) {
-                    if(!plugin.game.running) name = pName;
-                    else name = pSpecName;
-
-                } else name = pName;
-            }
         }
 
-        if(!plugin.players.contains(player.getUniqueId()) && !plugin.inCooldown.contains(player.getUniqueId())) {
+        if(!plugin.players.contains(player.getUniqueId())) {
             if(plugin.game.running || plugin.game.preparing) {
                 usefulMethods.setSpectator(player);
 
@@ -123,9 +123,7 @@ public class PlayerJoin implements Listener {
         if(!plugin.game.running) {
             player.teleport(new Location(world, 0, world.getHighestBlockYAt(0, 0) + 2.5, 0));
             player.setGameMode(GameMode.ADVENTURE);
-
-            for(ItemStack i : player.getInventory().getArmorContents())
-                i.setType(Material.AIR);
+            player.getInventory().setArmorContents(null);
         }
         Tablist tablist = new Tablist(plugin);
         tablist.animate(player);

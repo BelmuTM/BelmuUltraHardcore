@@ -43,28 +43,29 @@ public class PlayerInteract implements Listener {
         if(!plugin.players.contains(player.getUniqueId())) {
 
             if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-                if (it.hasItemMeta()) {
-                    if (it.getItemMeta().hasDisplayName()) {
-                        if (it.getItemMeta().getDisplayName().equalsIgnoreCase("§fSpectate§7 (Right Click)")) {
+                if (it.getType().isBlock()) {
+                    if (it.hasItemMeta()) {
+                        if (it.getItemMeta().hasDisplayName()) {
+                            if (it.getItemMeta().getDisplayName().equalsIgnoreCase("§fSpectate §7(Right Click)")) {
 
-                            Inventory inv = specInventory();
-                            e.setCancelled(true);
+                                Inventory inv = specInventory();
+                                e.setCancelled(true);
 
-                            for(Player all : Bukkit.getOnlinePlayers()) {
-                                if(plugin.players.contains(all))
-                                    inv.addItem(usefulMethods.getSkull(all.getName()));
-                            }
-                            try {
-                                player.openInventory(inv);
-                            } catch (NullPointerException exc) {
-                                player.sendMessage(plugin.prefix + "§cThere is no player alive!");
-                            }
-                        } else if (!it.getItemMeta().getDisplayName().equalsIgnoreCase("§fSpectate§7 (Right Click)"))
+                                for (Player all : Bukkit.getOnlinePlayers()) {
+                                    if (plugin.players.contains(all.getUniqueId()))
+                                        inv.addItem(usefulMethods.getSkull(Bukkit.getPlayer(all.getUniqueId()).getName()));
+                                }
+                                try {
+                                    player.openInventory(inv);
+                                } catch (NullPointerException exc) {
+                                    player.sendMessage(plugin.prefix + "§cThere is no player alive!");
+                                }
+                            } else e.setCancelled(true);
+                        } else if (!it.getItemMeta().hasDisplayName())
                             e.setCancelled(true);
-                    } else if (!it.getItemMeta().hasDisplayName())
+                    } else if (!it.hasItemMeta())
                         e.setCancelled(true);
-                } else if (!it.hasItemMeta())
-                    e.setCancelled(true);
+                }
             }
 
         } else if(plugin.players.contains(player.getUniqueId())) {
@@ -123,14 +124,13 @@ public class PlayerInteract implements Listener {
 
         if(target instanceof Player) {
 
-            if(!plugin.players.contains(player.getUniqueId())) {
+            if(plugin.game.running && !plugin.players.contains(player.getUniqueId())) {
                 Inventory i = Bukkit.createInventory(null, 54, target.getName() + "'s Inventory");
 
                 for(ItemStack c : ((Player) target).getInventory().getContents()) {
                     if(c != null)
                         i.addItem(c);
                 }
-
                 for(ItemStack ac : ((Player) target).getInventory().getArmorContents()) {
                     if(ac != null)
                         i.addItem(ac);

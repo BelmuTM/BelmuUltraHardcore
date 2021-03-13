@@ -60,8 +60,8 @@ public class ReviveCommand implements CommandExecutor {
                                 UUID uuid = target.getUniqueId();
                                 String name;
 
-                                if(player.isOp()) name = "§c[OP]§7 " + player.getName();
-                                else name = "§7" + player.getName();
+                                if(player.isOp()) name = "§c[OP]§7 " + target.getName();
+                                else name = "§7" + target.getName();
 
                                 if(plugin.getMode().equalsIgnoreCase("Teams")) {
 
@@ -89,7 +89,11 @@ public class ReviveCommand implements CommandExecutor {
                                     world.getBlockAt(x, y, z).setType(Material.GLASS);
                                     usefulMethods.setBlocksRegionAsBorder(loc, 1, Material.GLASS);
                                 }
-                                target.teleport(new Location(world, x + 0.5, y + 1.250, z + 0.5));
+
+                                if(world.getBlockAt(x, y + 1, z).getType() != Material.AIR)
+                                    target.teleport(new Location(world, x + 0.5, world.getHighestBlockYAt(x, z), z + 0.5));
+                                else
+                                    target.teleport(new Location(world, x + 0.5, y + 1.250, z + 0.5));
 
                                 if (PlayerDeath.inv.containsKey(uuid)) {
 
@@ -102,8 +106,8 @@ public class ReviveCommand implements CommandExecutor {
                                     target.getInventory().setArmorContents(PlayerDeath.armorInv.get(uuid));
                                     PlayerDeath.armorInv.remove(uuid);
                                 }
-                                player.sendMessage(plugin.prefix + "§aRevived §7" + target.getName() + "§a.");
-                                target.sendMessage(plugin.prefix + "§aYou have been revived by§7 " + player.getName() + "§a.");
+                                player.sendMessage(plugin.prefix + "§aRevived §7" + target.getName());
+                                target.sendMessage(plugin.prefix + "§aYou have been revived by§7 " + player.getName());
 
                             } else
                                 player.sendMessage(plugin.prefix + "§cThis player is alive.");

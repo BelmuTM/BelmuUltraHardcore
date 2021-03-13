@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
@@ -82,33 +83,24 @@ public class PlayerDeath implements Listener {
             usefulMethods.setSpectator(target);
 
             String rip = "§cR.I.P.";
-            String spec = "§7You are spectator";
+            String spectator = "§7You are spectator";
 
             plugin.title.sendTitle(target, rip, ChatColor.BLACK, 5, 75, 5);
-            plugin.title.sendSubTitle(target, spec, ChatColor.BLACK, 5, 75, 5);
-
-            DecimalFormat format = new DecimalFormat("#");
+            plugin.title.sendSubTitle(target, spectator, ChatColor.BLACK, 5, 75, 5);
 
             double xU = loc.getX();
             double yU = loc.getY();
             double zU = loc.getZ();
 
+            DecimalFormat format = new DecimalFormat("#");
             String x = format.format(xU);
             String y = format.format(yU);
             String z = format.format(zU);
 
-            String specName;
-
-            if(target.isOp()) specName = "§7[S]§c[OP]§7 " + target.getName();
-            else specName = "§7[S] " + target.getName();
-
-            target.setDisplayName(specName);
-            target.setPlayerListName(target.getDisplayName());
-
             ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
 
-            String msg = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r§7");
+            String msg = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r§f");
             String paranoia = " §7at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]";
 
             String deathMessage = null;
@@ -120,7 +112,7 @@ public class PlayerDeath implements Listener {
 
                 if(killer instanceof Player) {
 
-                    String msg2 = msg.replace(killer.getDisplayName(), killer.getDisplayName() + "§r§7");
+                    String msg2 = msg.replace(killer.getDisplayName(), killer.getDisplayName() + "§r§f");
                     String finalMsg = msg2.replace(".", "");
 
                     if (plugin.scenarios.contains("paranoia")) {
@@ -175,6 +167,22 @@ public class PlayerDeath implements Listener {
                 }
             }
             e.setDeathMessage(deathMessage);
+
+            ItemStack spec = new ItemStack(Material.COMPASS, 1);
+            ItemMeta specM = spec.getItemMeta();
+
+            specM.setDisplayName("§fSpectate §7(Right Click)");
+            spec.setItemMeta(specM);
+
+            target.getInventory().setItem(0, spec);
+
+            String specName;
+
+            if(target.isOp()) specName = "§7[S]§c[OP]§7 " + target.getName();
+            else specName = "§7[S] " + target.getName();
+
+            target.setDisplayName(specName);
+            target.setPlayerListName(target.getDisplayName());
         }
     }
 

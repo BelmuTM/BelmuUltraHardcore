@@ -3,10 +3,7 @@ package com.belmu.uhc.Utils;
 import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.TeamsManager.Teams;
 import com.belmu.uhc.UHC;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
 import org.bukkit.Material;
@@ -16,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -517,8 +515,6 @@ public class UsefulMethods {
     }
 
     public void setSpectator(Player player) {
-        PacketPlayOutPlayerInfo tablistInfo = new PacketPlayOutPlayerInfo
-                (PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, (EntityPlayer) ((CraftPlayer) player).getHandle());
 
         plugin.players.remove(player.getUniqueId());
 
@@ -533,12 +529,6 @@ public class UsefulMethods {
         player.setAllowFlight(true);
         player.setFlying(true);
 
-        player.hidePlayer(player);
-
-        for (Player all : Bukkit.getOnlinePlayers()) {
-            all.hidePlayer(player);
-            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(tablistInfo);
-        }
         ItemStack spec = new ItemStack(Material.COMPASS, 1);
         ItemMeta specM = spec.getItemMeta();
 
@@ -547,6 +537,29 @@ public class UsefulMethods {
 
         player.getInventory().setItem(0, spec);
         player.spigot().setCollidesWithEntities(false);
+
+        String specName;
+
+        if(player.isOp()) specName = "§7[S]§c[OP]§7 " + player.getName();
+        else specName = "§7[S] " + player.getName();
+
+        player.setDisplayName(specName);
+        player.setPlayerListName(specName);
+
+        PacketPlayOutPlayerInfo tablistInfo = new PacketPlayOutPlayerInfo
+                (PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, ((CraftPlayer) player).getHandle());
+
+        PacketPlayOutEntityEquipment hideCompass = new PacketPlayOutEntityEquipment
+                (((CraftPlayer) player).getHandle().getId(), 1, CraftItemStack.asNMSCopy(spec));
+
+        player.hidePlayer(player);
+        for (Player all : Bukkit.getOnlinePlayers()) {
+            all.hidePlayer(player);
+
+            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(tablistInfo);
+            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(hideCompass);
+        }
+
     }
 
 }

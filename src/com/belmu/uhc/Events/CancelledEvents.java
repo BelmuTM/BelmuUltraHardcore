@@ -119,7 +119,7 @@ public class CancelledEvents implements Listener {
         if(!isAble(player)) {
             e.setCancelled(true);
         } else {
-            if (e.getBlock().getType() == Material.SKULL && ((Skull) e.getBlock()).getOwner().equalsIgnoreCase("LegendaryJulien") ) {
+            if (e.getBlock().getType() == Material.SKULL) {
                 e.setCancelled(true);
                 return;
             }
@@ -172,9 +172,11 @@ public class CancelledEvents implements Listener {
 
         if(!plugin.game.running || plugin.game.teleported) e.setCancelled(true);
 
-        if(!isAble((Player) damager)) {
-            e.setCancelled(true);
-            return;
+        if(damager instanceof Player) {
+            if (!isAble((Player) damager)) {
+                e.setCancelled(true);
+                return;
+            }
         }
 
         if(dmgd instanceof Player) {

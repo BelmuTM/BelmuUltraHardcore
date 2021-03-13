@@ -31,33 +31,28 @@ public class FoodEvent implements Listener {
         if(player instanceof Player) {
             UUID uuid = player.getUniqueId();
 
-            if(plugin.game.running) {
+            if(plugin.game.running && !plugin.game.teleported) {
 
-                if(plugin.game.teleported || plugin.game.preparing || plugin.game.fell) {
-                    e.setCancelled(true);
+                if(plugin.players.contains(uuid)) {
+                    if (hunger.containsKey(uuid)) {
 
-                } else {
-                    if (plugin.players.contains(player.getUniqueId())) {
-                        if (hunger.containsKey(uuid)) {
-                            long a = 15 * 1000;
+                        long a = 15 * 1000;
 
-                            if (hunger.get(uuid) <= (System.currentTimeMillis()) - a) {
+                        if (hunger.get(uuid) <= (System.currentTimeMillis()) - a) {
 
-                                e.setCancelled(true);
-                                ((Player) player).setFoodLevel(((Player) player).getFoodLevel() - (20 / 19));
-                                hunger.remove(uuid);
-                            } else e.setCancelled(true);
+                            e.setCancelled(true);
+                            ((Player) player).setFoodLevel(((Player) player).getFoodLevel() - (20 / 19));
+                            hunger.remove(uuid);
+                        } else e.setCancelled(true);
 
-                        } else {
-                            if (!ate.contains(uuid)) {
-                                e.setCancelled(true);
-                                hunger.put(uuid, System.currentTimeMillis() * 1000);
-                            } else
-                                ate.remove(uuid);
-                        }
-                    } else if (!plugin.players.contains(player.getUniqueId()))
-                        e.setCancelled(true);
-                }
+                    } else {
+                        if (!ate.contains(uuid)) {
+                            e.setCancelled(true);
+                            hunger.put(uuid, System.currentTimeMillis() * 1000);
+                        } else
+                            ate.remove(uuid);
+                    }
+                } else e.setCancelled(true);
             } else e.setCancelled(true);
         }
     }

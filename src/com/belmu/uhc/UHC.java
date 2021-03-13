@@ -61,6 +61,8 @@ public class UHC extends JavaPlugin implements Listener {
         getConfig().set("UHC" + "." + "TeamPicking", "Normal");
 
         Properties.setServerProperty(Properties.ServerProperty.ANNOUNCE_PLAYER_ACHIEVEMENTS, false);
+        Properties.setServerProperty(Properties.ServerProperty.FLIGHT, true);
+        Properties.setServerProperty(Properties.ServerProperty.SPAWN_PROTECTION, 0);
 
         ListenerManager listenerManager = new ListenerManager(this);
         CommandManager commandManager = new CommandManager(this);
@@ -113,7 +115,6 @@ public class UHC extends JavaPlugin implements Listener {
         scenarios.add("finalheal");
         scenarios.add("timber");
         scenarios.add("cutclean");
-        scenarios.add("timebomb");
     }
 
 }

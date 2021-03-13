@@ -1,5 +1,6 @@
 package com.belmu.uhc.Scenarios;
 
+import com.belmu.uhc.Events.PlayerDeath;
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Utils.Countdown;
 import com.belmu.uhc.Utils.UsefulMethods;
@@ -58,13 +59,13 @@ public class TimeBomb implements Listener {
             for(int i = 0; i < player.getInventory().getContents().length; i++) {
 
                 if(player.getInventory().getContents()[i] != null)
-                    c.getBlockInventory().addItem(player.getInventory().getContents()[i]);
+                    c.getBlockInventory().addItem(PlayerDeath.inv.get(player.getUniqueId()));
             }
 
             for(int i = 0; i < player.getInventory().getArmorContents().length; i++) {
 
                 if(player.getInventory().getArmorContents()[i] != null)
-                    c.getBlockInventory().addItem(player.getInventory().getArmorContents()[i]);
+                    c.getBlockInventory().addItem(PlayerDeath.armorInv.get(player.getUniqueId()));
             }
 
             CraftArmorStand s = (CraftArmorStand) world.spawnEntity(standLoc, EntityType.ARMOR_STAND);

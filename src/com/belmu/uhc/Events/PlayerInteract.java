@@ -51,15 +51,15 @@ public class PlayerInteract implements Listener {
                                 Inventory inv = specInventory();
                                 e.setCancelled(true);
 
-                                for (Player all : Bukkit.getOnlinePlayers()) {
-                                    if (plugin.players.contains(all.getUniqueId()))
+                                for(Player all : Bukkit.getOnlinePlayers()) {
+                                    if(plugin.players.contains(all.getUniqueId()))
                                         inv.addItem(usefulMethods.getSkull(Bukkit.getPlayer(all.getUniqueId()).getName()));
                                 }
-                                try {
+                                if(plugin.players.size() != 0)
                                     player.openInventory(inv);
-                                } catch (NullPointerException exc) {
+                                else
                                     player.sendMessage(plugin.prefix + "§cThere is no player alive!");
-                                }
+
                             } else e.setCancelled(true);
                         } else if (!it.getItemMeta().hasDisplayName())
                             e.setCancelled(true);

@@ -21,37 +21,25 @@ public class FoodEvent implements Listener {
         this.plugin = plugin;
     }
 
-    private final Map<UUID, Long> hunger = new HashMap<>();
+    private final Map<UUID, Double> hunger = new HashMap<>();
     private final List<UUID> ate = new ArrayList<>();
 
     @EventHandler
     public void onFood(FoodLevelChangeEvent e) {
-        Entity player = e.getEntity();
+        Entity entity = e.getEntity();
 
-        if(player instanceof Player) {
+        if(entity instanceof Player) {
+            Player player = (Player) entity;
             UUID uuid = player.getUniqueId();
 
             if(plugin.game.running && !plugin.game.teleported) {
 
                 if(plugin.players.contains(uuid)) {
-                    if (hunger.containsKey(uuid)) {
+                    if(checkCooldown(hunger, player)) {
 
-                        long a = 15 * 1000;
+                        setCooldown(hunger, player, 11.5);
 
-                        if (hunger.get(uuid) <= (System.currentTimeMillis()) - a) {
-
-                            e.setCancelled(true);
-                            ((Player) player).setFoodLevel(((Player) player).getFoodLevel() - (20 / 19));
-                            hunger.remove(uuid);
-                        } else e.setCancelled(true);
-
-                    } else {
-                        if (!ate.contains(uuid)) {
-                            e.setCancelled(true);
-                            hunger.put(uuid, System.currentTimeMillis() * 1000);
-                        } else
-                            ate.remove(uuid);
-                    }
+                    } else e.setCancelled(true);
                 } else e.setCancelled(true);
             } else e.setCancelled(true);
         }
@@ -70,6 +58,15 @@ public class FoodEvent implements Listener {
             hunger.remove(player.getUniqueId());
             ate.add(uuid);
         }
+    }
+
+    public void setCooldown(Map<UUID, Double> cooldowns, Player player, double seconds){
+        double delay = System.currentTimeMillis() + (seconds * 1000);
+        cooldowns.put(player.getUniqueId(), delay);
+    }
+
+    public boolean checkCooldown(Map<UUID, Double> cooldowns, Player player){
+        return !cooldowns.containsKey(player.getUniqueId()) || cooldowns.get(player.getUniqueId()) <= System.currentTimeMillis();
     }
 
 }

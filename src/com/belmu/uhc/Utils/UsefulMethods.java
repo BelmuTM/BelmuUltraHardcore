@@ -113,15 +113,6 @@ public class UsefulMethods {
         return skull;
     }
 
-    public void addKill(Player p, int count) {
-        FileConfiguration cfg = plugin.getConfig();
-
-        int i = cfg.getInt("Players" + "." + p.getName() + ".kills");
-        cfg.set("Players" + "." + p.getName() + "." + "kills", count + i);
-
-        plugin.saveConfig();
-    }
-
     @SuppressWarnings("deprecation")
     public void setBlocksRegion(Location loc1, Location loc2, Material material) {
 
@@ -436,41 +427,9 @@ public class UsefulMethods {
         return "N/A";
     }
 
-    public int getKills(Player player) {
-        FileConfiguration cfg = plugin.getConfig();
-
-        if(cfg.get("Players" + "." + player.getName() + ".kills") != null) {
-            return cfg.getInt("Players" + "." + player.getName() + ".kills");
-
-        } else if(cfg.get("Players" + "." + player.getName() + ".kills") == null) {
-
-            cfg.set("Players" + "." + player.getName() + ".kills", 0);
-            return cfg.getInt("Players" + "." + player.getName() + ".kills");
-        }
-        return 0;
-    }
-
     public void sendPacket(Player p, String text) {
         PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + text + "\"}"), (byte) 2);
         ((CraftPlayer)p).getHandle().playerConnection.sendPacket(packet);
-    }
-
-    public Map<Player, Integer> sortedKills() {
-
-        Map<Player, Integer> unsortedKills = new HashMap<>();
-
-        for(UUID uuid : plugin.players)
-            unsortedKills.put(Bukkit.getPlayer(uuid),
-                    plugin.getConfig().getInt("Players" + "." + Bukkit.getPlayer(uuid).getName() + ".kills"));
-
-        Map<Player, Integer> sortedKills = new HashMap<>();
-
-        unsortedKills.entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .forEachOrdered(x -> sortedKills.put(x.getKey(), x.getValue()));
-
-        return sortedKills;
     }
 
     public void deleteWorlds() {
@@ -560,6 +519,92 @@ public class UsefulMethods {
             ((CraftPlayer) all).getHandle().playerConnection.sendPacket(hideCompass);
         }
 
+    }
+
+    public void addKills(Player player, int amount) {
+
+        if(plugin.kills.get(player.getUniqueId()) != null)
+            plugin.kills.put(player.getUniqueId(), plugin.kills.get(player.getUniqueId()) + amount);
+        else plugin.kills.put(player.getUniqueId(), amount);
+    }
+
+    public int getKills(Player player) {
+         return plugin.kills.get(player.getUniqueId());
+    }
+
+    public LinkedHashMap<UUID, Integer> sortedKills(boolean natural) {
+        LinkedHashMap<UUID, Integer> sorted = new LinkedHashMap<>();
+
+        if(natural) {
+            plugin.kills.entrySet()
+                    .stream()
+                    .sorted(java.util.Map.Entry.comparingByValue(Comparator.naturalOrder()))
+                    .forEachOrdered(x -> sorted.put(x.getKey(), x.getValue()));
+        } else {
+            plugin.kills.entrySet()
+                    .stream()
+                    .sorted(java.util.Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .forEachOrdered(x -> sorted.put(x.getKey(), x.getValue()));
+        }
+        return sorted;
+    }
+
+    public String ordinal(int i) {
+        String[] suffixes = new String[] { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
+        switch (i % 100) {
+            case 11:
+            case 12:
+            case 13:
+                return i + "th";
+            default:
+                return i + suffixes[i % 10];
+
+        }
+    }
+
+    public void sendWinMessage(String winner) {
+        List players = new ArrayList(sortedKills(false).keySet());
+
+        StringBuilder win = new StringBuilder();
+        String na = "§7N/A";
+        if(!players.isEmpty()) {
+            for (int i = 0; i < 3; i++) {
+                String format;
+
+                int n = i + 1;
+                String ordinal = ordinal(n);
+                String place = "";
+
+                if(n == 1) place = "§e§l" + ordinal + " Killer";
+                if(n == 2) place = "§6§l" + ordinal + " Killer";
+                if(n == 3) place = "§c§l" + ordinal + " Killer";
+
+                if(i < players.size()) {
+                    UUID uuid = UUID.fromString(players.get(i).toString());
+                    OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
+                    String pName = "§7§m" + p.getName() + "§r";
+
+                    if(p.isOnline()) pName = "§7" + p.getName();
+
+                    int kills = sortedKills(false).get(p.getUniqueId());
+                    format = place + " " + pName + " §e- §a" + kills;
+                } else {
+                    format = place + " " + na + " §e- " + na;
+                }
+                win.append("§r      ").append(format).append("\n");
+            }
+
+            String name;
+
+            if(plugin.getMode().equals("Teams"))
+                name = "§c§lUHC Teams";
+            else if(plugin.getMode().equals("Solo"))
+                name = "§c§lUHC Solo";
+            else name = "§c§lUHC";
+
+            String line = "§7§m                                                   ";
+            Bukkit.broadcastMessage(line + "\n" + "§r                 " + name + "§r" + "\n§r               §bWinner(s): " + winner + "\n§r \n" + win.toString().trim() + "\n§r \n" + line);
+        }
     }
 
 }

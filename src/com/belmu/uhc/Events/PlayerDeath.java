@@ -41,7 +41,6 @@ public class PlayerDeath implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
-        FileConfiguration cfg = plugin.getConfig();
         UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         Player target = e.getEntity();
@@ -52,14 +51,8 @@ public class PlayerDeath implements Listener {
         Location loc = target.getLocation();
 
         if(plugin.game.running) {
-            if(killer instanceof Player) {
-                try {
-                    usefulMethods.addKill(killer, 1);
-                } catch (NullPointerException exc) {
-                    cfg.set("Players" + "." + killer.getName() + ".kills", 0);
-                    usefulMethods.addKill(killer, 1);
-                }
-            }
+            if(killer != null) usefulMethods.addKills(killer, 1);
+
             ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
             SkullMeta headM = (SkullMeta) head.getItemMeta();
 
@@ -110,7 +103,7 @@ public class PlayerDeath implements Listener {
                 Team team = s.getPlayerTeam(target);
                 playerTeam.put(uuid, team);
 
-                if(killer instanceof Player) {
+                if(killer != null) {
 
                     String msg2 = msg.replace(killer.getDisplayName(), killer.getDisplayName() + "§r§f");
                     String finalMsg = msg2.replace(".", "");
@@ -144,7 +137,7 @@ public class PlayerDeath implements Listener {
                 }
 
             } else if(plugin.getMode().equalsIgnoreCase("Solo")) {
-                if (killer instanceof Player) {
+                if(killer != null) {
 
                     String msg2 = msg.replace(killer.getName(), killer.getName() + "§f");
                     String finalMsg = msg2.replace(".", "");

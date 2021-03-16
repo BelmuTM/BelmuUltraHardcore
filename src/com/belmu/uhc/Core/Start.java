@@ -1,4 +1,4 @@
-package com.belmu.uhc.Commands;
+package com.belmu.uhc.Core;
 
 import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.UHC;
@@ -21,7 +21,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -65,10 +64,6 @@ public class Start implements CommandExecutor {
                                     World world = Bukkit.getWorld("world");
                                     World nether = Bukkit.getWorld("world_nether");
 
-                                    String bar_1 = "§8§m                                                       \n";
-                                    String bar_2 = "\n§8§m                                                       ";
-
-                                    String sortError = "§cError: Failed to sort kills.";
                                     /*
                                     WIN CHECK
                                      */
@@ -86,42 +81,16 @@ public class Start implements CommandExecutor {
                                                         if(plugin.game.running) {
                                                             this.cancel();
 
-                                                            Countdown gtimer = new Countdown(plugin,
-                                                                    0.25,
-                                                                    () -> {},
-                                                                    () -> {
-                                                                        StringBuilder a = new StringBuilder();
-                                                                        for(int i = 0; i < 4; i++) {
+                                                            for (UUID uuid : plugin.players) {
+                                                                Player player = Bukkit.getPlayer(uuid);
+                                                                plugin.title.winTitle(player, player == winner);
+                                                            }
 
-                                                                            try {
-                                                                                Map<Player, Integer> sortedKills = usefulMethods.sortedKills();
+                                                            for (Player all : Bukkit.getOnlinePlayers())
+                                                                all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1f, 1f);
 
-                                                                                Player p = (Player) sortedKills.keySet().toArray()[i];
-                                                                                int kills = sortedKills.get(p);
-
-                                                                                a.append("§7» ").append(p.getName()).append("§7: §c")
-                                                                                        .append(kills).append("§f kills").append("\n");
-
-                                                                            } catch (ArrayIndexOutOfBoundsException aioobe) {
-                                                                                Bukkit.broadcastMessage(plugin.prefix + sortError);
-                                                                            }
-                                                                        }
-                                                                        for(UUID uuid : plugin.players) {
-                                                                            Player player = Bukkit.getPlayer(uuid);
-                                                                            plugin.title.winTitle(player, player == winner);
-                                                                        }
-
-                                                                        Bukkit.broadcastMessage(bar_1 + "§c§l                UHC Solo" + "\n" + "§7            Thanks for playing!" + "\n " + "\n " +
-                                                                                "          §cWinner :§7 " + winner.getName() + a.toString().trim() + bar_2);
-
-                                                                        for(Player all : Bukkit.getOnlinePlayers())
-                                                                            all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1, Integer.MAX_VALUE);
-
-                                                                        endGame();
-                                                                    },
-                                                                    (t) -> {}
-                                                            );
-                                                            gtimer.scheduleTimer();
+                                                            usefulMethods.sendWinMessage(winner.getName());
+                                                            endGame();
                                                         }
                                                     }
                                                 } else if (plugin.getMode().equalsIgnoreCase("Teams")) {
@@ -132,43 +101,19 @@ public class Start implements CommandExecutor {
                                                             if(Teams.teamsAtStart.size() != Teams.inGameTeams.size()) {
                                                                 this.cancel();
 
-                                                                Countdown gtimer = new Countdown(plugin,
-                                                                        0.25,
-                                                                        () -> {},
-                                                                        () -> {
-                                                                            StringBuilder a = new StringBuilder();
+                                                                Team lastTeam = Teams.inGameTeams.get(0);
 
-                                                                            for (int i = 0; i < 4; i++) {
-                                                                                try {
-                                                                                    Map<Player, Integer> sortedKills = usefulMethods.sortedKills();
+                                                                for (UUID uuid : plugin.players) {
+                                                                    Player player = Bukkit.getPlayer(uuid);
+                                                                    for (OfflinePlayer winners : lastTeam.getPlayers())
+                                                                        plugin.title.winTitle(player, player == winners);
+                                                                }
 
-                                                                                    Player p = (Player) sortedKills.keySet().toArray()[i];
-                                                                                    int kills = sortedKills.get(p);
+                                                                for (Player all : Bukkit.getOnlinePlayers())
+                                                                    all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1f, 1f);
 
-                                                                                    a.append("§7» ").append(p.getName()).append("§7: §c").append(kills).append("§f kills").append("\n");
-
-                                                                                } catch (ArrayIndexOutOfBoundsException aioobe) {
-                                                                                    Bukkit.broadcastMessage(plugin.prefix + sortError);
-                                                                                }
-                                                                            }
-                                                                            Team lastTeam = Teams.inGameTeams.get(0);
-
-                                                                            for(UUID uuid : plugin.players) {
-                                                                                Player player = Bukkit.getPlayer(uuid);
-                                                                                for (OfflinePlayer winners : lastTeam.getPlayers())
-                                                                                    plugin.title.winTitle(player, player == winners);
-                                                                            }
-                                                                            Bukkit.broadcastMessage(bar_1 + "§c§l               UHC Teams" + "\n" + "§7            Thanks for playing!" + "\n " + "          §cWinner : "
-                                                                                    + lastTeam.getPrefix() + lastTeam.getDisplayName() + "§7 Team" + a.toString().trim() + bar_2);
-
-                                                                            for (Player all : Bukkit.getOnlinePlayers())
-                                                                                all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1, Integer.MAX_VALUE);
-
-                                                                            endGame();
-                                                                        },
-                                                                        (t) -> {}
-                                                                );
-                                                                gtimer.scheduleTimer();
+                                                                usefulMethods.sendWinMessage(lastTeam.getPrefix() + " " + lastTeam.getName());
+                                                                endGame();
                                                             }
                                                         }
                                                     }
@@ -452,7 +397,7 @@ public class Start implements CommandExecutor {
         UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
         int time = 60;
-        String kickallMessage = plugin.prefix + "§cKicking all the players in§b " + (time / 60) + " minute(s)";
+        String kickallMessage = plugin.prefix + "§cKicking players in§b " + (time / 60) + " minute(s)";
         String thxForPlaying = "§7§m                              " + "\n§cThanks for Playing!\n" + "§7§m                              ";
 
         border = false;

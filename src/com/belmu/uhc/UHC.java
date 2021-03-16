@@ -1,6 +1,6 @@
 package com.belmu.uhc;
 
-import com.belmu.uhc.Commands.Start;
+import com.belmu.uhc.Core.Start;
 import com.belmu.uhc.Core.CommandManager;
 import com.belmu.uhc.Core.ListenerManager;
 import com.belmu.uhc.Core.Packets.GameScoreboard;
@@ -30,6 +30,7 @@ public class UHC extends JavaPlugin implements Listener {
 
     public List<UUID> inCooldown = new ArrayList<>();
     public List<UUID> players = new ArrayList<>();
+    public Map<UUID, Integer> kills = new HashMap<>();
     public List<String> scenarios = new ArrayList<>();
 
     public Start game;

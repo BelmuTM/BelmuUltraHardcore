@@ -18,9 +18,6 @@ import org.bukkit.scoreboard.*;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Belmu (https://github.com/BelmuTM/)
@@ -35,14 +32,13 @@ public class GameScoreboard {
     public int timer;
 
     public void createGameScoreboard(Player player) {
-        FileConfiguration cfg = plugin.getConfig();
         BPlayerBoard board = Netherboard.instance().createBoard(player, "uhcScoreboard");
 
         String name;
 
-        if(cfg.get("UHC" + "." + "Mode").equals("Teams"))
+        if(plugin.getMode().equals("Teams"))
             name = "§c§lUHC Teams";
-        else if(cfg.get("UHC" + "." + "Mode").equals("Solo"))
+        else if(plugin.getMode().equals("Solo"))
             name = "§c§lUHC Solo";
         else name = "§c§lUHC";
 

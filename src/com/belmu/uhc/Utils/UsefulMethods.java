@@ -11,7 +11,6 @@ import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
@@ -272,7 +271,6 @@ public class UsefulMethods {
     @SuppressWarnings("deprecation")
     public void tp() {
         Scoreboard s = Bukkit.getScoreboardManager().getMainScoreboard();
-        World world = Bukkit.getWorld("world");
 
         for (Player all : Bukkit.getOnlinePlayers()) {
             UUID uuid = all.getUniqueId();
@@ -286,21 +284,14 @@ public class UsefulMethods {
             if(plugin.getMode().equalsIgnoreCase("Solo")) {
 
                 if (tpLocation.containsKey(uuid)) {
-                    int x = tpLocation.get(uuid).getBlockX();
-                    int z = tpLocation.get(uuid).getBlockZ();
-
                     all.teleport(tpLocation.get(uuid));
                     plugin.game.teleported = true;
                 }
 
             } else if(plugin.getMode().equalsIgnoreCase("Teams")) {
-
                 Team team = s.getPlayerTeam(all);
 
                 if (tpLocationTeams.containsKey(team)) {
-                    int x = tpLocationTeams.get(team).getBlockX();
-                    int z = tpLocationTeams.get(team).getBlockZ();
-
                     all.teleport(tpLocationTeams.get(team));
                     plugin.game.teleported = true;
                 }
@@ -593,7 +584,6 @@ public class UsefulMethods {
                 }
                 win.append("§r      ").append(format).append("\n");
             }
-
             String name;
 
             if(plugin.getMode().equals("Teams"))
@@ -604,6 +594,9 @@ public class UsefulMethods {
 
             String line = "§7§m                                                   ";
             Bukkit.broadcastMessage(line + "\n" + "§r                 " + name + "§r" + "\n§r               §bWinner(s): " + winner + "\n§r \n" + win.toString().trim() + "\n§r \n" + line);
+
+            for(Player all : Bukkit.getOnlinePlayers())
+                all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1f, 1f);
         }
     }
 

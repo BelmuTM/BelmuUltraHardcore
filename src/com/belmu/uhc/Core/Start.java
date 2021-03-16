@@ -86,9 +86,6 @@ public class Start implements CommandExecutor {
                                                                 plugin.title.winTitle(player, player == winner);
                                                             }
 
-                                                            for (Player all : Bukkit.getOnlinePlayers())
-                                                                all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1f, 1f);
-
                                                             usefulMethods.sendWinMessage(winner.getName());
                                                             endGame();
                                                         }
@@ -108,9 +105,6 @@ public class Start implements CommandExecutor {
                                                                     for (OfflinePlayer winners : lastTeam.getPlayers())
                                                                         plugin.title.winTitle(player, player == winners);
                                                                 }
-
-                                                                for (Player all : Bukkit.getOnlinePlayers())
-                                                                    all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1f, 1f);
 
                                                                 usefulMethods.sendWinMessage(lastTeam.getPrefix() + " " + lastTeam.getName());
                                                                 endGame();

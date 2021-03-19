@@ -73,6 +73,8 @@ public class Start implements CommandExecutor {
                                         public void run() {
 
                                             if(running) {
+                                                usefulMethods.gameChecks();
+
                                                 if(plugin.getMode().equalsIgnoreCase("Solo")) {
                                                     if(plugin.players.size() == 1 && Bukkit.getOnlinePlayers().size() > 1) {
 
@@ -137,15 +139,9 @@ public class Start implements CommandExecutor {
 
                                                     if(plugin.getTeamPicking().equalsIgnoreCase("Normal")) {
 
-                                                        ItemStack ch = new ItemStack(Material.MELON, 1);
-                                                        ItemMeta chM = ch.getItemMeta();
-
-                                                        chM.setDisplayName("§fChoose Team§7 (Right Click)");
-                                                        ch.setItemMeta(chM);
-
                                                         for(Player online : Bukkit.getOnlinePlayers()) {
                                                             Teams.playersToSpread.add(online.getUniqueId());
-                                                            online.getInventory().setItem(0, ch);
+                                                            usefulMethods.giveTeamChooser(online);
                                                         }
                                                     }
                                                     Scoreboard s = Bukkit.getScoreboardManager().getMainScoreboard();

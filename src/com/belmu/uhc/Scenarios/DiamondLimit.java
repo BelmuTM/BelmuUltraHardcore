@@ -48,14 +48,13 @@ public class DiamondLimit implements Listener {
                         int a = DiamondLimit.dLimit.get(uuid);
 
                         if (a == Options.diamondLimit) {
-
                             e.setCancelled(true);
 
                             block.setType(Material.AIR);
                             usefulMethods.sendPacket(player, "§cYou have reached your diamond limit! (§b" + Options.diamondLimit + "§c)");
 
                             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(block.getLocation(), EntityType.EXPERIENCE_ORB);
-                            orb.setExperience(2);
+                            orb.setExperience(4);
 
                         } else if (a < Options.diamondLimit)
                             DiamondLimit.dLimit.put(uuid, a + 1);

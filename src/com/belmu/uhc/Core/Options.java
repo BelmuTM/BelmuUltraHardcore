@@ -26,4 +26,6 @@ public class Options {
     public static double untilGameStarts = 120;
     public static int beforeElimination = 5 * 60;
 
+    public static String compassName = "§fSpectate §7(Right Click)";
+    public static String teamChooserName = "§fChoose Team §7(Right Click)";
 }

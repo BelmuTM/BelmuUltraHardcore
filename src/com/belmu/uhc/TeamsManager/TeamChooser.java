@@ -38,8 +38,6 @@ public class TeamChooser implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onClick(InventoryClickEvent e) {
-
-
         Inventory inv = e.getClickedInventory();
         ItemStack cur = e.getCurrentItem();
         HumanEntity p = e.getWhoClicked();
@@ -64,13 +62,10 @@ public class TeamChooser implements Listener {
 
                             ScoreboardManager m = Bukkit.getScoreboardManager();
                             Scoreboard s = m.getMainScoreboard();
-
                             Team chosenTeam = s.getTeam(team.teamName);
 
                             if(chosenTeam.getPlayers() != null) {
-
                                 if (chosenTeam.getPlayers().contains(player)) {
-
                                     player.sendMessage(plugin.prefix + "§cYou are already in this team!");
                                     player.closeInventory();
 
@@ -107,7 +102,7 @@ public class TeamChooser implements Listener {
                             player.openInventory(inven);
                         }
                     }
-                } else if (cur.getType() == Material.BARRIER)
+                } else if(cur.getType() == Material.BARRIER)
                     player.closeInventory();
             }
         }
@@ -115,7 +110,6 @@ public class TeamChooser implements Listener {
 
     @EventHandler
     public void interact(PlayerInteractEvent e) {
-
         Player player = e.getPlayer();
         Action action = e.getAction();
         ItemStack it = e.getItem();
@@ -125,10 +119,9 @@ public class TeamChooser implements Listener {
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
             if (it.hasItemMeta()) {
                 if (it.getItemMeta().hasDisplayName()) {
-                    if (it.getItemMeta().getDisplayName().equalsIgnoreCase("§fChoose Team§7 (Right Click)")) {
+                    if (it.getItemMeta().getDisplayName().equalsIgnoreCase(Options.teamChooserName)) {
 
                         e.setCancelled(true);
-
                         Inventory inv = teamChooser(player);
                         player.openInventory(inv);
                     }
@@ -138,7 +131,6 @@ public class TeamChooser implements Listener {
     }
 
     public static List<Team> getPossibleTeams() {
-
         List<Team> possibleTeams = new ArrayList<>();
 
         int ppt = Options.pPerTeam;
@@ -172,15 +164,12 @@ public class TeamChooser implements Listener {
 
     @SuppressWarnings("deprecation")
     public static Inventory teamChooser(Player player) {
+        ScoreboardManager m = Bukkit.getScoreboardManager();
+        Scoreboard s = m.getMainScoreboard();
         Inventory inv = Bukkit.createInventory(null, 27, "Teams");
 
         for (int i = 0; i < getPossibleTeams().size(); i++) {
-
             List<TeamsList> teamsList = new ArrayList<>(Arrays.asList(TeamsList.values()));
-
-            ScoreboardManager m = Bukkit.getScoreboardManager();
-            Scoreboard s = m.getMainScoreboard();
-
             TeamsList team = teamsList.get(i);
 
             ItemStack ch = new ItemStack(Material.BANNER, 1);
@@ -191,21 +180,18 @@ public class TeamChooser implements Listener {
             BannerMeta meta = (BannerMeta) chM;
             meta.setBaseColor(team.teamDyeColor);
 
-            try {
-                chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + scoreboardTeam.getPlayers().size() + "/" + Options.pPerTeam + ")");
-            } catch (NullPointerException npe) {
-                chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + 0 + "/" + Options.pPerTeam + ")");
-            }
             List<String> lore = new ArrayList<>();
 
             if(scoreboardTeam.getPlayers() != null) {
+                chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + scoreboardTeam.getPlayers().size() + "/" + Options.pPerTeam + ")");
 
                 for (OfflinePlayer all : scoreboardTeam.getPlayers())
                     lore.add("§7» " + team.teamColor + all.getName());
+            } else {
+                chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + 0 + "/" + Options.pPerTeam + ")");
             }
 
             if(s.getPlayerTeam(player) == scoreboardTeam) {
-
                 lore.add(" ");
                 lore.add("§cYou are already in this team!");
             }

@@ -1,5 +1,6 @@
 package com.belmu.uhc.Events;
 
+import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Scenarios.Paranoïa;
 import com.belmu.uhc.TeamsManager.Teams;
@@ -96,7 +97,7 @@ public class PlayerDeath implements Listener {
             String msg = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r§f");
             String paranoia = " §7at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]";
 
-            String deathMessage = null;
+            String deathMessage = "";
 
             if(plugin.getMode().equalsIgnoreCase("Teams")) {
 
@@ -159,15 +160,12 @@ public class PlayerDeath implements Listener {
                         deathMessage = plugin.prefix + "§f" + msg;
                 }
             }
-            e.setDeathMessage(deathMessage);
+            if(killer != null) deathMessage.replaceAll(killer.getName(), killer.getDisplayName() + "§r");
 
-            ItemStack spec = new ItemStack(Material.COMPASS, 1);
-            ItemMeta specM = spec.getItemMeta();
+            e.setDeathMessage(deathMessage.replaceAll(target.getName(), target.getDisplayName() + "§r"));
 
-            specM.setDisplayName("§fSpectate §7(Right Click)");
-            spec.setItemMeta(specM);
-
-            target.getInventory().setItem(0, spec);
+            usefulMethods.giveCompass(target);
+            target.getInventory().setArmorContents(null);
 
             String specName;
 

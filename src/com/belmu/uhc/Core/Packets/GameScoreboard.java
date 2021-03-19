@@ -172,8 +172,12 @@ public class GameScoreboard {
         }
         player.setScoreboard(sb);
 
-        CraftPlayer cp = ((CraftPlayer) player);
-        cp.getHandle().triggerHealthUpdate();
+        for(Player all : Bukkit.getOnlinePlayers()) {
+            all.setHealth(all.getHealth());
+
+            CraftPlayer cp = ((CraftPlayer) player);
+            cp.getHandle().triggerHealthUpdate();
+        }
     }
 
 }

@@ -26,10 +26,10 @@ public class FinalHeal implements Listener {
                     () -> {
                         for(Player all : Bukkit.getOnlinePlayers()) {
 
-                            if(plugin.players.contains(all)) {
+                            if(plugin.players.contains(all.getUniqueId())) {
                                 all.setHealth(20);
                                 all.setFoodLevel(20);
-                                all.playSound(all.getLocation(), Sound.VILLAGER_YES, 1, Integer.MAX_VALUE);
+                                all.playSound(all.getLocation(), Sound.CAT_MEOW, 1, Integer.MAX_VALUE);
                             }
                         }
                         Bukkit.broadcastMessage(plugin.prefix + "§aFinal Heal §eproceeded!");

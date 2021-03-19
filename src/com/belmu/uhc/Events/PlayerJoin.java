@@ -1,5 +1,6 @@
 package com.belmu.uhc.Events;
 
+import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.Core.Packets.Tablist.Tablist;
 import com.belmu.uhc.TeamsManager.Teams;
 import com.belmu.uhc.UHC;
@@ -47,16 +48,10 @@ public class PlayerJoin implements Listener {
             if(plugin.getTeamPicking().equals("Normal")) {
 
                 if(plugin.game.preparing) {
-                    ItemStack ch = new ItemStack(Material.MELON, 1);
-                    ItemMeta chM = ch.getItemMeta();
-
-                    chM.setDisplayName("§fChoose Team §7(Right Click)");
-                    ch.setItemMeta(chM);
+                    usefulMethods.giveTeamChooser(player);
 
                     if(!Teams.playersToSpread.contains(player.getUniqueId()))
                         Teams.playersToSpread.add(player.getUniqueId());
-
-                    player.getInventory().setItem(0, ch);
                 }
             }
         }
@@ -80,6 +75,8 @@ public class PlayerJoin implements Listener {
 
             } else name = pName;
         }
+        player.setDisplayName(name);
+        player.setPlayerListName(player.getDisplayName());
 
         if(plugin.players.contains(player.getUniqueId()) && plugin.inCooldown.contains(player.getUniqueId())) {
             joinMessage = plugin.prefix + player.getDisplayName() + " §fhas §areconnected";
@@ -129,8 +126,6 @@ public class PlayerJoin implements Listener {
         tablist.animate(player);
 
         initializeScoreboard(player);
-        player.setDisplayName(name);
-        player.setPlayerListName(player.getDisplayName());
 
         e.setJoinMessage(joinMessage);
         plugin.inCooldown.remove(player.getUniqueId());

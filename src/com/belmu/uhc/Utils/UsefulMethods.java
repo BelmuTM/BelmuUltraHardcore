@@ -464,54 +464,6 @@ public class UsefulMethods {
         yeet.scheduleTimer();
     }
 
-    public void setSpectator(Player player) {
-
-        plugin.players.remove(player.getUniqueId());
-
-        player.getInventory().clear();
-        player.setHealth(20);
-        player.setFoodLevel(20);
-        player.setGameMode(GameMode.ADVENTURE);
-
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 2), true);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 2), true);
-
-        player.setAllowFlight(true);
-        player.setFlying(true);
-
-        ItemStack spec = new ItemStack(Material.COMPASS, 1);
-        ItemMeta specM = spec.getItemMeta();
-
-        specM.setDisplayName("§fSpectate §7(Right Click)");
-        spec.setItemMeta(specM);
-
-        player.getInventory().setItem(0, spec);
-        player.spigot().setCollidesWithEntities(false);
-
-        String specName;
-
-        if(player.isOp()) specName = "§7[S]§c[OP]§7 " + player.getName();
-        else specName = "§7[S] " + player.getName();
-
-        player.setDisplayName(specName);
-        player.setPlayerListName(specName);
-
-        PacketPlayOutPlayerInfo tablistInfo = new PacketPlayOutPlayerInfo
-                (PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, ((CraftPlayer) player).getHandle());
-
-        PacketPlayOutEntityEquipment hideCompass = new PacketPlayOutEntityEquipment
-                (((CraftPlayer) player).getHandle().getId(), 1, CraftItemStack.asNMSCopy(spec));
-
-        player.hidePlayer(player);
-        for (Player all : Bukkit.getOnlinePlayers()) {
-            all.hidePlayer(player);
-
-            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(tablistInfo);
-            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(hideCompass);
-        }
-
-    }
-
     public void addKills(Player player, int amount) {
 
         if(plugin.kills.get(player.getUniqueId()) != null)
@@ -520,7 +472,8 @@ public class UsefulMethods {
     }
 
     public int getKills(Player player) {
-         return plugin.kills.get(player.getUniqueId());
+        if(plugin.kills.get(player.getUniqueId()) != null) return plugin.kills.get(player.getUniqueId());
+        else return 0;
     }
 
     public LinkedHashMap<UUID, Integer> sortedKills(boolean natural) {
@@ -598,6 +551,78 @@ public class UsefulMethods {
             for(Player all : Bukkit.getOnlinePlayers())
                 all.playSound(all.getLocation(), Sound.ENDERDRAGON_GROWL, 1f, 1f);
         }
+    }
+
+    public void setSpectator(Player player) {
+
+        plugin.players.remove(player.getUniqueId());
+        player.getInventory().clear();
+
+        player.setHealth(20);
+        player.setFoodLevel(20);
+        player.setGameMode(GameMode.ADVENTURE);
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 2), true);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 2), true);
+
+        player.spigot().setCollidesWithEntities(false);
+        player.setAllowFlight(true);
+        player.setFlying(true);
+
+        String specName;
+
+        if(player.isOp()) specName = "§7[S]§c[OP]§7 " + player.getName();
+        else specName = "§7[S] " + player.getName();
+
+        player.setDisplayName(specName);
+        player.setPlayerListName(specName);
+
+        PacketPlayOutPlayerInfo tablistInfo = new PacketPlayOutPlayerInfo
+                (PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, ((CraftPlayer) player).getHandle());
+
+        player.hidePlayer(player);
+        for (Player all : Bukkit.getOnlinePlayers()) {
+            all.hidePlayer(player);
+            ((CraftPlayer) all).getHandle().playerConnection.sendPacket(tablistInfo);
+        }
+    }
+
+    public void giveCompass(Player player) {
+        ItemStack spec = new ItemStack(Material.COMPASS, 1);
+        ItemMeta specM = spec.getItemMeta();
+
+        specM.setDisplayName(Options.compassName);
+        spec.setItemMeta(specM);
+
+        player.getInventory().setItem(0, spec);
+    }
+
+    public void giveTeamChooser(Player player) {
+        ItemStack ch = new ItemStack(Material.MELON, 1);
+        ItemMeta chM = ch.getItemMeta();
+
+        chM.setDisplayName(Options.teamChooserName);
+        ch.setItemMeta(chM);
+
+        player.getInventory().setItem(0, ch);
+    }
+
+    public void gameChecks() {
+        UsefulMethods usefulMethods = new UsefulMethods(plugin);
+
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                if(!plugin.game.running) this.cancel();
+
+                for(Player all : Bukkit.getOnlinePlayers()) {
+
+                    if(!plugin.players.contains(all.getUniqueId()))
+                        if (!all.getInventory().contains(Material.COMPASS)) usefulMethods.giveCompass(all);
+                }
+            }
+        }.runTaskTimer(plugin, 12, 12);
     }
 
 }

@@ -9,7 +9,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -60,7 +59,7 @@ public class ReviveCommand implements CommandExecutor {
                                 UUID uuid = target.getUniqueId();
                                 String name;
 
-                                if(player.isOp()) name = "§c[OP]§7 " + target.getName();
+                                if(target.isOp()) name = "§c[OP]§7 " + target.getName();
                                 else name = "§7" + target.getName();
 
                                 if(plugin.getMode().equalsIgnoreCase("Teams")) {

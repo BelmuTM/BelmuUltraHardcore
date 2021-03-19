@@ -1,5 +1,6 @@
 package com.belmu.uhc.Events;
 
+import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.Bukkit;
@@ -43,29 +44,26 @@ public class PlayerInteract implements Listener {
         if(!plugin.players.contains(player.getUniqueId())) {
 
             if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-                if (it.getType().isBlock()) {
-                    if (it.hasItemMeta()) {
-                        if (it.getItemMeta().hasDisplayName()) {
-                            if (it.getItemMeta().getDisplayName().equalsIgnoreCase("§fSpectate §7(Right Click)")) {
+                if (it.hasItemMeta()) {
+                    if (it.getItemMeta().hasDisplayName()) {
+                        if (it.getItemMeta().getDisplayName().equalsIgnoreCase(Options.compassName)) {
 
-                                Inventory inv = specInventory();
-                                e.setCancelled(true);
-
-                                for(Player all : Bukkit.getOnlinePlayers()) {
-                                    if(plugin.players.contains(all.getUniqueId()))
-                                        inv.addItem(usefulMethods.getSkull(Bukkit.getPlayer(all.getUniqueId()).getName()));
-                                }
-                                if(plugin.players.size() != 0)
-                                    player.openInventory(inv);
-                                else
-                                    player.sendMessage(plugin.prefix + "§cThere is no player alive!");
-
-                            } else e.setCancelled(true);
-                        } else if (!it.getItemMeta().hasDisplayName())
+                            Inventory inv = specInventory();
                             e.setCancelled(true);
-                    } else if (!it.hasItemMeta())
+
+                            for (Player all : Bukkit.getOnlinePlayers()) {
+                                if (plugin.players.contains(all.getUniqueId()))
+                                    inv.addItem(usefulMethods.getSkull(Bukkit.getPlayer(all.getUniqueId()).getName()));
+                            }
+                            if (plugin.players.size() != 0)
+                                player.openInventory(inv);
+                            else player.sendMessage(plugin.prefix + "§cThere is no player alive!");
+
+                        } else e.setCancelled(true);
+                    } else if (!it.getItemMeta().hasDisplayName())
                         e.setCancelled(true);
-                }
+                } else if (!it.hasItemMeta())
+                    e.setCancelled(true);
             }
 
         } else if(plugin.players.contains(player.getUniqueId())) {
@@ -73,7 +71,7 @@ public class PlayerInteract implements Listener {
             if (it.hasItemMeta()) {
                 if(it.getItemMeta().hasLore()) {
                     if (it.getType() == Material.SKULL_ITEM) {
-                        if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
+                        if(action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
 
                             UsefulMethods.consumeItem(player, 1, it);
 
@@ -127,14 +125,8 @@ public class PlayerInteract implements Listener {
             if(plugin.game.running && !plugin.players.contains(player.getUniqueId())) {
                 Inventory i = Bukkit.createInventory(null, 54, target.getName() + "'s Inventory");
 
-                for(ItemStack c : ((Player) target).getInventory().getContents()) {
-                    if(c != null)
-                        i.addItem(c);
-                }
-                for(ItemStack ac : ((Player) target).getInventory().getArmorContents()) {
-                    if(ac != null)
-                        i.addItem(ac);
-                }
+                i.addItem(((Player) target).getInventory().getContents());
+                i.addItem(((Player) target).getInventory().getArmorContents());
 
                 DecimalFormat format = new DecimalFormat("#");
                 Double hlth = ((Player) target).getHealth();
@@ -143,13 +135,13 @@ public class PlayerInteract implements Listener {
                 ItemStack health = new ItemStack(Material.APPLE, 1);
                 ItemMeta m = health.getItemMeta();
 
-                m.setDisplayName("§fHealth§7 :§c " + h + "§4❤");
+                m.setDisplayName("§fHealth §7: §c" + h + "§4❤");
                 health.setItemMeta(m);
 
                 ItemStack food = new ItemStack(Material.COOKED_BEEF, 1);
                 ItemMeta m2 = food.getItemMeta();
 
-                m2.setDisplayName("§fFood§7 :§e " + ((Player) target).getFoodLevel() + "§6✚");
+                m2.setDisplayName("§fFood §7: §e" + ((Player) target).getFoodLevel() + "§6✚");
                 food.setItemMeta(m2);
 
                 i.setItem(45, food);

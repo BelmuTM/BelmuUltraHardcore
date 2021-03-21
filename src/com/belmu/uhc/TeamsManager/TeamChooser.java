@@ -64,19 +64,16 @@ public class TeamChooser implements Listener {
                             Scoreboard s = m.getMainScoreboard();
                             Team chosenTeam = s.getTeam(team.teamName);
 
-                            player.closeInventory();
-
-                            Inventory chooser = teamChooser(player);
-                            player.openInventory(chooser);
-
                             if(chosenTeam.getPlayers() != null) {
                                 if (chosenTeam.getPlayers().contains(player)) {
                                     player.sendMessage(plugin.prefix + "§cYou are already in this team!");
+                                    refresh(player);
                                     return;
                                 }
 
                                 if (chosenTeam.getPlayers().size() >= Options.pPerTeam) {
                                     player.sendMessage(plugin.prefix + "§cThis team is full!");
+                                    refresh(player);
                                     return;
                                 }
                             }
@@ -90,13 +87,22 @@ public class TeamChooser implements Listener {
                                 Teams.inGameTeams.add(chosenTeam);
 
                             player.sendMessage(plugin.prefix + "§7Successfully added you to " + chosenTeam.getPrefix() + chosenTeam.getName());
-                            player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
+                            player.playSound(player.getLocation(), Sound.CLICK, 1, Integer.MAX_VALUE);
+
+                            refresh(player);
                         }
                     }
                 } else if(cur.getType() == Material.BARRIER)
                     player.closeInventory();
             }
         }
+    }
+
+    public void refresh(Player player) {
+        player.closeInventory();
+
+        Inventory chooser = teamChooser(player);
+        player.openInventory(chooser);
     }
 
     @EventHandler

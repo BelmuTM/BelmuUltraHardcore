@@ -37,7 +37,7 @@ public class FoodEvent implements Listener {
                 if(plugin.players.contains(uuid)) {
                     if(checkCooldown(hunger, player)) {
 
-                        setCooldown(hunger, player, 23.5D);
+                        setCooldown(hunger, player, 30.5D);
 
                     } else e.setCancelled(true);
                 } else e.setCancelled(true);

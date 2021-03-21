@@ -31,7 +31,6 @@ public class CoordinatesCommand implements CommandExecutor {
                     if (args.length == 0) {
 
                         if(plugin.getMode().equalsIgnoreCase("Teams")) {
-
                             ScoreboardManager m = Bukkit.getScoreboardManager();
                             Scoreboard s = m.getMainScoreboard();
 
@@ -41,14 +40,13 @@ public class CoordinatesCommand implements CommandExecutor {
                             long y = loc.getBlockY();
                             long z = loc.getBlockZ();
 
-                            if(!plugin.players.contains(player.getUniqueId())) {
+                            if(plugin.players.contains(player.getUniqueId())) {
 
                                 for (OfflinePlayer p : s.getPlayerTeam(player).getPlayers()) {
                                     if (p instanceof Player)
                                         ((Player) p).sendMessage("§8[§cUHC§8]§b " + player.getName() + "§8 » X:§7" + x + "§8 Y:§7" + y + "§8 Z:§7" + z);
                                 }
-                            } else
-                                player.sendMessage(plugin.prefix + "§cYou can not do that as a spectator.");
+                            } else player.sendMessage(plugin.prefix + "§cYou can not do that as a spectator.");
 
                         } else if(plugin.getMode().equalsIgnoreCase("Solo"))
                             player.sendMessage(plugin.prefix + "§cYou don't have any team mates!");

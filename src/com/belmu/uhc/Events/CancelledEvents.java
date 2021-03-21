@@ -5,10 +5,7 @@ import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.*;
 import org.bukkit.block.Skull;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,6 +16,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.text.DecimalFormat;
 import java.util.Random;
@@ -167,6 +165,7 @@ public class CancelledEvents implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onDamageByEntity(EntityDamageByEntityEvent e) {
+        Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
         Entity damager = e.getDamager();
         Entity dmgd = e.getEntity();
 
@@ -179,14 +178,14 @@ public class CancelledEvents implements Listener {
             }
         }
 
-        if(dmgd instanceof Player) {
+        if(dmgd instanceof Player && damager instanceof Player) {
             if(!isAble((Player) damager) || !isAble((Player) dmgd)) {
                 e.setCancelled(true);
                 return;
             }
 
             if(plugin.getMode().equals("Teams")) {
-                if(Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(Bukkit.getOfflinePlayer(dmgd.getUniqueId())) == Bukkit.getScoreboardManager().getMainScoreboard().getPlayerTeam(Bukkit.getOfflinePlayer(damager.getUniqueId()))) {
+                if(sb.getPlayerTeam((Player) damager) == sb.getPlayerTeam((Player) dmgd)) {
 
                     e.setCancelled(true);
                     damager.sendMessage(plugin.prefix + " §cYou can't hit your teammate!");
@@ -194,9 +193,9 @@ public class CancelledEvents implements Listener {
             }
         }
 
-        if (damager instanceof Arrow) {
+        if(damager instanceof Arrow) {
             Arrow arrow = (Arrow) damager;
-            if (arrow.getShooter() instanceof Player) {
+            if(arrow.getShooter() instanceof Player) {
 
                 if(dmgd instanceof Player) {
                     DecimalFormat format = new DecimalFormat("#");
@@ -252,6 +251,16 @@ public class CancelledEvents implements Listener {
     @EventHandler
     public void onEnd(PlayerPortalEvent e) {
         if(e.getCause() == PlayerTeleportEvent.TeleportCause.END_PORTAL) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onSpawn(EntitySpawnEvent e) {
+        Entity entity = e.getEntity();
+
+        if(entity instanceof Monster) {
+            Random r = new Random();
+            if(r.nextInt(Options.monsterSpawnRate) == 1) e.setCancelled(true);
+        }
     }
 
     public boolean isAble(Player player) {

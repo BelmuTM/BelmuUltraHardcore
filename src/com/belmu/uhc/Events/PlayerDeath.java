@@ -104,14 +104,14 @@ public class PlayerDeath implements Listener {
                 }
             }
 
-            String msg = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r§f");
+            String msg = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r");
             String paranoia = " §7at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]";
 
             String deathMessage = "";
 
             if(killer != null) {
 
-                String msg2 = msg.replace(killer.getName(), killer.getDisplayName() + "§f");
+                String msg2 = msg.replace(target.getDisplayName(), "§7" + killer.getDisplayName() + "§r");
                 String finalMsg = msg2.replace(".", "");
 
                 if(plugin.scenarios.contains("paranoia")) {

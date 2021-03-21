@@ -125,8 +125,13 @@ public class PlayerInteract implements Listener {
             if(plugin.game.running && !plugin.players.contains(player.getUniqueId())) {
                 Inventory i = Bukkit.createInventory(null, 54, target.getName() + "'s Inventory");
 
-                i.addItem(((Player) target).getInventory().getContents());
-                i.addItem(((Player) target).getInventory().getArmorContents());
+                ItemStack[] contents = ((Player) target).getInventory().getContents();
+                if(contents != null)
+                    for(ItemStack items : contents) if(items != null) i.addItem(items);
+
+                ItemStack[] armorContents = ((Player) target).getInventory().getArmorContents();
+                if(contents != null)
+                    for(ItemStack items : armorContents) if(items != null) i.addItem(items);
 
                 DecimalFormat format = new DecimalFormat("#");
                 Double hlth = ((Player) target).getHealth();

@@ -94,7 +94,6 @@ public class UsefulMethods {
             if (count <= 0)
                 break;
         }
-
         player.updateInventory();
         return true;
     }
@@ -598,7 +597,7 @@ public class UsefulMethods {
     }
 
     public void giveTeamChooser(Player player) {
-        ItemStack ch = new ItemStack(Material.MELON, 1);
+        ItemStack ch = new ItemStack(Material.EMERALD, 1);
         ItemMeta chM = ch.getItemMeta();
 
         chM.setDisplayName(Options.teamChooserName);
@@ -615,6 +614,8 @@ public class UsefulMethods {
             @Override
             public void run() {
                 if(!plugin.game.running) this.cancel();
+
+                if(plugin.getMode().equals("Teams")) Teams.inGameTeams.removeIf(team -> team.getPlayers() == null);
 
                 for(Player all : Bukkit.getOnlinePlayers()) {
 

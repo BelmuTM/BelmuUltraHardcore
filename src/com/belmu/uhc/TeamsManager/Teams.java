@@ -27,13 +27,11 @@ public class Teams {
     }
 
     public static List<TeamsList> teams = new ArrayList<>();
-
     public static List<Team> allTeams = new ArrayList<>();
     public static List<Team> inGameTeams = new ArrayList<>();
     public static List<Team> teamsAtStart = new ArrayList<>();
 
     public static void initializeTeams() {
-
         ScoreboardManager m = Bukkit.getScoreboardManager();
         Scoreboard s = m.getMainScoreboard();
 
@@ -43,7 +41,7 @@ public class Teams {
                 Team t = s.registerNewTeam(teamsList.teamName);
 
                 t.setPrefix(teamsList.prefix);
-                t.setCanSeeFriendlyInvisibles(false);
+                t.setCanSeeFriendlyInvisibles(true);
                 t.setAllowFriendlyFire(false);
                 t.setNameTagVisibility(NameTagVisibility.ALWAYS);
                 t.setDisplayName(teamsList.teamName);

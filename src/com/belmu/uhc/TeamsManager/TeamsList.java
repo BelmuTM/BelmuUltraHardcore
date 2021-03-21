@@ -14,8 +14,8 @@ public enum TeamsList {
     PURPLE("purple", "§5✪ ", ChatColor.DARK_PURPLE, DyeColor.PURPLE),
     PINK("pink", "§d⚔ ", ChatColor.LIGHT_PURPLE, DyeColor.PINK),
     ORANGE("orange", "§6☯ ", ChatColor.GOLD, DyeColor.ORANGE),
-    YELLOW("yellow", "§e☼ ", ChatColor.YELLOW, DyeColor.YELLOW),
-    WHITE("white", "§f☢ ", ChatColor.WHITE, DyeColor.WHITE),
+    YELLOW("yellow", "§e☀ ", ChatColor.YELLOW, DyeColor.YELLOW),
+    WHITE("white", "§f❦ ", ChatColor.WHITE, DyeColor.WHITE),
     GRAY("gray", "§7♣ ", ChatColor.DARK_GRAY, DyeColor.GRAY),
     BLACK("black", "§0◆ ", ChatColor.BLACK, DyeColor.BLACK);
 
@@ -24,7 +24,6 @@ public enum TeamsList {
     public DyeColor teamDyeColor;
 
     TeamsList(String teamName, String prefix, ChatColor teamColor, DyeColor teamDyeColor){
-
         this.teamName = teamName;
         this.prefix = prefix;
         this.teamColor = teamColor;

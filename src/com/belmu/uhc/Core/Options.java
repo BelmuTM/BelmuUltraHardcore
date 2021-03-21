@@ -15,6 +15,7 @@ public class Options {
     public static int borderScale = (92 * Bukkit.getOnlinePlayers().size()) * 2;
 
     public static int monstersSpawn = pvpSeconds / 4;
+    public static int monsterSpawnRate = 3; // 1 out of X
 
     public static int pPerTeam = 2;
 

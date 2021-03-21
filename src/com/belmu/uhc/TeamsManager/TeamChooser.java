@@ -80,15 +80,15 @@ public class TeamChooser implements Listener {
                             chosenTeam.addPlayer(player);
                             Teams.playersToSpread.remove(player.getUniqueId());
 
-                            player.setDisplayName(chosenTeam.getPrefix() + player.getName());
-                            player.setPlayerListName(chosenTeam.getPrefix() + player.getName());
+                            String name = chosenTeam.getPrefix() + player.getName();
+                            player.setDisplayName(name);
+                            player.setPlayerListName(name);
 
                             if (!Teams.inGameTeams.contains(chosenTeam))
                                 Teams.inGameTeams.add(chosenTeam);
 
                             player.sendMessage(plugin.prefix + "§7Successfully added you to " + chosenTeam.getPrefix() + chosenTeam.getName());
                             player.playSound(player.getLocation(), Sound.CLICK, 1, Integer.MAX_VALUE);
-
                             refresh(player);
                         }
                     }
@@ -184,9 +184,8 @@ public class TeamChooser implements Listener {
 
                 for (OfflinePlayer all : scoreboardTeam.getPlayers())
                     lore.add("§7» " + team.teamColor + all.getName());
-            } else {
+            } else
                 chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + 0 + "/" + Options.pPerTeam + ")");
-            }
 
             if(s.getPlayerTeam(player) == scoreboardTeam) {
                 lore.add(" ");

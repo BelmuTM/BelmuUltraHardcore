@@ -1,6 +1,5 @@
 package com.belmu.uhc.Core;
 
-import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Scenarios.DiamondLimit;
 import com.belmu.uhc.Scenarios.FinalHeal;
@@ -15,8 +14,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -48,6 +45,7 @@ public class Start implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             UsefulMethods usefulMethods = new UsefulMethods(plugin);
+            Scoreboard s = Bukkit.getScoreboardManager().getMainScoreboard();
 
             if (cmd.getName().equalsIgnoreCase("start")) {
                 if(player.isOp()) {
@@ -144,7 +142,6 @@ public class Start implements CommandExecutor {
                                                             usefulMethods.giveTeamChooser(online);
                                                         }
                                                     }
-                                                    Scoreboard s = Bukkit.getScoreboardManager().getMainScoreboard();
 
                                                     for(Team team : s.getTeams())
                                                         try {
@@ -163,8 +160,8 @@ public class Start implements CommandExecutor {
 
                                             () -> {
 
-                                                if (plugin.getMode().equalsIgnoreCase("Teams")) {
-                                                    if (plugin.getTeamPicking().equalsIgnoreCase("Random")) {
+                                                if(plugin.getMode().equalsIgnoreCase("Teams")) {
+                                                    if(plugin.getTeamPicking().equalsIgnoreCase("Random")) {
 
                                                         for (Player online : Bukkit.getOnlinePlayers())
                                                             Teams.addPlayersToTeams(online);
@@ -178,6 +175,7 @@ public class Start implements CommandExecutor {
                                                             }
                                                         }
                                                     }
+                                                    Teams.inGameTeams.removeIf(team -> team.getPlayers() == null);
                                                 }
                                                 for(Player all : Bukkit.getOnlinePlayers()) {
                                                     plugin.players.add(all.getUniqueId());
@@ -222,6 +220,7 @@ public class Start implements CommandExecutor {
                                                                     },
 
                                                                     () -> {
+                                                                        preparing = false;
                                                                         teleported = false;
 
                                                                         for (Player all : Bukkit.getOnlinePlayers()) {

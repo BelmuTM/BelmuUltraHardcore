@@ -155,7 +155,7 @@ public class GameScoreboard {
     }
 
     private String getTimer() {
-        return new SimpleDateFormat("mm:ss").format(timer * 1000);
+        return new SimpleDateFormat("HH:mm:ss").format(timer * 1000);
     }
 
     public void initializeHealth(Player player) {

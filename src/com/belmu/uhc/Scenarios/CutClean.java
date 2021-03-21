@@ -30,10 +30,9 @@ public class CutClean implements Listener {
 
         Player player = e.getPlayer();
         Block block = e.getBlock();
-
         Material type = block.getType();
-
         World world = Bukkit.getWorld("world");
+
         Location loc = block.getLocation();
         Location orbLoc = new Location(world, loc.getX() + 0.5, loc.getBlockY() + 0.5, loc.getBlockZ() + 0.5);
 
@@ -48,7 +47,6 @@ public class CutClean implements Listener {
             if (!e.isCancelled()) {
 
                 if(player.getGameMode() == GameMode.SURVIVAL) {
-
                     int upper = 2;
                     Random random = new Random();
 
@@ -57,11 +55,10 @@ public class CutClean implements Listener {
                         e.setCancelled(true);
 
                         usefulMethods.drop(loc, gold);
-
                         if(random.nextInt(upper) == 1) {
 
                             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(orbLoc, EntityType.EXPERIENCE_ORB);
-                            orb.setExperience(2);
+                            orb.setExperience(3);
                         }
                     }
 
@@ -70,7 +67,6 @@ public class CutClean implements Listener {
                         e.setCancelled(true);
 
                         usefulMethods.drop(loc, iron);
-
                         if(random.nextInt(upper) == 1) {
 
                             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(orbLoc, EntityType.EXPERIENCE_ORB);
@@ -90,7 +86,6 @@ public class CutClean implements Listener {
                         e.setCancelled(true);
 
                         usefulMethods.drop(loc, torch);
-
                         if(random.nextInt(upper) == 1) {
 
                             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(orbLoc, EntityType.EXPERIENCE_ORB);
@@ -103,7 +98,6 @@ public class CutClean implements Listener {
                         e.setCancelled(true);
 
                         usefulMethods.drop(loc, glass);
-
                         if(random.nextInt(upper) == 1) {
 
                             ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(orbLoc, EntityType.EXPERIENCE_ORB);
@@ -178,20 +172,16 @@ public class CutClean implements Listener {
 
                                 ItemStack leather = new ItemStack(Material.LEATHER, r.nextInt(upper));
                                 usefulMethods.dropCutClean(entity.getLocation(), leather);
-
                                 return;
                             }
                         }
                     }
                 }
-
                 Random r = new Random();
                 int upper = ((3 - 2) + 1) + 2; //((max - min) + 1) + min;
 
                 ItemStack leather = new ItemStack(Material.LEATHER, r.nextInt(upper));
-                Item item = usefulMethods.dropCutClean(entity.getLocation(), leather);
-
-                item.setPickupDelay(0);
+                usefulMethods.dropCutClean(entity.getLocation(), leather);
             }
 
             if(entity instanceof Chicken) {
@@ -206,7 +196,6 @@ public class CutClean implements Listener {
                     ItemStack item = player.getItemInHand();
 
                     for (Material sword : swords) {
-
                         if (item.getType() == sword) {
 
                             if (item.containsEnchantment(Enchantment.LOOT_BONUS_MOBS)) {
@@ -217,7 +206,6 @@ public class CutClean implements Listener {
 
                                 ItemStack feather = new ItemStack(Material.FEATHER, r.nextInt(upper));
                                 usefulMethods.dropCutClean(entity.getLocation(), feather);
-
                                 return;
                             }
                         }

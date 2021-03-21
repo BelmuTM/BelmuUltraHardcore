@@ -362,7 +362,7 @@ public class Start implements CommandExecutor {
                                                 untilStartSec = t.getSecondsLeft();
 
                                                 if(t.getSecondsLeft() % 30 == 0 || t.getSecondsLeft() <= 10)  {
-                                                    Bukkit.broadcastMessage(plugin.prefix + "§7Teleporting players in §c" + t.getSecondsLeft() + " §7second(s)!");
+                                                    Bukkit.broadcastMessage(plugin.prefix + "§7Teleporting players in §c" + Math.round(t.getSecondsLeft()) + " §7second(s)!");
 
                                                     for (Player online : Bukkit.getOnlinePlayers())
                                                         online.playSound(online.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);

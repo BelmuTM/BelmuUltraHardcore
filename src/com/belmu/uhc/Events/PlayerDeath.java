@@ -1,6 +1,5 @@
 package com.belmu.uhc.Events;
 
-import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Scenarios.Paranoïa;
 import com.belmu.uhc.TeamsManager.Teams;
@@ -8,13 +7,11 @@ import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
@@ -72,7 +69,7 @@ public class PlayerDeath implements Listener {
             world.strikeLightningEffect(loc);
 
             for(Player all : Bukkit.getOnlinePlayers())
-                all.playSound(all.getLocation(), Sound.AMBIENCE_THUNDER, 1.0f, Integer.MAX_VALUE);
+                all.playSound(all.getLocation(), Sound.AMBIENCE_THUNDER, 1.0f, 1.0f);
 
             String rip = "§cR.I.P.";
             String spectator = "§7You are spectator";
@@ -92,38 +89,9 @@ public class PlayerDeath implements Listener {
             ScoreboardManager m = Bukkit.getScoreboardManager();
             Scoreboard s = m.getMainScoreboard();
 
-            String msg = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r§f");
-            String paranoia = " §7at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]";
-
-            String deathMessage = "";
-
             if(plugin.getMode().equalsIgnoreCase("Teams")) {
-
                 Team team = s.getPlayerTeam(target);
                 playerTeam.put(uuid, team);
-
-                if(killer != null) {
-
-                    String msg2 = msg.replace(killer.getDisplayName(), killer.getDisplayName() + "§r§f");
-                    String finalMsg = msg2.replace(".", "");
-
-                    if (plugin.scenarios.contains("paranoia")) {
-                        deathMessage = "";
-                        Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
-
-                    } else if (!plugin.scenarios.contains("paranoia"))
-                        deathMessage = plugin.prefix + msg2;
-
-                } else {
-                    String finalMsg = msg.replace(".", "");
-
-                    if(plugin.scenarios.contains("paranoia")) {
-                        deathMessage = "";
-                        Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§f" + finalMsg + paranoia);
-
-                    } else if(!plugin.scenarios.contains("paranoia"))
-                        deathMessage = plugin.prefix + "§f" + msg;
-                }
 
                 team.removePlayer(target);
                 if(team.getPlayers().size() == 0) {
@@ -134,33 +102,35 @@ public class PlayerDeath implements Listener {
                     for (Player all : Bukkit.getOnlinePlayers())
                         all.playSound(all.getLocation(), Sound.WITHER_DEATH, 1, Integer.MAX_VALUE);
                 }
-
-            } else if(plugin.getMode().equalsIgnoreCase("Solo")) {
-                if(killer != null) {
-
-                    String msg2 = msg.replace(killer.getName(), killer.getName() + "§f");
-                    String finalMsg = msg2.replace(".", "");
-
-                    if(plugin.scenarios.contains("paranoia")) {
-                        deathMessage = "";
-                        Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§7" + finalMsg + paranoia);
-
-                    } else if (!plugin.scenarios.contains("paranoia"))
-                        deathMessage = plugin.prefix + msg2;
-                } else {
-                    String finalMsg = msg.replace(".", "");
-
-                    if (plugin.scenarios.contains("paranoia")) {
-                        deathMessage = "";
-                        Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§7" + finalMsg + paranoia);
-
-                    } else if (!plugin.scenarios.contains("paranoia"))
-                        deathMessage = plugin.prefix + "§f" + msg;
-                }
             }
-            if(killer != null) deathMessage.replaceAll(killer.getName(), killer.getDisplayName() + "§r");
 
-            e.setDeathMessage(deathMessage.replaceAll(target.getName(), target.getDisplayName() + "§r"));
+            String msg = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r§f");
+            String paranoia = " §7at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]";
+
+            String deathMessage = "";
+
+            if(killer != null) {
+
+                String msg2 = msg.replace(killer.getName(), killer.getDisplayName() + "§f");
+                String finalMsg = msg2.replace(".", "");
+
+                if(plugin.scenarios.contains("paranoia")) {
+                    deathMessage = "";
+                    Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§7" + finalMsg + paranoia);
+
+                } else if (!plugin.scenarios.contains("paranoia"))
+                    deathMessage = plugin.prefix + msg2;
+            } else {
+                String finalMsg = msg.replace(".", "");
+
+                if (plugin.scenarios.contains("paranoia")) {
+                    deathMessage = "";
+                    Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§7" + finalMsg + paranoia);
+
+                } else if (!plugin.scenarios.contains("paranoia"))
+                    deathMessage = plugin.prefix + "§f" + msg;
+            }
+            e.setDeathMessage(deathMessage);
 
             usefulMethods.giveCompass(target);
             target.getInventory().setArmorContents(null);

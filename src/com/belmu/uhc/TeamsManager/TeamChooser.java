@@ -64,6 +64,11 @@ public class TeamChooser implements Listener {
                             Scoreboard s = m.getMainScoreboard();
                             Team chosenTeam = s.getTeam(team.teamName);
 
+                            player.closeInventory();
+
+                            Inventory chooser = teamChooser(player);
+                            player.openInventory(chooser);
+
                             if(chosenTeam.getPlayers() != null) {
                                 if (chosenTeam.getPlayers().contains(player)) {
                                     player.sendMessage(plugin.prefix + "§cYou are already in this team!");
@@ -86,8 +91,6 @@ public class TeamChooser implements Listener {
 
                             player.sendMessage(plugin.prefix + "§7Successfully added you to " + chosenTeam.getPrefix() + chosenTeam.getName());
                             player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
-
-                            player.closeInventory();
                         }
                     }
                 } else if(cur.getType() == Material.BARRIER)

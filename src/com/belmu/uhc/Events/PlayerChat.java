@@ -48,7 +48,7 @@ public class PlayerChat implements Listener {
             if(plugin.game.running) {
                 if(plugin.players.contains(player.getUniqueId())) {
 
-                    if(msg.startsWith("!") && msg.length() <= 1) {
+                    if(msg.startsWith("!") && msg.length() > 1) {
                         String finalMsg = msg.substring(1);
                         e.setFormat("§7[Global] " + player.getDisplayName() + "§8 »§f " + finalMsg);
 

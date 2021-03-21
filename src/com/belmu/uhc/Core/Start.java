@@ -175,7 +175,8 @@ public class Start implements CommandExecutor {
                                                             }
                                                         }
                                                     }
-                                                    Teams.inGameTeams.removeIf(team -> team.getPlayers() == null);
+                                                    for(Team team : Teams.inGameTeams)
+                                                        if(team.getPlayers() == null) Teams.inGameTeams.remove(team);
                                                 }
                                                 for(Player all : Bukkit.getOnlinePlayers()) {
                                                     plugin.players.add(all.getUniqueId());
@@ -220,7 +221,7 @@ public class Start implements CommandExecutor {
                                                                     },
 
                                                                     () -> {
-                                                                        preparing = false;
+
                                                                         teleported = false;
 
                                                                         for (Player all : Bukkit.getOnlinePlayers()) {

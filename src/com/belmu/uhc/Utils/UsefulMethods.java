@@ -615,8 +615,6 @@ public class UsefulMethods {
             public void run() {
                 if(!plugin.game.running) this.cancel();
 
-                if(plugin.getMode().equals("Teams")) Teams.inGameTeams.removeIf(team -> team.getPlayers() == null);
-
                 for(Player all : Bukkit.getOnlinePlayers()) {
 
                     if(!plugin.players.contains(all.getUniqueId()))

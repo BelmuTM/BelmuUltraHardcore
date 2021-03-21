@@ -20,8 +20,8 @@ public class Options {
 
     public static int noCleanUpHearts = 2;
 
-    public static int diamondLimit = 17;
-    public static int heightLimit = 105;
+    public static int diamondLimit = 20;
+    public static int heightLimit = 100;
 
     public static double untilGameStarts = 120;
     public static int beforeElimination = 5 * 60;

@@ -57,7 +57,7 @@ public class PlayerInteract implements Listener {
                             }
                             if (plugin.players.size() != 0)
                                 player.openInventory(inv);
-                            else player.sendMessage(plugin.prefix + "§cThere is no player alive!");
+                            else player.sendMessage(plugin.prefix + "§cThere are no players alive!");
 
                         } else e.setCancelled(true);
                     } else if (!it.getItemMeta().hasDisplayName())

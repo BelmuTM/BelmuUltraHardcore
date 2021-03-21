@@ -38,7 +38,6 @@ public class PlayerChat implements Listener {
                     mentioned.playSound(all.getLocation(), Sound.NOTE_PLING, 1f, Integer.MAX_VALUE);
                 }
             }
-
         e.setMessage(msg);
 
         if(plugin.getMode().equalsIgnoreCase("Solo")) {
@@ -49,8 +48,8 @@ public class PlayerChat implements Listener {
             if(plugin.game.running) {
                 if(plugin.players.contains(player.getUniqueId())) {
 
-                    if(msg.startsWith("!")) {
-                        String finalMsg = msg.substring(2);
+                    if(msg.startsWith("!") && msg.length() <= 1) {
+                        String finalMsg = msg.substring(1);
                         e.setFormat("§7[Global] " + player.getDisplayName() + "§8 »§f " + finalMsg);
 
                     } else {
@@ -58,7 +57,6 @@ public class PlayerChat implements Listener {
                         Scoreboard s = m.getMainScoreboard();
 
                         for (OfflinePlayer p : s.getPlayerTeam(player).getPlayers()) {
-
                             if (p instanceof Player) {
                                 e.setCancelled(true);
                                 ((Player) p).sendMessage("§7[Team] " + player.getDisplayName() + "§8 »§f " + msg);
@@ -70,20 +68,6 @@ public class PlayerChat implements Listener {
             } else
                 e.setFormat(player.getDisplayName() + "§8 »§f " + e.getMessage());
         }
-    }
-
-    public static boolean containsIgnoreCase(String str, String searchStr)     {
-        if(str == null || searchStr == null) return false;
-
-        final int length = searchStr.length();
-        if (length == 0)
-            return true;
-
-        for (int i = str.length() - length; i >= 0; i--) {
-            if (str.regionMatches(true, i, searchStr, 0, length))
-                return true;
-        }
-        return false;
     }
 
 }

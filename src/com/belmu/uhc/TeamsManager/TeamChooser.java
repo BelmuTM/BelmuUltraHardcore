@@ -5,6 +5,7 @@ import com.belmu.uhc.Core.Options;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -59,7 +60,6 @@ public class TeamChooser implements Listener {
                     for (TeamsList team : TeamsList.values()) {
 
                         if (banner.getBaseColor() == team.teamDyeColor) {
-
                             ScoreboardManager m = Bukkit.getScoreboardManager();
                             Scoreboard s = m.getMainScoreboard();
                             Team chosenTeam = s.getTeam(team.teamName);
@@ -67,22 +67,11 @@ public class TeamChooser implements Listener {
                             if(chosenTeam.getPlayers() != null) {
                                 if (chosenTeam.getPlayers().contains(player)) {
                                     player.sendMessage(plugin.prefix + "§cYou are already in this team!");
-                                    player.closeInventory();
-
-                                    Inventory inven = teamChooser(player);
-                                    player.openInventory(inven);
-
                                     return;
                                 }
 
                                 if (chosenTeam.getPlayers().size() >= Options.pPerTeam) {
-
                                     player.sendMessage(plugin.prefix + "§cThis team is full!");
-                                    player.closeInventory();
-
-                                    Inventory inven = teamChooser(player);
-                                    player.openInventory(inven);
-
                                     return;
                                 }
                             }
@@ -95,11 +84,10 @@ public class TeamChooser implements Listener {
                             if (!Teams.inGameTeams.contains(chosenTeam))
                                 Teams.inGameTeams.add(chosenTeam);
 
-                            player.sendMessage(plugin.prefix + "§7Successfully added you to " + chosenTeam.getPrefix() + chosenTeam.getName() + "§7.");
-                            player.closeInventory();
+                            player.sendMessage(plugin.prefix + "§7Successfully added you to " + chosenTeam.getPrefix() + chosenTeam.getName());
+                            player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);
 
-                            Inventory inven = teamChooser(player);
-                            player.openInventory(inven);
+                            player.closeInventory();
                         }
                     }
                 } else if(cur.getType() == Material.BARRIER)

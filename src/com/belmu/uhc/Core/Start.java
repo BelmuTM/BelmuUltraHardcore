@@ -181,6 +181,7 @@ public class Start implements CommandExecutor {
                                                 }
                                                 for(Player all : Bukkit.getOnlinePlayers()) {
                                                     plugin.players.add(all.getUniqueId());
+                                                    all.getInventory().clear();
 
                                                     usefulMethods.sendPacket(all, "§7Loading game...");
                                                     all.playSound(all.getLocation(), Sound.CHICKEN_EGG_POP, 1, Integer.MAX_VALUE);
@@ -360,8 +361,8 @@ public class Start implements CommandExecutor {
                                             (t) -> {
                                                 untilStartSec = t.getSecondsLeft();
 
-                                                if(t.getSecondsLeft() % 60 == 0)  {
-                                                    Bukkit.broadcastMessage(plugin.prefix + "§7Teleporting players in §c" + Math.round(t.getSecondsLeft() / 60) + " §7minute(s)!");
+                                                if(t.getSecondsLeft() % 30 == 0 || t.getSecondsLeft() <= 10)  {
+                                                    Bukkit.broadcastMessage(plugin.prefix + "§7Teleporting players in §c" + t.getSecondsLeft() + " §7second(s)!");
 
                                                     for (Player online : Bukkit.getOnlinePlayers())
                                                         online.playSound(online.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);

@@ -58,8 +58,8 @@ public class UHC extends JavaPlugin implements Listener {
         getConfig().set("Players", null);
         getConfig().set("Host", "N/A");
         getConfig().set("UHC", null);
-        getConfig().set("UHC" + "." + "Mode", "Solo");
-        getConfig().set("UHC" + "." + "TeamPicking", "Normal");
+        getConfig().set("UHC" + "." + "Mode", "Teams"); // Solo | Teams
+        getConfig().set("UHC" + "." + "TeamPicking", "Normal"); // Normal | Random
 
         Properties.setServerProperty(Properties.ServerProperty.ANNOUNCE_PLAYER_ACHIEVEMENTS, false);
         Properties.setServerProperty(Properties.ServerProperty.FLIGHT, true);

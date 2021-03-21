@@ -74,8 +74,6 @@ public class PlayerDeath implements Listener {
             for(Player all : Bukkit.getOnlinePlayers())
                 all.playSound(all.getLocation(), Sound.AMBIENCE_THUNDER, 1.0f, Integer.MAX_VALUE);
 
-            usefulMethods.setSpectator(target);
-
             String rip = "§cR.I.P.";
             String spectator = "§7You are spectator";
 
@@ -167,13 +165,7 @@ public class PlayerDeath implements Listener {
             usefulMethods.giveCompass(target);
             target.getInventory().setArmorContents(null);
 
-            String specName;
-
-            if(target.isOp()) specName = "§7[S]§c[OP]§7 " + target.getName();
-            else specName = "§7[S] " + target.getName();
-
-            target.setDisplayName(specName);
-            target.setPlayerListName(target.getDisplayName());
+            usefulMethods.setSpectator(target);
         }
     }
 

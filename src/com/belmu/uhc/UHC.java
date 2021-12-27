@@ -58,7 +58,7 @@ public class UHC extends JavaPlugin implements Listener {
         getConfig().set("Players", null);
         getConfig().set("Host", "N/A");
         getConfig().set("UHC", null);
-        getConfig().set("UHC" + "." + "Mode", "Teams"); // Solo | Teams
+        getConfig().set("UHC" + "." + "Mode", "Solo"); // Solo | Teams
         getConfig().set("UHC" + "." + "TeamPicking", "Normal"); // Normal | Random
 
         Properties.setServerProperty(Properties.ServerProperty.ANNOUNCE_PLAYER_ACHIEVEMENTS, false);
@@ -76,7 +76,6 @@ public class UHC extends JavaPlugin implements Listener {
         Teams.initializeTeams();
         players.clear();
 
-        addScenarios();
         worldSettings();
     }
 
@@ -106,16 +105,6 @@ public class UHC extends JavaPlugin implements Listener {
 
         world.setPVP(false);
         nether.setPVP(false);
-    }
-
-    public void addScenarios() {
-        scenarios.add("nocleanup");
-        scenarios.add("diamondlimit");
-        scenarios.add("vanilla+");
-        scenarios.add("goldenhead");
-        scenarios.add("finalheal");
-        scenarios.add("timber");
-        scenarios.add("cutclean");
     }
 
 }

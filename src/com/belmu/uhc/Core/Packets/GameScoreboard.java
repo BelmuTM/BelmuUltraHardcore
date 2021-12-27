@@ -32,7 +32,7 @@ public class GameScoreboard {
     public int timer;
 
     public void createGameScoreboard(Player player) {
-        BPlayerBoard board = Netherboard.instance().createBoard(player, "uhcScoreboard");
+        BPlayerBoard board = fr.minuskube.netherboard.Netherboard.instance().createBoard(player, "uhcScoreboard");
 
         String name;
 
@@ -46,12 +46,12 @@ public class GameScoreboard {
     }
 
     public void createLobbyScoreboard(Player player) {
-        BPlayerBoard board = Netherboard.instance().createBoard(player, "lobbyScoreboard");
+        BPlayerBoard board = fr.minuskube.netherboard.Netherboard.instance().createBoard(player, "lobbyScoreboard");
         board.setName("§c§lUHC Lobby");
     }
 
     public void updateLobbyScoreboard(Player player) {
-        BPlayerBoard b = Netherboard.instance().getBoard(player);
+        BPlayerBoard b = fr.minuskube.netherboard.Netherboard.instance().getBoard(player);
         FileConfiguration cfg = plugin.getConfig();
 
         String gray = "§7";
@@ -71,7 +71,7 @@ public class GameScoreboard {
         FileConfiguration cfg = plugin.getConfig();
         UsefulMethods usefulMethods = new UsefulMethods(plugin);
 
-        BPlayerBoard b = Netherboard.instance().getBoard(player);
+        BPlayerBoard b = fr.minuskube.netherboard.Netherboard.instance().getBoard(player);
         World world = Bukkit.getWorld("world");
         Location loc = new Location(player.getWorld(), 0, player.getLocation().getY(), 0);
 
@@ -159,7 +159,7 @@ public class GameScoreboard {
     }
 
     public void initializeHealth(Player player) {
-        Scoreboard sb = Netherboard.instance().getBoard(player).getScoreboard();
+        Scoreboard sb = fr.minuskube.netherboard.Netherboard.instance().getBoard(player).getScoreboard();
 
         if(sb.getObjective("showhealth") == null) {
 

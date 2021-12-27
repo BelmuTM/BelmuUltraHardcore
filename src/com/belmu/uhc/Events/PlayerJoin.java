@@ -34,7 +34,7 @@ public class PlayerJoin implements Listener {
 
         Player player = e.getPlayer();
         World world = Bukkit.getWorld("world");
-        Netherboard.instance().removeBoard(player);
+        fr.minuskube.netherboard.Netherboard.instance().removeBoard(player);
 
         String name = "";
         String joinMessage;
@@ -148,7 +148,7 @@ public class PlayerJoin implements Listener {
                     plugin.gameScoreboard.updateGameScoreboard(player);
                     if (!plugin.game.running || !plugin.game.preparing) this.cancel();
                 }
-            }.runTaskTimer(plugin, 5, 15);
+            }.runTaskTimer(plugin, 10, 20);
         }
     }
 

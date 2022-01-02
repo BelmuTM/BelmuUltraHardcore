@@ -1,5 +1,6 @@
 package com.belmu.uhc.Scenarios;
 
+import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Utility.Countdown;
 import org.bukkit.Bukkit;
@@ -19,19 +20,18 @@ public class Netheribus implements Listener {
         this.plugin = plugin;
     }
 
-    private static final String prefix = "§7[§4Netheribus§7] ";
-    private static final int seconds = 30;
+    private static final String prefix = "§7[§dNetheribus§7] ";
 
     public void execute() {
 
         if(plugin.scenarios.contains("netheribus")) {
 
             Countdown nether = new Countdown(plugin,
-                    10,
+                    Options.netheribusMinutes,
                     () -> {
                     },
                     () -> {
-                        Bukkit.broadcastMessage(plugin.prefix + prefix + "§cThe§b Netheribus§c started! Staying in the Overworld will now deal you damage.");
+                        Bukkit.broadcastMessage(plugin.prefix + prefix + "§6§lNetheribus §r§eis now active! §cStaying in the Overworld will deal you damage");
 
                         new BukkitRunnable() {
 
@@ -44,19 +44,19 @@ public class Netheribus implements Listener {
 
                                     if(all.getWorld() != plugin.nether) {
 
-                                        all.sendMessage(plugin.prefix + prefix + "§bHurry up!§f You §dneed§f to stay in the Nether.");
+                                        all.sendMessage(plugin.prefix + prefix + "§eHurry up!§7 You to go in the Nether");
                                         all.damage(7.5);
                                         all.getWorld().playEffect(all.getLocation(), Effect.SMOKE, 1, 2);
                                     }
                                 }
                             }
-                        }.runTaskTimer(plugin, 0, (long) seconds * 20);
+                        }.runTaskTimer(plugin, 0, (long) Options.netheribusDmgTime * 20);
 
                     },
                     (t) -> {
                         if(t.getSecondsLeft() <= 5) {
 
-                            Bukkit.broadcastMessage(plugin.prefix + prefix + "§cThe §bNetheribus§c is starting in §b" + t.getSecondsLeft() + "§c seconds!");
+                            Bukkit.broadcastMessage(plugin.prefix + "§dNetheribus§7 starts in §b" + t.getSecondsLeft() + "§7 seconds!");
 
                             for(Player all : Bukkit.getOnlinePlayers())
                                 all.playSound(all.getLocation(), Sound.NOTE_PLING, 1, Integer.MAX_VALUE);

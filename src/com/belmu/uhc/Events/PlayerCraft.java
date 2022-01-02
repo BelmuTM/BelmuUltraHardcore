@@ -14,12 +14,10 @@ public class PlayerCraft implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onCraft(PrepareItemCraftEvent e) {
-
-        byte data = e.getRecipe().getResult().getData().getData();
+        byte data     = e.getRecipe().getResult().getData().getData();
         Material type = e.getRecipe().getResult().getType();
 
         if(type == Material.GOLDEN_APPLE && data == 1)
             e.getInventory().setResult(new ItemStack(Material.AIR));
     }
-
 }

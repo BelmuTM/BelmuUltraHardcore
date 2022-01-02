@@ -1,11 +1,11 @@
 package com.belmu.uhc.Core;
 
+import com.belmu.uhc.Scenarios.CatEyes;
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Scenarios.DiamondLimit;
 import com.belmu.uhc.Scenarios.FinalHeal;
 import com.belmu.uhc.Scenarios.Netheribus;
-import com.belmu.uhc.Utils.*;
-import com.belmu.uhc.TeamsManager.*;
+import com.belmu.uhc.Utility.*;
 import fr.minuskube.netherboard.Netherboard;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -15,7 +15,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.UUID;
@@ -44,8 +43,6 @@ public class Start implements CommandExecutor {
 
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            UsefulMethods usefulMethods = new UsefulMethods(plugin);
-            Scoreboard s = Bukkit.getScoreboardManager().getMainScoreboard();
 
             if (cmd.getName().equalsIgnoreCase("start")) {
                 if(player.isOp()) {
@@ -71,9 +68,9 @@ public class Start implements CommandExecutor {
                                         public void run() {
 
                                             if(running) {
-                                                usefulMethods.gameChecks();
+                                                plugin.common.gameChecks();
 
-                                                if(plugin.getMode().equalsIgnoreCase("Solo")) {
+                                                if(plugin.getMode() == 0) {
                                                     if(plugin.players.size() == 1 && Bukkit.getOnlinePlayers().size() > 1) {
 
                                                         Player winner = Bukkit.getPlayer(plugin.players.get(0));
@@ -86,19 +83,19 @@ public class Start implements CommandExecutor {
                                                                 plugin.title.winTitle(player, player == winner);
                                                             }
 
-                                                            usefulMethods.sendWinMessage(winner.getName());
+                                                            plugin.common.sendWinMessage(winner.getName());
                                                             endGame();
                                                         }
                                                     }
-                                                } else if (plugin.getMode().equalsIgnoreCase("Teams")) {
+                                                } else if (plugin.getMode() == 1) {
 
-                                                    if(Teams.inGameTeams.size() == 1 && Bukkit.getOnlinePlayers().size() > 1) {
+                                                    if(plugin.teams.inGameTeams.size() == 1 && Bukkit.getOnlinePlayers().size() > 1) {
                                                         if(plugin.game.running) {
 
-                                                            if(Teams.teamsAtStart.size() != Teams.inGameTeams.size()) {
+                                                            if(plugin.teams.teamsAtStart.size() != plugin.teams.inGameTeams.size()) {
                                                                 this.cancel();
 
-                                                                Team lastTeam = Teams.inGameTeams.get(0);
+                                                                Team lastTeam = plugin.teams.inGameTeams.get(0);
 
                                                                 for (UUID uuid : plugin.players) {
                                                                     Player player = Bukkit.getPlayer(uuid);
@@ -106,7 +103,7 @@ public class Start implements CommandExecutor {
                                                                         plugin.title.winTitle(player, player == winners);
                                                                 }
 
-                                                                usefulMethods.sendWinMessage(lastTeam.getPrefix() + " " + lastTeam.getName());
+                                                                plugin.common.sendWinMessage(lastTeam.getPrefix() + " " + lastTeam.getName());
                                                                 endGame();
                                                             }
                                                         }
@@ -119,7 +116,7 @@ public class Start implements CommandExecutor {
                                     preparing = true;
                                     int a = Bukkit.getOnlinePlayers().size();
 
-                                    if(plugin.getMode().equalsIgnoreCase("Solo")) {
+                                    if(plugin.getMode() == 0) {
                                         if(a > 0 && 4 >= a) untilStartCt = 20;
                                         else if(a > 4 && 8 >= a) untilStartCt = 30;
                                         else if(a > 8 && 12 >= a) untilStartCt = 40;
@@ -133,22 +130,18 @@ public class Start implements CommandExecutor {
                                             () -> {
                                                 Bukkit.broadcastMessage(plugin.prefix + "§7Game is currently §apreparing §8§o(§7§o" + (int) untilStartCt + "s§8§o)");
 
-                                                if(plugin.getMode().equalsIgnoreCase("Teams")) {
-
-                                                    if(plugin.getTeamPicking().equalsIgnoreCase("Normal")) {
-
+                                                if(plugin.getMode() == 1) {
+                                                    if(plugin.getTeamPicking() == 0) {
                                                         for(Player online : Bukkit.getOnlinePlayers()) {
-                                                            Teams.playersToSpread.add(online.getUniqueId());
-                                                            usefulMethods.giveTeamChooser(online);
+                                                            plugin.teams.playersToSpread.add(online.getUniqueId());
+                                                            plugin.common.giveTeamChooser(online);
                                                         }
                                                     }
 
-                                                    for(Team team : s.getTeams())
+                                                    for(Team team : plugin.sc.getTeams())
                                                         try {
                                                             if(!team.getPlayers().isEmpty()) {
-                                                                for(OfflinePlayer p : team.getPlayers()) {
-                                                                    team.removePlayer(p);
-                                                                }
+                                                                for(OfflinePlayer p : team.getPlayers()) team.removePlayer(p);
                                                             }
                                                         } catch(Exception e) {
                                                             Bukkit.broadcastMessage(plugin.prefix + "§cError: Failed to clear players from teams.");
@@ -160,43 +153,41 @@ public class Start implements CommandExecutor {
 
                                             () -> {
 
-                                                if(plugin.getMode().equalsIgnoreCase("Teams")) {
-                                                    if(plugin.getTeamPicking().equalsIgnoreCase("Random")) {
+                                                if(plugin.getMode() == 1) {
+                                                    if(plugin.getTeamPicking() == 1) {
 
-                                                        for (Player online : Bukkit.getOnlinePlayers())
-                                                            Teams.addPlayersToTeams(online);
+                                                        for (Player online : Bukkit.getOnlinePlayers()) plugin.teams.addPlayersToTeams(online);
                                                     } else {
 
-                                                        if (!Teams.playersToSpread.isEmpty()) {
-                                                            for (int i = 0; i < Teams.playersToSpread.size(); i++) {
+                                                        if (!plugin.teams.playersToSpread.isEmpty()) {
+                                                            for (int i = 0; i < plugin.teams.playersToSpread.size(); i++) {
 
-                                                                Player toSpread = Bukkit.getPlayer(Teams.playersToSpread.get(i));
-                                                                Teams.addPlayersToTeams(toSpread);
+                                                                Player toSpread = Bukkit.getPlayer(plugin.teams.playersToSpread.get(i));
+                                                                plugin.teams.addPlayersToTeams(toSpread);
                                                             }
                                                         }
                                                     }
-                                                    for(Team team : Teams.inGameTeams)
-                                                        if(team.getPlayers() == null) Teams.inGameTeams.remove(team);
+                                                    plugin.teams.inGameTeams.removeIf(team -> team.getPlayers() == null);
                                                 }
                                                 for(Player all : Bukkit.getOnlinePlayers()) {
                                                     plugin.players.add(all.getUniqueId());
                                                     all.getInventory().clear();
 
-                                                    usefulMethods.sendPacket(all, "§7Loading game...");
+                                                    plugin.common.sendPacket(all, "§7Loading game...");
                                                     all.playSound(all.getLocation(), Sound.CHICKEN_EGG_POP, 1, Integer.MAX_VALUE);
                                                 }
                                                 preparing = true;
-                                                usefulMethods.prepareTp();
+                                                plugin.common.prepareTp();
 
                                                 new BukkitRunnable() {
 
                                                     @Override
                                                     public void run() {
 
-                                                        if(plugin.getMode().equalsIgnoreCase("Teams")
-                                                                && usefulMethods.tpLocationTeams.size() == Teams.inGameTeams.size() && Teams.playersToSpread.isEmpty()
-                                                        || plugin.getMode().equalsIgnoreCase("Solo")
-                                                                && usefulMethods.tpLocation.size() == plugin.players.size()) {
+                                                        if(plugin.getMode() == 1
+                                                                && plugin.common.tpLocationTeams.size() == plugin.teams.inGameTeams.size() && plugin.teams.playersToSpread.isEmpty()
+                                                        || plugin.getMode() == 0
+                                                                && plugin.common.tpLocation.size() == plugin.players.size()) {
                                                             this.cancel();
 
                                                             running = true;
@@ -210,14 +201,14 @@ public class Start implements CommandExecutor {
 
                                                                         Location loc3 = new Location(world, a, b + 1, -a);
                                                                         Location loc4 = new Location(world, -a, b + 1, a);
-                                                                        usefulMethods.setBlocksRegion(loc3, loc4, Material.AIR);
+                                                                        plugin.common.setBlocksRegion(loc3, loc4, Material.AIR);
 
                                                                         Location loc1 = new Location(world, a, b, -a);
                                                                         Location loc2 = new Location(world, -a, b, a);
-                                                                        usefulMethods.setBlocksRegion(loc1, loc2, Material.AIR);
+                                                                        plugin.common.setBlocksRegion(loc1, loc2, Material.AIR);
 
-                                                                        usefulMethods.tp();
-                                                                        usefulMethods.start(plugin.timer);
+                                                                        plugin.common.tp();
+                                                                        plugin.common.start(plugin.timer);
                                                                     },
 
                                                                     () -> {
@@ -250,10 +241,12 @@ public class Start implements CommandExecutor {
                                                                             CraftPlayer cp = ((CraftPlayer) all);
                                                                             cp.getHandle().triggerHealthUpdate();
                                                                         }
+                                                                        CatEyes catEyes       = new CatEyes(plugin);
+                                                                        FinalHeal finalHeal   = new FinalHeal(plugin);
                                                                         Netheribus netheribus = new Netheribus(plugin);
-                                                                        FinalHeal finalHeal = new FinalHeal(plugin);
 
-                                                                        finalHeal.execute(Options.finalHealSeconds);
+                                                                        catEyes.execute();
+                                                                        finalHeal.execute(Options.finalHealTime);
                                                                         netheribus.execute();
 
                                                                         plugin.gameScoreboard.startTimer();
@@ -286,10 +279,10 @@ public class Start implements CommandExecutor {
                                                                         monsters.scheduleTimer();
 
                                                                         Countdown borderCd = new Countdown(plugin,
-                                                                                Options.borderSeconds,
+                                                                                Options.borderTime,
                                                                                 () -> {},
                                                                                 () -> {
-                                                                                    world.getWorldBorder().setSize(250, Options.borderShrinkingSeconds);
+                                                                                    world.getWorldBorder().setSize(250, Options.borderShrinkTime);
                                                                                     world.getWorldBorder().setCenter(0, 0);
                                                                                     world.getWorldBorder().setWarningDistance(25);
 
@@ -304,7 +297,7 @@ public class Start implements CommandExecutor {
                                                                         borderCd.scheduleTimer();
 
                                                                         Countdown pvp = new Countdown(plugin,
-                                                                                Options.pvpSeconds,
+                                                                                Options.pvpTime,
                                                                                 () -> {},
                                                                                 () -> {
                                                                                     if(!world.getPVP() && !nether.getPVP()) {
@@ -371,37 +364,38 @@ public class Start implements CommandExecutor {
                                     );
                                     untilStart.scheduleTimer();
                                 }
-                            } else
+                            } else {
                                 player.sendMessage(plugin.prefix + "§cYou must be host to do that.");
-                        } else
+                            }
+                        } else {
                             player.sendMessage(plugin.prefix + "§cPlease define host before doing that.");
-                    } else
+                        }
+                    } else {
                         player.sendMessage(plugin.prefix + "§cWrong usage. Try /start");
-                } else
+                    }
+                } else {
                     player.sendMessage(plugin.prefix + "§cYou must be operator to do that.");
+                }
             }
         }
         return false;
     }
 
     public void endGame() {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-
-        int time = 60;
-        String kickallMessage = plugin.prefix + "§cKicking players in§b " + (time / 60) + " minute(s)";
+        String kickallMessage = plugin.prefix + "§cKicking players in§b " + (Options.kickTime / 60) + " minute(s)";
         String thxForPlaying = "§7§m                              " + "\n§cThanks for Playing!\n" + "§7§m                              ";
 
         border = false;
 
         Countdown kickall = new Countdown(plugin,
-                time,
+                Options.kickTime,
                 () -> Bukkit.broadcastMessage(kickallMessage),
                 () -> {
-                    usefulMethods.kickAll(thxForPlaying);
+                    plugin.common.kickAll(thxForPlaying);
 
                     EasyCountdown shutdown = new EasyCountdown(plugin,
                             2.30D,
-                            usefulMethods::deleteWorlds
+                            plugin.common::deleteWorlds
                     );
                     shutdown.scheduleTimer();
                 },
@@ -409,5 +403,4 @@ public class Start implements CommandExecutor {
         );
         kickall.scheduleTimer();
     }
-
 }

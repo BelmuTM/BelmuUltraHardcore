@@ -1,4 +1,4 @@
-package com.belmu.uhc.Utils;
+package com.belmu.uhc.Utility;
 
 import com.belmu.uhc.UHC;
 import org.bukkit.*;
@@ -6,6 +6,8 @@ import org.bukkit.block.Block;
 import org.bukkit.material.Tree;
 
 import java.util.*;
+
+import static org.bukkit.TreeSpecies.*;
 
 /**
  * @author Belmu (https://github.com/BelmuTM/)
@@ -29,26 +31,22 @@ public class TreeCutter {
             int index = 0;
             @Override
             public void run() {
-
                 if (!plugin.isEnabled()) {
                     cancel();
                     return;
                 }
 
-                if (index >= blocksSize)
-                    cancel();
-                else
+                if (index >= blocksSize) { cancel(); }
+                else {
                     try {
-
                         Block block = blocks.get(index);
                         Bukkit.getScheduler().runTask(plugin, block::breakNaturally);
-                        index += 1;
+                        index ++;
 
-                    } catch (Exception e) {
-                        cancel();
-                    }
+                    } catch (Exception e) { cancel(); }
+                }
             }
-        }, 0, 1);
+        }, 0, 3);
 
         popLeaves(startBlock);
     }
@@ -56,10 +54,8 @@ public class TreeCutter {
     private void runLoop(Block b1, final int x1, final int z1) {
 
         for (int x = -2; x <= 2; x++) {
-
             for (int y = -2; y <= 2; y++) {
-
-                for (int z = -2; z <= 1; z++) {
+                for (int z = -2; z <= 2; z++) {
 
                     if (x == 0 && y == 0 && z == 0)
                         continue;
@@ -67,14 +63,10 @@ public class TreeCutter {
                     Block b2 = b1.getRelative(x, y, z);
                     String s = b2.getX() + ":" + b2.getY() + ":" + b2.getZ();
 
-                    if ((b2.getType() == Material.LEAVES || b2.getType() == Material.LEAVES_2)
-
-                            && !comparisonBlockArrayLeaves.contains(s))
+                    if ((b2.getType() == Material.LEAVES || b2.getType() == Material.LEAVES_2) && !comparisonBlockArrayLeaves.contains(s))
                         comparisonBlockArrayLeaves.add(s);
 
-                    if (b2.getType() != Material.LOG && b2.getType() != Material.LOG_2)
-
-                        continue;
+                    if (b2.getType() != Material.LOG && b2.getType() != Material.LOG_2) continue;
                     int searchSquareSize = 25;
 
                     if (b2.getX() > x1 + searchSquareSize || b2.getX() < x1 - searchSquareSize
@@ -82,7 +74,6 @@ public class TreeCutter {
                         break;
 
                     if (!comparisonBlockArray.contains(s)) {
-
                         comparisonBlockArray.add(s);
                         blocks.add(b2);
 
@@ -94,18 +85,14 @@ public class TreeCutter {
     }
 
     private void popLeaves(Block block) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-
         if(block.getType() == Material.LOG || block.getType() == Material.LOG_2) {
 
-            for (int y = -6; y < 12 + 1; y++) {
-                for (int x = -5; x < 5 + 1; x++) {
-                    for (int z = -5; z < 5 + 1; z++) {
-
+            for (int y = -6; y < 13; y++) {
+                for (int x = -5; x < 6; x++) {
+                    for (int z = -5; z < 6; z++) {
                         Block target = block.getRelative(x, y, z);
 
                         if (target.getType() == Material.LEAVES || target.getType() == Material.LEAVES_2) {
-
                             Location loc = treeSize(leafType(target));
 
                             int fX = loc.getBlockX();
@@ -117,13 +104,12 @@ public class TreeCutter {
                                 for (int mX = -fX; mX < fX + 1; mX++) {
                                     for (int mY = -fY; mY < fY + 1; mY++) {
                                         for (int mZ = -fZ; mZ < fZ + 1; mZ++) {
-
                                             Block finalTarget = block.getRelative(mX, mY, mZ);
 
                                             if (finalTarget.getType() == Material.LEAVES) {
 
-                                                if (leafType(finalTarget) == TreeSpecies.GENERIC)
-                                                    usefulMethods.dropTreeApple(target);
+                                                if (leafType(finalTarget) == GENERIC)
+                                                    plugin.common.dropTreeApple(target);
 
                                                 finalTarget.breakNaturally();
                                             }
@@ -134,17 +120,14 @@ public class TreeCutter {
                             } else if(target.getType() == Material.LEAVES_2) {
 
                                 for (int sx = -7; sx < 6 + 1; sx++) {
-
                                     for (int sy = -10; sy < 12 + 1; sy++) {
-
                                         for (int sz = -7; sz < 6 + 1; sz++) {
-
                                             Block finalTarget = block.getRelative(sx, sy, sz);
 
                                             if (finalTarget.getType() == Material.LEAVES_2) {
 
-                                                if (leafType(finalTarget) == TreeSpecies.DARK_OAK)
-                                                    usefulMethods.dropTreeApple(target);
+                                                if (leafType(finalTarget) == DARK_OAK)
+                                                    plugin.common.dropTreeApple(target);
 
                                                 finalTarget.breakNaturally();
                                             }
@@ -162,37 +145,25 @@ public class TreeCutter {
     private TreeSpecies leafType(Block block) {
 
         if(block.getType() == Material.LEAVES) {
-
             Tree w = (Tree) block.getState().getData();
             return w.getSpecies();
 
         } else if(block.getType() == Material.LEAVES_2) {
-            return TreeSpecies.DARK_OAK;
+            return DARK_OAK;
 
-        } else
-            return null;
+        } else { return null; }
     }
 
     private Location treeSize(TreeSpecies specie) {
-        World world = Bukkit.getWorld("world");
-
-        if(specie == TreeSpecies.GENERIC) {
-            return new Location(world, 3, 8, 3);
-
-        } else if(specie == TreeSpecies.REDWOOD) {
-            return new Location(world, 4, 13, 3);
-
-        } else if(specie == TreeSpecies.ACACIA) {
-            return new Location(world, 5, 8, 5);
-
-        } else if(specie == TreeSpecies.BIRCH) {
-            return new Location(world, 2, 13, 2);
-
-        } else if(specie == TreeSpecies.DARK_OAK) {
-
-            return new Location(world, 3, 12, 3);
+        switch(specie) {
+            case GENERIC:
+            case BIRCH:
+                return new Location(plugin.world, 3, 8, 3);
+            case ACACIA:
+                return new Location(plugin.world, 5, 8, 5);
+            case DARK_OAK:
+                return new Location(plugin.world, 3, 12, 3);
         }
-        return new Location(world, 0, 0, 0);
+        return new Location(plugin.world, 0, 0, 0);
     }
-
 }

@@ -22,34 +22,34 @@ public class ForcePvPCommand implements CommandExecutor {
 
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            World world = Bukkit.getWorld("world");
-            World nether = Bukkit.getWorld("world_nether");
 
             if (cmd.getName().equalsIgnoreCase("forcepvp")) {
 
                 if (player.isOp()) {
-                    if(plugin.game.running) {
+                    if (plugin.game.running) {
                         if (args.length == 0) {
 
-                            if (world.getPVP() && nether.getPVP()) {
+                            if (plugin.world.getPVP() && plugin.nether.getPVP()) {
                                 player.sendMessage(plugin.prefix + "§cPVP is already activated.");
 
-                            } else if (!world.getPVP() && !nether.getPVP()) {
+                            } else if (!plugin.world.getPVP() && !plugin.nether.getPVP()) {
 
-                                world.setPVP(true);
-                                nether.setPVP(true);
+                                plugin.world.setPVP(true);
+                                plugin.nether.setPVP(true);
 
                                 Bukkit.broadcastMessage(plugin.prefix + "§bPVP§c was forcibly §a§lactivated");
                             }
-                        } else
+                        } else {
                             player.sendMessage(plugin.prefix + "§cWrong usage ! Try /forcepvp");
-                    } else
+                        }
+                    } else {
                         player.sendMessage(plugin.prefix + "§cGame hasn't started yet.");
-                } else
+                    }
+                } else {
                     player.sendMessage(plugin.prefix + "§cYou must be operator to do that.");
+                }
             }
         }
         return false;
     }
-
 }

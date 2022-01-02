@@ -1,4 +1,4 @@
-package com.belmu.uhc.Utils;
+package com.belmu.uhc.Utility;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,7 +32,6 @@ public class EasyCountdown implements Runnable {
             if (assignedTaskId != null) Bukkit.getScheduler().cancelTask(assignedTaskId);
             return;
         }
-
         secondsLeft--;
     }
 
@@ -42,5 +41,4 @@ public class EasyCountdown implements Runnable {
     public void scheduleTimer() {
         this.assignedTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, 0L, 20L);
     }
-
 }

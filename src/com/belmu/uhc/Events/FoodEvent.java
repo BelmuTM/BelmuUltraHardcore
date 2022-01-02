@@ -1,5 +1,6 @@
 package com.belmu.uhc.Events;
 
+import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.UHC;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -36,8 +37,7 @@ public class FoodEvent implements Listener {
 
                 if(plugin.players.contains(uuid)) {
                     if(checkCooldown(hunger, player)) {
-
-                        setCooldown(hunger, player, 30.5D);
+                        setCooldown(hunger, player, Options.hungerDelay);
 
                     } else e.setCancelled(true);
                 } else e.setCancelled(true);
@@ -47,9 +47,8 @@ public class FoodEvent implements Listener {
 
     @EventHandler
     public void onConsume(PlayerItemConsumeEvent e) {
-
-        Player player = e.getPlayer();
-        UUID uuid = player.getUniqueId();
+        Player player  = e.getPlayer();
+        UUID uuid      = player.getUniqueId();
         ItemStack item = e.getItem();
 
         if(item.getType().isEdible()) {
@@ -68,5 +67,4 @@ public class FoodEvent implements Listener {
     public boolean checkCooldown(Map<UUID, Double> cooldowns, Player player){
         return !cooldowns.containsKey(player.getUniqueId()) || cooldowns.get(player.getUniqueId()) <= System.currentTimeMillis();
     }
-
 }

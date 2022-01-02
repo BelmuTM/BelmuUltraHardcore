@@ -29,5 +29,4 @@ public enum TeamsList {
         this.teamColor = teamColor;
         this.teamDyeColor = teamDyeColor;
     }
-
 }

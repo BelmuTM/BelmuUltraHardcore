@@ -1,7 +1,7 @@
 package com.belmu.uhc.Scenarios;
 
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Utils.UsefulMethods;
+import com.belmu.uhc.Utility.Common;
 import org.bukkit.block.Furnace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,11 +21,10 @@ public class FastMelting implements Listener {
 
     @EventHandler
     public void onFurnaceBurn(final FurnaceBurnEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
         Random r = new Random();
 
         if(plugin.scenarios.contains("fastsmelting")) {
-            usefulMethods.startUpdate((Furnace) e.getBlock().getState(), r.nextBoolean() ? 1 : 2);
+            plugin.common.startUpdate((Furnace) e.getBlock().getState(), r.nextBoolean() ? 1 : 2);
         }
     }
 }

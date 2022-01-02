@@ -2,7 +2,6 @@ package com.belmu.uhc.Events;
 
 import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -33,86 +32,70 @@ public class PlayerInteract implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-
         Player player = e.getPlayer();
         Action action = e.getAction();
-        ItemStack it = e.getItem();
+        ItemStack it  = e.getItem();
 
         if (it == null) return;
 
         if(!plugin.players.contains(player.getUniqueId())) {
 
-            if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-                if (it.hasItemMeta()) {
-                    if (it.getItemMeta().hasDisplayName()) {
-                        if (it.getItemMeta().getDisplayName().equalsIgnoreCase(Options.compassName)) {
+            if (it.hasItemMeta() && it.getItemMeta().hasDisplayName() && it.getItemMeta().getDisplayName().equalsIgnoreCase(Options.compassName)) {
+                if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
+                    Inventory inv = specInventory();
+                    if(inv == null) return;
 
-                            Inventory inv = specInventory();
-                            e.setCancelled(true);
+                    for (Player all : Bukkit.getOnlinePlayers()) {
+                        if (plugin.players.contains(all.getUniqueId()))
+                            inv.addItem(plugin.common.getSkull(Bukkit.getPlayer(all.getUniqueId()).getName()));
+                    }
 
-                            for (Player all : Bukkit.getOnlinePlayers()) {
-                                if (plugin.players.contains(all.getUniqueId()))
-                                    inv.addItem(usefulMethods.getSkull(Bukkit.getPlayer(all.getUniqueId()).getName()));
-                            }
-                            if (plugin.players.size() != 0)
-                                player.openInventory(inv);
-                            else player.sendMessage(plugin.prefix + "§cThere are no players alive!");
-
-                        } else e.setCancelled(true);
-                    } else if (!it.getItemMeta().hasDisplayName())
-                        e.setCancelled(true);
-                } else if (!it.hasItemMeta())
-                    e.setCancelled(true);
+                    if (plugin.players.size() != 0) player.openInventory(inv);
+                    else player.sendMessage(plugin.prefix + "§cThere are no players alive!");
+                }
+                e.setCancelled(true);
             }
 
-        } else if(plugin.players.contains(player.getUniqueId())) {
+        } else {
+            if (it.hasItemMeta() && it.getItemMeta().hasLore() && it.getType() == Material.SKULL_ITEM) {
+                if(action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
 
-            if (it.hasItemMeta()) {
-                if(it.getItemMeta().hasLore()) {
-                    if (it.getType() == Material.SKULL_ITEM) {
-                        if(action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
+                    plugin.common.consumeItem(player, 1, it);
 
-                            UsefulMethods.consumeItem(player, 1, it);
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 0));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 160, 1));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 2400, 0));
 
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 120, 0));
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 160, 1));
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 2400, 0));
+                    if(player.getHealth() < 20 &&  player.getHealth() > 0)
+                        player.setHealth(player.getHealth() + 4);
 
-                            if(player.getHealth() < 20 &&  player.getHealth() > 0)
-                                player.setHealth(player.getHealth() + 4);
-
-                            for (Player all : Bukkit.getOnlinePlayers())
-                                all.playSound(player.getLocation(), Sound.EAT, 1, Integer.MAX_VALUE);
-                        }
-                    }
+                    for (Player all : Bukkit.getOnlinePlayers())
+                        all.playSound(player.getLocation(), Sound.EAT, 1, Integer.MAX_VALUE);
                 }
             }
         }
     }
 
     private Inventory specInventory() {
-        int size = plugin.players.size();
+        int size    = plugin.players.size();
+        String name = "Spectator Menu";
 
         if(size <= 9 && size > 0)
-            return Bukkit.createInventory(null, 9, "Spectator Menu");
+            return Bukkit.createInventory(null, 9, name);
 
         else if(size <= 18 && size > 9)
-            return Bukkit.createInventory(null, 18, "Spectator Menu");
+            return Bukkit.createInventory(null, 18, name);
 
         else if(plugin.players.size() <= 27 && size > 18)
-            return Bukkit.createInventory(null, 27, "Spectator Menu");
+            return Bukkit.createInventory(null, 27, name);
 
         else if(plugin.players.size() <= 36 && size > 27)
-            return Bukkit.createInventory(null, 36, "Spectator Menu");
+            return Bukkit.createInventory(null, 36, name);
 
         else if(plugin.players.size() <= 45 && size > 36)
-            return Bukkit.createInventory(null, 45, "Spectator Menu");
-
-        else if(plugin.players.size() <= 54 && size > 45)
-            return Bukkit.createInventory(null, 54, "Spectator Menu");
-
-        return null;
+            return Bukkit.createInventory(null, 45, name);
+        else
+            return Bukkit.createInventory(null, 54, name);
     }
 
     @EventHandler
@@ -135,16 +118,16 @@ public class PlayerInteract implements Listener {
 
                 DecimalFormat format = new DecimalFormat("#");
                 Double hlth = ((Player) target).getHealth();
-                String h = format.format(hlth);
+                String h    = format.format(hlth);
 
                 ItemStack health = new ItemStack(Material.APPLE, 1);
-                ItemMeta m = health.getItemMeta();
+                ItemMeta m       = health.getItemMeta();
 
                 m.setDisplayName("§fHealth §7: §c" + h + "§4❤");
                 health.setItemMeta(m);
 
                 ItemStack food = new ItemStack(Material.COOKED_BEEF, 1);
-                ItemMeta m2 = food.getItemMeta();
+                ItemMeta m2    = food.getItemMeta();
 
                 m2.setDisplayName("§fFood §7: §e" + ((Player) target).getFoodLevel() + "§6✚");
                 food.setItemMeta(m2);
@@ -156,5 +139,4 @@ public class PlayerInteract implements Listener {
             }
         }
     }
-
 }

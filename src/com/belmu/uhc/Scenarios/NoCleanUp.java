@@ -19,7 +19,6 @@ public class NoCleanUp implements Listener {
 
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
-
         Player target = e.getEntity();
         Player killer = target.getKiller();
 
@@ -35,5 +34,4 @@ public class NoCleanUp implements Listener {
             }
         }
     }
-
 }

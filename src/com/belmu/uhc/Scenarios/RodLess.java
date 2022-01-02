@@ -22,10 +22,7 @@ public class RodLess implements Listener {
         Material type = e.getRecipe().getResult().getType();
 
         if(plugin.scenarios.contains("rodless")) {
-
-            if (type == Material.FISHING_ROD)
-                e.getInventory().setResult(new ItemStack(Material.AIR));
+            if (type == Material.FISHING_ROD) e.getInventory().setResult(new ItemStack(Material.AIR));
         }
     }
-
 }

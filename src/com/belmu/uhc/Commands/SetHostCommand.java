@@ -39,15 +39,17 @@ public class SetHostCommand implements CommandExecutor {
                             plugin.getConfig().set("Host", target.getName());
                             player.sendMessage(plugin.prefix + "§fHost has been successfully assigned to§7 " + target.getName());
 
-                        } else
+                        } else {
                             player.sendMessage(plugin.prefix + "§cGame has already started.");
-                    } else
+                        }
+                    } else {
                         player.sendMessage(plugin.prefix + "§cUnknown player.");
-                } else
+                    }
+                } else {
                     player.sendMessage(plugin.prefix + "§cWrong usage. Try /sethost (player)");
+                }
             }
         }
         return false;
     }
-
 }

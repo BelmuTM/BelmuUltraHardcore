@@ -16,13 +16,11 @@ public class CatEyes {
         this.plugin = plugin;
     }
 
-    public void catEyes() {
+    public void execute() {
 
         if(plugin.scenarios.contains("cateyes")) {
-
             for (Player all : Bukkit.getOnlinePlayers())
-                all.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 2));
+                all.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 1));
         }
     }
-
 }

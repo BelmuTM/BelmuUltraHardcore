@@ -112,5 +112,4 @@ public class ScenariosCommand implements CommandExecutor {
         }
         return false;
     }
-
 }

@@ -44,13 +44,13 @@ public class HealCommand implements CommandExecutor {
                                 player.setHealth(20);
                                 player.sendMessage(plugin.prefix + "§aHealed");
                             }
-                        } else
-                            player.sendMessage(plugin.prefix + "§cUnknown player.");
+                        } else { player.sendMessage(plugin.prefix + "§cUnknown player."); }
                     }
-                    if (args.length > 1)
-                        player.sendMessage(plugin.prefix + "§cWrong usage. Try /heal (player)");
-                } else
+                    if (args.length > 1) player.sendMessage(plugin.prefix + "§cWrong usage. Try /heal (player)");
+
+                } else {
                     player.sendMessage(plugin.prefix + "§cYou must be operator to do that.");
+                }
             }
         }
         return false;

@@ -7,26 +7,31 @@ import org.bukkit.Bukkit;
  */
 public class Options {
 
-    public static int pvpSeconds = 20 * 60;
-    public static int finalHealSeconds = pvpSeconds - 300;
+    public static final int pvpTime = 20 * 60;
+    public static final int finalHealTime = pvpTime - 300;
 
-    public static int borderSeconds = 45 * 60;
-    public static int borderShrinkingSeconds = 60 * 60;
-    public static int borderScale = (92 * Bukkit.getOnlinePlayers().size()) * 2;
+    public static final int borderTime = 45 * 60;
+    public static final int borderShrinkTime = 60 * 60;
+    public static final int borderScale = (92 * Bukkit.getOnlinePlayers().size()) * 2;
 
-    public static int monstersSpawn = pvpSeconds / 4;
-    public static int monsterSpawnRate = 3; // 1 out of X
+    public static final int monstersSpawn = pvpTime / 4;
+    public static final int monsterSpawnRate = 3; // 1 out of X
 
     public static int pPerTeam = 2;
 
-    public static int noCleanUpHearts = 2;
+    public static final int noCleanUpHearts = 2;
 
-    public static int diamondLimit = 20;
-    public static int heightLimit = 100;
+    public static final int diamondLimit = 20;
+    public static final int heightLimit = 100;
 
-    public static double untilGameStarts = 120;
-    public static int beforeElimination = 5 * 60;
+    public static final double untilGameStarts = 120;
+    public static final int beforeElimination = 5 * 60;
 
-    public static String compassName = "§fSpectate §7(Right Click)";
-    public static String teamChooserName = "§fChoose Team §7(Right Click)";
+    public static final int kickTime = 60;
+    public static final int timeBombTime = 140;
+
+    public static final double hungerDelay = 32.5D;
+
+    public static final String compassName     = "§fSpectate §7(Right Click)";
+    public static final String teamChooserName = "§fChoose Team §7(Right Click)";
 }

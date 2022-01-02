@@ -1,10 +1,8 @@
 package com.belmu.uhc.Events;
 
 import com.belmu.uhc.Core.Packets.Tablist.Tablist;
-import com.belmu.uhc.TeamsManager.Teams;
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Utils.UsefulMethods;
-import fr.minuskube.netherboard.Netherboard;
+import com.belmu.uhc.Utility.Common;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -14,7 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Scoreboard;
 
 /**
  * @author Belmu (https://github.com/BelmuTM/)
@@ -28,15 +25,12 @@ public class PlayerJoin implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+        Player player         = e.getPlayer();
         FileConfiguration cfg = plugin.getConfig();
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-        Scoreboard s = Bukkit.getScoreboardManager().getMainScoreboard();
 
-        Player player = e.getPlayer();
-        World world = Bukkit.getWorld("world");
         fr.minuskube.netherboard.Netherboard.instance().removeBoard(player);
 
-        String name = "";
+        String name;
         String joinMessage;
 
         CraftPlayer cp = ((CraftPlayer) player);
@@ -62,8 +56,8 @@ public class PlayerJoin implements Listener {
             } else name = pName;
         }
 
-        if(plugin.getMode().equals("Teams") && s.getPlayerTeam(player) != null)
-            name = s.getPlayerTeam(player).getPrefix() + player.getName();
+        if(plugin.getMode() == 1 && plugin.sc.getPlayerTeam(player) != null)
+            name = plugin.sc.getPlayerTeam(player).getPrefix() + player.getName();
 
         if(plugin.players.contains(player.getUniqueId()) && plugin.inCooldown.contains(player.getUniqueId())) {
             joinMessage = plugin.prefix + name + " §fhas §areconnected";
@@ -76,17 +70,16 @@ public class PlayerJoin implements Listener {
 
         if(!plugin.players.contains(player.getUniqueId())) {
             if (plugin.game.running || plugin.game.preparing && plugin.game.teleported) {
-                usefulMethods.setSpectator(player);
+                plugin.common.setSpectator(player);
 
             } else {
-                usefulMethods.clearEffects(player);
+                plugin.common.clearEffects(player);
                 player.setHealth(20);
                 player.setFoodLevel(20);
                 player.getInventory().clear();
                 player.spigot().setCollidesWithEntities(true);
 
-                for (ItemStack i : player.getInventory().getArmorContents())
-                    i.setType(Material.AIR);
+                for (ItemStack i : player.getInventory().getArmorContents()) i.setType(Material.AIR);
             }
         }
         player.setDisplayName(name);
@@ -98,7 +91,7 @@ public class PlayerJoin implements Listener {
         }
 
         if (!plugin.game.running) {
-            player.teleport(new Location(world, 0, world.getHighestBlockYAt(0, 0) + 2.5, 0));
+            player.teleport(new Location(plugin.world, 0, plugin.world.getHighestBlockYAt(0, 0) + 2.5, 0));
             player.setGameMode(GameMode.ADVENTURE);
             player.getInventory().setArmorContents(null);
         }
@@ -110,15 +103,15 @@ public class PlayerJoin implements Listener {
         e.setJoinMessage(joinMessage);
         plugin.inCooldown.remove(player.getUniqueId());
 
-        if (plugin.getMode().equals("Teams")) {
-            if (plugin.getTeamPicking().equals("Normal")) {
+        if (plugin.getMode() == 1) {
+            if (plugin.getTeamPicking() == 0) {
 
                 if(!plugin.players.contains(player.getUniqueId())) {
                     if(plugin.game.preparing && !plugin.game.teleported) {
-                        usefulMethods.giveTeamChooser(player);
+                        plugin.common.giveTeamChooser(player);
 
-                        if (!Teams.playersToSpread.contains(player.getUniqueId()))
-                            Teams.playersToSpread.add(player.getUniqueId());
+                        if (!plugin.teams.playersToSpread.contains(player.getUniqueId()))
+                            plugin.teams.playersToSpread.add(player.getUniqueId());
                     }
                 }
             }

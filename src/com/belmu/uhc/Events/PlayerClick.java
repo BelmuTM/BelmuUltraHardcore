@@ -22,7 +22,6 @@ public class PlayerClick implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {
-
         Inventory inv = e.getClickedInventory();
         ItemStack cur = e.getCurrentItem();
         HumanEntity player = e.getWhoClicked();
@@ -31,7 +30,6 @@ public class PlayerClick implements Listener {
         if (cur == null) return;
 
         if (e.getInventory().getName().equals("Spectator Menu")) {
-
             if (!cur.hasItemMeta()) return;
             e.setCancelled(true);
 
@@ -42,8 +40,8 @@ public class PlayerClick implements Listener {
                 player.sendMessage("§7You have been teleported to§f " + cur.getItemMeta().getDisplayName() + "§7.");
             }
 
-        } else
-            if(!plugin.players.contains(player.getUniqueId())) e.setCancelled(true);
+        } else {
+            if (!plugin.players.contains(player.getUniqueId())) e.setCancelled(true);
+        }
     }
-
 }

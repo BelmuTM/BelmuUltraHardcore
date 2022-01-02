@@ -1,7 +1,6 @@
 package com.belmu.uhc.Scenarios;
 
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -13,6 +12,9 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Random;
+
+import static org.bukkit.Material.*;
+import static org.bukkit.entity.EntityType.*;
 
 /**
  * @author Belmu (https://github.com/BelmuTM/)
@@ -26,198 +28,125 @@ public class CutClean implements Listener {
 
     @EventHandler
     public void onBreak(BlockBreakEvent e){
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-
         Player player = e.getPlayer();
-        Block block = e.getBlock();
+        Block block   = e.getBlock();
         Material type = block.getType();
-        World world = Bukkit.getWorld("world");
 
-        Location loc = block.getLocation();
-        Location orbLoc = new Location(world, loc.getX() + 0.5, loc.getBlockY() + 0.5, loc.getBlockZ() + 0.5);
+        Location loc    = block.getLocation();
+        Location orbLoc = new Location(plugin.world, loc.getX() + 0.5, loc.getBlockY() + 0.5, loc.getBlockZ() + 0.5);
 
-        ItemStack gold = new ItemStack(Material.GOLD_INGOT, 1);
-        ItemStack iron = new ItemStack(Material.IRON_INGOT, 1);
-        ItemStack flint = new ItemStack(Material.FLINT, 1);
-        ItemStack torch = new ItemStack(Material.TORCH, 4);
-        ItemStack glass = new ItemStack(Material.GLASS, 1);
+        ItemStack gold  = new ItemStack(GOLD_INGOT, 1);
+        ItemStack iron  = new ItemStack(IRON_INGOT, 1);
+        ItemStack flint = new ItemStack(FLINT, 1);
+        ItemStack torch = new ItemStack(TORCH, 4);
+        ItemStack glass = new ItemStack(GLASS, 1);
 
         if(plugin.scenarios.contains("cutclean")) {
+            if (player.getGameMode() == GameMode.SURVIVAL && !e.isCancelled()) {
+                Random random = new Random();
+                int upper = 2;
 
-            if (!e.isCancelled()) {
+                ItemStack item = null;
+                int exp        = 0;
 
-                if(player.getGameMode() == GameMode.SURVIVAL) {
-                    int upper = 2;
-                    Random random = new Random();
+                switch(type) {
+                    case GRAVEL:
+                        item = flint;
+                        break;
+                    case SAND:
+                        item = glass;
+                        exp  = 1;
+                        break;
+                    case COAL_ORE:
+                        item = torch;
+                        exp  = 2;
+                        break;
+                    case IRON_ORE:
+                        item = iron;
+                        exp  = 2;
+                        break;
+                    case GOLD_ORE:
+                        item = gold;
+                        exp  = 3;
+                        break;
+                }
 
-                    if(type == Material.GOLD_ORE) {
-                        block.setType(Material.AIR);
-                        e.setCancelled(true);
+                block.setType(AIR);
+                e.setCancelled(true);
 
-                        usefulMethods.drop(loc, gold);
-                        if(random.nextInt(upper) == 1) {
-
-                            ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(orbLoc, EntityType.EXPERIENCE_ORB);
-                            orb.setExperience(3);
-                        }
-                    }
-
-                    if(type == Material.IRON_ORE) {
-                        block.setType(Material.AIR);
-                        e.setCancelled(true);
-
-                        usefulMethods.drop(loc, iron);
-                        if(random.nextInt(upper) == 1) {
-
-                            ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(orbLoc, EntityType.EXPERIENCE_ORB);
-                            orb.setExperience(2);
-                        }
-                    }
-
-                    if(type == Material.GRAVEL) {
-                        block.setType(Material.AIR);
-                        e.setCancelled(true);
-
-                        usefulMethods.drop(loc, flint);
-                    }
-
-                    if(type == Material.COAL_ORE) {
-                        block.setType(Material.AIR);
-                        e.setCancelled(true);
-
-                        usefulMethods.drop(loc, torch);
-                        if(random.nextInt(upper) == 1) {
-
-                            ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(orbLoc, EntityType.EXPERIENCE_ORB);
-                            orb.setExperience(2);
-                        }
-                    }
-
-                    if(type == Material.SAND) {
-                        block.setType(Material.AIR);
-                        e.setCancelled(true);
-
-                        usefulMethods.drop(loc, glass);
-                        if(random.nextInt(upper) == 1) {
-
-                            ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(orbLoc, EntityType.EXPERIENCE_ORB);
-                            orb.setExperience(1);
-                        }
-                    }
+                if(item != null) plugin.common.drop(loc, item);
+                if(random.nextInt(upper) == 1) {
+                    ExperienceOrb orb = (ExperienceOrb) plugin.world.spawnEntity(orbLoc, EXPERIENCE_ORB);
+                    orb.setExperience(exp);
                 }
             }
         }
     }
 
-    private Material[] swords = {
-            Material.WOOD_SWORD,
-            Material.STONE_SWORD,
-            Material.IRON_SWORD,
-            Material.GOLD_SWORD,
-            Material.DIAMOND_SWORD
+    private final Material[] swords = {
+            WOOD_SWORD,
+            STONE_SWORD,
+            IRON_SWORD,
+            GOLD_SWORD,
+            DIAMOND_SWORD
     };
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-
         Entity entity = e.getEntity();
         Player player = e.getEntity().getKiller();
 
-        if(plugin.scenarios.contains("cutclean")) {
+        if(plugin.scenarios.contains("cutclean") && player != null) {
 
-            if(entity instanceof Pig) {
-
-                for(ItemStack i : e.getDrops()) {
-                    if(i.getType() == Material.PORK)
-                        i.setType(Material.GRILLED_PORK);
+            for(ItemStack i : e.getDrops()) {
+                switch(i.getType()) {
+                    case PORK:
+                        i.setType(GRILLED_PORK);
+                        break;
+                    case MUTTON:
+                        i.setType(COOKED_MUTTON);
+                        break;
+                    case RABBIT:
+                        i.setType(COOKED_RABBIT);
+                        break;
+                    case RAW_BEEF:
+                        i.setType(COOKED_BEEF);
+                        break;
+                    case RAW_CHICKEN:
+                        i.setType(COOKED_CHICKEN);
+                        break;
                 }
             }
 
-            if(entity instanceof Sheep) {
-
-                for(ItemStack i : e.getDrops()) {
-                    if(i.getType() == Material.MUTTON)
-                        i.setType(Material.COOKED_MUTTON);
-                }
+            Material material = null;
+            switch(entity.getType()) {
+                case COW:
+                    material = LEATHER;
+                    break;
+                case CHICKEN:
+                    material = FEATHER;
+                    break;
             }
 
-            if(entity instanceof Rabbit) {
+            if(material != null) {
+                ItemStack item = player.getItemInHand();
+                Random r = new Random();
 
-                for(ItemStack i : e.getDrops()) {
-                    if(i.getType() == Material.RABBIT)
-                        i.setType(Material.COOKED_RABBIT);
-                }
-            }
+                for (Material sword : swords) {
+                    if (item.getType() == sword) {
+                        if (item.containsEnchantment(Enchantment.LOOT_BONUS_MOBS)) {
 
-            if(entity instanceof Cow) {
+                            int max = item.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
 
-                for(ItemStack i : e.getDrops()) {
-                    if(i.getType() == Material.RAW_BEEF)
-                        i.setType(Material.COOKED_BEEF);
-                }
-
-                if(player != null) {
-                    ItemStack item = player.getItemInHand();
-
-                    for(Material sword : swords) {
-
-                        if(item.getType() == sword) {
-
-                            if(item.containsEnchantment(Enchantment.LOOT_BONUS_MOBS)) {
-
-                                int max = item.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
-                                Random r = new Random();
-                                int upper = ((max - 2) + 1) + 2;
-
-                                ItemStack leather = new ItemStack(Material.LEATHER, r.nextInt(upper));
-                                usefulMethods.dropCutClean(entity.getLocation(), leather);
-                                return;
-                            }
+                            ItemStack drop = new ItemStack(material, r.nextInt(max + 2) + 1);
+                            plugin.common.drop(entity.getLocation(), drop);
+                            return;
                         }
                     }
                 }
-                Random r = new Random();
-                int upper = ((3 - 2) + 1) + 2; //((max - min) + 1) + min;
-
-                ItemStack leather = new ItemStack(Material.LEATHER, r.nextInt(upper));
-                usefulMethods.dropCutClean(entity.getLocation(), leather);
-            }
-
-            if(entity instanceof Chicken) {
-
-                for(ItemStack i : e.getDrops()) {
-                    if(i.getType() == Material.RAW_CHICKEN)
-                        i.setType(Material.COOKED_CHICKEN);
-                }
-
-                if(player != null) {
-
-                    ItemStack item = player.getItemInHand();
-
-                    for (Material sword : swords) {
-                        if (item.getType() == sword) {
-
-                            if (item.containsEnchantment(Enchantment.LOOT_BONUS_MOBS)) {
-
-                                int max = item.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
-                                Random r = new Random();
-                                int upper = ((max - 2) + 1) + 2; //((max - min) + 1) + min;
-
-                                ItemStack feather = new ItemStack(Material.FEATHER, r.nextInt(upper));
-                                usefulMethods.dropCutClean(entity.getLocation(), feather);
-                                return;
-                            }
-                        }
-                    }
-                }
-                Random r = new Random();
-                int upper = ((3 - 2) + 1) + 2; //((max - min) + 1) + min;
-
-                ItemStack feather = new ItemStack(Material.FEATHER, r.nextInt(upper));
-                usefulMethods.dropCutClean(entity.getLocation(), feather);
+                ItemStack drop = new ItemStack(material, r.nextInt(3) + 1);
+                plugin.common.drop(entity.getLocation(), drop);
             }
         }
     }
-
 }

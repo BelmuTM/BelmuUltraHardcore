@@ -1,7 +1,6 @@
 package com.belmu.uhc.Scenarios;
 
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -61,7 +60,6 @@ public class VanillaPlus implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
         Player player = e.getPlayer();
 
         if(plugin.scenarios.contains("vanilla+")) {
@@ -73,19 +71,19 @@ public class VanillaPlus implements Listener {
                     if (player.getItemInHand().getType() != Material.SHEARS) {
 
                         if (data == 0 || data == 4 || data == 8 || data == 12)
-                            usefulMethods.dropApple(player, e.getBlock());
+                            plugin.common.dropApple(player, e.getBlock());
                     }
 
                 }else if(e.getBlock().getType() == Material.LEAVES_2) {
 
                     if (data == 1 || data == 5 || data == 9 || data == 13)
-                        usefulMethods.dropApple(player, e.getBlock());
+                        plugin.common.dropApple(player, e.getBlock());
 
                 } else if (e.getBlock().getType() == Material.GRAVEL) {
 
                     if(!plugin.scenarios.contains("cutclean")) {
-                        int upper = 9;
                         Random random = new Random();
+                        int upper = 9;
 
                         if (random.nextInt(upper) == 1) {
 
@@ -96,12 +94,11 @@ public class VanillaPlus implements Listener {
                             e.setCancelled(true);
 
                             world.getBlockAt(loc).setType(Material.AIR);
-                            usefulMethods.drop(loc, flint);
+                            plugin.common.drop(loc, flint);
                         }
                     }
                 }
             }
         }
     }
-
 }

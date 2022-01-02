@@ -2,12 +2,10 @@ package com.belmu.uhc.Scenarios;
 
 import com.belmu.uhc.Commands.HideCommand;
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Core.Options;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,10 +23,10 @@ import java.util.UUID;
 /**
  * @author Belmu (https://github.com/BelmuTM/)
  */
-public class Paranoïa implements Listener {
+public class Paranoia implements Listener {
 
     public final UHC plugin;
-    public Paranoïa(UHC plugin) {
+    public Paranoia(UHC plugin) {
         this.plugin = plugin;
     }
 
@@ -38,50 +36,36 @@ public class Paranoïa implements Listener {
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
         Player player = e.getPlayer();
-        FileConfiguration cfg = plugin.getConfig();
 
         Material type = e.getBlock().getType();
-        Block block = e.getBlock();
+        Block block   = e.getBlock();
 
         int x = block.getX();
         int y = block.getY();
         int z = block.getZ();
 
-        if (plugin.scenarios.contains("paranoia")) {
-            if (!e.isCancelled()) {
-
-                if (type == Material.EMERALD_ORE)
-                    sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f mined an §aEmerald§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-
-                if (type == Material.GOLD_ORE)
-                    sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f mined a §6Gold§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-
-                if (type == Material.DIAMOND_ORE) {
-
-                    if(!plugin.scenarios.contains("diamondlimit")) {
-                        sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f mined a §bDiamond§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-
-                    } else if(plugin.scenarios.contains("diamondlimit")) {
-
-                        int a = cfg.getInt("Players" + "." + player.getName() + "." + "diamond");
-                        if(a >= (Options.diamondLimit - 1)) {
-
-                            return;
-                        } else
-                            sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f mined a §bDiamond§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-                    }
-                }
+        if (plugin.scenarios.contains("paranoia") && !e.isCancelled()) {
+            String ore = "";
+            switch(type) {
+                case EMERALD_ORE:
+                    ore = "§aEmerald";
+                    break;
+                case GOLD_ORE:
+                    ore = "§6Gold";
+                    break;
+                case DIAMOND_ORE:
+                    ore = "§bDiamond";
+                    break;
             }
+            sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f mined a " + ore + "§f ore at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
         }
     }
 
     @EventHandler
     public void onCraft(CraftItemEvent e) {
-
-        Material type = e.getRecipe().getResult().getType();
+        Material type      = e.getRecipe().getResult().getType();
         HumanEntity player = e.getView().getPlayer();
-
-        Location loc = player.getLocation();
+        Location loc       = player.getLocation();
 
         DecimalFormat format = new DecimalFormat("#");
 
@@ -96,12 +80,17 @@ public class Paranoïa implements Listener {
         if(player instanceof Player) {
 
             if (plugin.scenarios.contains("paranoia")) {
+                String item = "";
 
-                if (type == Material.GOLDEN_APPLE)
-                    sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f crafted a §eGolden Apple§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
-
-                if (type == Material.BREWING_STAND_ITEM)
-                    sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f crafted a §dBrewing Stand§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
+                switch(type) {
+                    case GOLDEN_APPLE:
+                        item = "§eGolden Apple";
+                        break;
+                    case BREWING_STAND_ITEM:
+                        item = "§dBrewing Stand";
+                        break;
+                }
+                sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f crafted a " + item + "§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
             }
         }
     }
@@ -133,7 +122,7 @@ public class Paranoïa implements Listener {
 
             if (plugin.scenarios.contains("paranoia")) {
 
-                if (player.getWorld() == Bukkit.getWorld("world_nether"))
+                if (player.getWorld() == plugin.nether)
                     sendBroadcast(plugin.prefix + prefix + "§7" + player.getName() + "§f entered the §cNether§f at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]");
             }
 
@@ -149,5 +138,4 @@ public class Paranoïa implements Listener {
                 all.sendMessage(msg);
         }
     }
-
 }

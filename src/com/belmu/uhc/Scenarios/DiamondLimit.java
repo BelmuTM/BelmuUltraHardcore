@@ -2,10 +2,8 @@ package com.belmu.uhc.Scenarios;
 
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Core.Options;
-import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
@@ -32,38 +30,30 @@ public class DiamondLimit implements Listener {
 
     @EventHandler
     public void onBlockBreakEvent(BlockBreakEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-
         Player player = e.getPlayer();
-        Block block = e.getBlock();
-        World world = player.getWorld();
+        Block block   = e.getBlock();
 
         if(plugin.scenarios.contains("diamondlimit")) {
-            if (player.getGameMode() == GameMode.SURVIVAL) {
-                if (block.getType() == Material.DIAMOND_ORE) {
+            if (player.getGameMode() == GameMode.SURVIVAL && block.getType() == Material.DIAMOND_ORE) {
+                UUID uuid = player.getUniqueId();
 
-                    UUID uuid = player.getUniqueId();
+                if(DiamondLimit.dLimit.containsKey(uuid)) {
+                    int a = DiamondLimit.dLimit.get(uuid);
 
-                    if(DiamondLimit.dLimit.containsKey(uuid)) {
-                        int a = DiamondLimit.dLimit.get(uuid);
+                    if (a == Options.diamondLimit) {
+                        e.setCancelled(true);
 
-                        if (a == Options.diamondLimit) {
-                            e.setCancelled(true);
+                        block.setType(Material.AIR);
+                        plugin.common.sendPacket(player, "§cYou have reached your diamond limit! (§b" + Options.diamondLimit + "§c)");
 
-                            block.setType(Material.AIR);
-                            usefulMethods.sendPacket(player, "§cYou have reached your diamond limit! (§b" + Options.diamondLimit + "§c)");
+                        ExperienceOrb orb = (ExperienceOrb) plugin.world.spawnEntity(block.getLocation(), EntityType.EXPERIENCE_ORB);
+                        orb.setExperience(4);
 
-                            ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(block.getLocation(), EntityType.EXPERIENCE_ORB);
-                            orb.setExperience(4);
+                    } else if (a < Options.diamondLimit)
+                        DiamondLimit.dLimit.put(uuid, a + 1);
 
-                        } else if (a < Options.diamondLimit)
-                            DiamondLimit.dLimit.put(uuid, a + 1);
-
-                    } else if(!DiamondLimit.dLimit.containsKey(uuid))
-                        DiamondLimit.dLimit.put(uuid, 1);
-                }
+                } else { DiamondLimit.dLimit.put(uuid, 1); }
             }
         }
     }
-
 }

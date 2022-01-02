@@ -1,7 +1,7 @@
 package com.belmu.uhc.Scenarios;
 
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Utils.Countdown;
+import com.belmu.uhc.Utility.Countdown;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Sound;
@@ -19,8 +19,8 @@ public class Netheribus implements Listener {
         this.plugin = plugin;
     }
 
-    private static String prefix = "§7[§4Netheribus§7] ";
-    private static int seconds = 30;
+    private static final String prefix = "§7[§4Netheribus§7] ";
+    private static final int seconds = 30;
 
     public void execute() {
 
@@ -37,21 +37,20 @@ public class Netheribus implements Listener {
 
                             @Override
                             public void run() {
-
                                 if(!plugin.scenarios.contains("netheribus"))
                                     this.cancel();
 
                                 for(Player all : Bukkit.getOnlinePlayers()) {
 
-                                    if(all.getWorld() != Bukkit.getWorld("world_nether")) {
+                                    if(all.getWorld() != plugin.nether) {
 
-                                        all.sendMessage(plugin.prefix + prefix + "§bHurry up!§f You §dneed§f to go to the Nether.");
+                                        all.sendMessage(plugin.prefix + prefix + "§bHurry up!§f You §dneed§f to stay in the Nether.");
                                         all.damage(7.5);
                                         all.getWorld().playEffect(all.getLocation(), Effect.SMOKE, 1, 2);
                                     }
                                 }
                             }
-                        }.runTaskTimer(plugin, 0, seconds * 20);
+                        }.runTaskTimer(plugin, 0, (long) seconds * 20);
 
                     },
                     (t) -> {

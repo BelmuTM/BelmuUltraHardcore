@@ -25,7 +25,6 @@ public class HideCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String msg, String[] args) {
 
         if (sender instanceof Player) {
-
             Player player = (Player) sender;
 
             if (cmd.getName().equalsIgnoreCase("h")) {
@@ -39,19 +38,20 @@ public class HideCommand implements CommandExecutor {
                                 hideParanoia.remove(uuid);
                                 player.sendMessage(plugin.prefix + "§cParanoïa§f messages are now§a ON");
 
-                            } else if (!hideParanoia.containsKey(uuid)) {
+                            } else {
                                 hideParanoia.put(uuid, true);
                                 player.sendMessage(plugin.prefix + "§cParanoïa§f messages are now§c OFF");
                             }
                         } else
                             player.sendMessage(plugin.prefix + "§cWrong usage. Try /h");
-                    } else if(!plugin.scenarios.contains("paranoia"))
+                    } else {
                         player.sendMessage(plugin.prefix + "§cParanoïa isn't activated.");
-                } else
+                    }
+                } else {
                     player.sendMessage(plugin.prefix + "§cGame hasn't started yet.");
+                }
             }
         }
         return false;
     }
-
 }

@@ -1,7 +1,7 @@
 package com.belmu.uhc.Core.Packets.Tablist;
 
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Utils.Lag;
+import com.belmu.uhc.Utility.Lag;
 import net.minecraft.server.v1_8_R3.ChatComponentText;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
 import org.bukkit.Bukkit;
@@ -22,7 +22,7 @@ public class Tablist {
         this.plugin = plugin;
     }
 
-    int frames = 0;
+    private int frames = 0;
 
     public void animate(Player player) {
 
@@ -58,7 +58,7 @@ public class Tablist {
                             b.set(packet, footer);
                         }
                     }
-                    frames += 1;
+                    frames++;
                     if(frames >= (TabEnum.values().length) - 1) frames = 0;
 
                     if(Bukkit.getOnlinePlayers().size() == 0) return;
@@ -70,5 +70,4 @@ public class Tablist {
             }
         }.runTaskTimer(plugin, 0, 15);
     }
-
 }

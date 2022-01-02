@@ -2,9 +2,7 @@ package com.belmu.uhc.Events;
 
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Core.Options;
-import com.belmu.uhc.Utils.UsefulMethods;
 import org.bukkit.*;
-import org.bukkit.block.Skull;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -16,7 +14,6 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.scoreboard.Scoreboard;
 
 import java.text.DecimalFormat;
 import java.util.Random;
@@ -45,9 +42,7 @@ public class CancelledEvents implements Listener {
 
     @EventHandler
     public void onPlayerRegainHealth(EntityRegainHealthEvent e) {
-        Entity player = e.getEntity();
-
-        if (player instanceof Player) {
+        if (e.getEntity() instanceof Player) {
             EntityRegainHealthEvent.RegainReason r = e.getRegainReason();
 
             if (r == EntityRegainHealthEvent.RegainReason.SATIATED || r == EntityRegainHealthEvent.RegainReason.EATING)
@@ -57,12 +52,11 @@ public class CancelledEvents implements Listener {
 
     @EventHandler
     public void onBed(PlayerBedEnterEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-        usefulMethods.sendPacket(e.getPlayer(), "§cYou can not sleep!");
+        plugin.common.sendPacket(e.getPlayer(), "§cYou can't sleep!");
         e.setCancelled(true);
     }
 
-    private String[] cmds = {
+    private final String[] cmds = {
             "?",
             "help",
             "version",
@@ -76,7 +70,6 @@ public class CancelledEvents implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
         Player player = e.getPlayer();
 
         if(cmdCancelled(player, e.getMessage())) {
@@ -86,8 +79,8 @@ public class CancelledEvents implements Listener {
         } else if (!cmdCancelled(player, e.getMessage())) {
 
             if(e.getMessage().equalsIgnoreCase("/reload") || e.getMessage().equalsIgnoreCase("/rl")) {
-                String space = "                              ";
-                usefulMethods.kickAll("§7§m" + space + "\n§cServer is reloading...\n" + "§7§m" + space);
+                String space = "     --                         ";
+                plugin.common.kickAll("§7§m" + space + "\n§cServer is reloading...\n" + "§7§m" + space);
             }
         }
     }
@@ -105,13 +98,11 @@ public class CancelledEvents implements Listener {
 
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
-        Player player = e.getPlayer();
-        if(!isAble(player)) e.setCancelled(true);
+        if(!isAble(e.getPlayer())) e.setCancelled(true);
     }
 
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
         Player player = e.getPlayer();
 
         if(!isAble(player)) {
@@ -124,32 +115,28 @@ public class CancelledEvents implements Listener {
 
             if(e.getBlock().getY() > Options.heightLimit) {
                 e.setCancelled(true);
-                usefulMethods.sendPacket(player, "§cYou have reached the height limit! (§b" + Options.heightLimit + "§c)");
+                plugin.common.sendPacket(player, "§cYou have reached the height limit! (§b" + Options.heightLimit + "§c)");
             }
         }
     }
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent e) {
-        Player player = e.getPlayer();
-        if(!isAble(player)) e.setCancelled(true);
+        if(!isAble(e.getPlayer())) e.setCancelled(true);
     }
 
     @EventHandler
     public void onPickup(PlayerPickupItemEvent e) {
-        Player player = e.getPlayer();
-        if(!isAble(player)) e.setCancelled(true);
+        if(!isAble(e.getPlayer())) e.setCancelled(true);
     }
 
     @EventHandler
     public void onTarget(EntityTargetLivingEntityEvent e) {
         Entity player = e.getTarget();
 
-        if(player instanceof Player) {
-            if(!isAble((Player) player)) {
-                e.setTarget(null);
-                e.setCancelled(true);
-            }
+        if(player instanceof Player && !isAble((Player) player)) {
+            e.setTarget(null);
+            e.setCancelled(true);
         }
     }
 
@@ -165,17 +152,14 @@ public class CancelledEvents implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onDamageByEntity(EntityDamageByEntityEvent e) {
-        Scoreboard sb = Bukkit.getScoreboardManager().getMainScoreboard();
         Entity damager = e.getDamager();
         Entity dmgd = e.getEntity();
 
         if(!plugin.game.running || plugin.game.teleported) e.setCancelled(true);
 
-        if(damager instanceof Player) {
-            if (!isAble((Player) damager)) {
-                e.setCancelled(true);
-                return;
-            }
+        if(damager instanceof Player && !isAble((Player) damager)) {
+            e.setCancelled(true);
+            return;
         }
 
         if(dmgd instanceof Player && damager instanceof Player) {
@@ -184,9 +168,8 @@ public class CancelledEvents implements Listener {
                 return;
             }
 
-            if(plugin.getMode().equals("Teams")) {
-                if(sb.getPlayerTeam((Player) damager) == sb.getPlayerTeam((Player) dmgd)) {
-
+            if(plugin.getMode() == 1) {
+                if(plugin.sc.getPlayerTeam((Player) damager) == plugin.sc.getPlayerTeam((Player) dmgd)) {
                     e.setCancelled(true);
                     damager.sendMessage(plugin.prefix + " §cYou can't hit your teammate!");
                 }
@@ -210,39 +193,32 @@ public class CancelledEvents implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
-        Player player = e.getPlayer();
-
-        if(e.getAction() == Action.RIGHT_CLICK_BLOCK) if(!isAble(player)) e.setCancelled(true);
+        if(e.getAction() == Action.RIGHT_CLICK_BLOCK) if(!isAble(e.getPlayer())) e.setCancelled(true);
     }
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-        if(plugin.game.teleported)
-            e.setTo(e.getFrom());
+        if(plugin.game.teleported) e.setTo(e.getFrom());
     }
 
     @EventHandler
     public void onPortal(PlayerChangedWorldEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-
         Player player = e.getPlayer();
-        World world = player.getWorld();
-        World overWorld = Bukkit.getWorld("world");
+        World world   = player.getWorld();
 
-        if(world == overWorld) {
-            if(usefulMethods.isOutsideOfBorder(player)) {
-
-                int upperX = (int) overWorld.getWorldBorder().getSize();
+        if(world == plugin.world) {
+            if(plugin.common.isOutsideOfBorder(player)) {
+                int upperX     = (int) plugin.world.getWorldBorder().getSize();
                 Random randomX = new Random();
 
-                int upperZ = (int) overWorld.getWorldBorder().getSize();
+                int upperZ     = (int) plugin.world.getWorldBorder().getSize();
                 Random randomZ = new Random();
 
                 int x = randomX.nextInt(upperX);
                 int z = randomZ.nextInt(upperZ);
-                int y = overWorld.getHighestBlockYAt(x, z);
+                int y = plugin.world.getHighestBlockYAt(x, z);
 
-                player.teleport(new Location(overWorld, x, y, z));
+                player.teleport(new Location(plugin.world, x, y, z));
                 player.sendMessage(plugin.prefix + "§7§oYou have been teleported to a random location because your nether portal was outside the border.");
             }
         }
@@ -255,9 +231,7 @@ public class CancelledEvents implements Listener {
 
     @EventHandler
     public void onSpawn(EntitySpawnEvent e) {
-        Entity entity = e.getEntity();
-
-        if(entity instanceof Monster) {
+        if(e.getEntity() instanceof Monster) {
             Random r = new Random();
             if(r.nextInt(Options.monsterSpawnRate) == 1) e.setCancelled(true);
         }
@@ -266,5 +240,4 @@ public class CancelledEvents implements Listener {
     public boolean isAble(Player player) {
         return plugin.game.running && !plugin.game.teleported && plugin.players.contains(player.getUniqueId());
     }
-
 }

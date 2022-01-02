@@ -24,5 +24,4 @@ public enum TabEnum {
         this.header = header;
         this.footer = footer;
     }
-
 }

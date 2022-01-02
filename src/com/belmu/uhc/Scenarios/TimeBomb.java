@@ -1,9 +1,9 @@
 package com.belmu.uhc.Scenarios;
 
+import com.belmu.uhc.Core.Options;
 import com.belmu.uhc.Events.PlayerDeath;
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Utils.Countdown;
-import com.belmu.uhc.Utils.UsefulMethods;
+import com.belmu.uhc.Utility.Countdown;
 import org.bukkit.*;
 import org.bukkit.block.Chest;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftArmorStand;
@@ -27,22 +27,20 @@ public class TimeBomb implements Listener {
 
     @EventHandler
     public void onDeath(PlayerDeathEvent e){
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
         Player player = e.getEntity();
-        World world = Bukkit.getWorld("world");
 
         Location loc = player.getLocation();
-        Location chestLoc_1 = new Location(world, loc.getX(), loc.getY() + 1, loc.getZ());
-        Location chestLoc_2 = new Location(world, loc.getX(), loc.getY() + 1, loc.getZ() + 1);
+        Location chestLoc_1 = new Location(plugin.world, loc.getX(), loc.getY() + 1, loc.getZ());
+        Location chestLoc_2 = new Location(plugin.world, loc.getX(), loc.getY() + 1, loc.getZ() + 1);
 
-        Location standLoc = new Location(world, chestLoc_1.getBlockX() + 0.5, chestLoc_1.getBlockY() - 1, chestLoc_1.getBlockZ() + 1);
+        Location standLoc = new Location(plugin.world, chestLoc_1.getBlockX() + 0.5, chestLoc_1.getBlockY() - 1, chestLoc_1.getBlockZ() + 1);
 
         if(plugin.scenarios.contains("timebomb")) {
 
-            usefulMethods.setBlock(chestLoc_1, Material.CHEST);
-            usefulMethods.setBlock(chestLoc_2, Material.CHEST);
+            plugin.common.setBlock(chestLoc_1, Material.CHEST);
+            plugin.common.setBlock(chestLoc_2, Material.CHEST);
 
-            Chest c = (Chest)world.getBlockAt(chestLoc_1).getState();
+            Chest c = (Chest) plugin.world.getBlockAt(chestLoc_1).getState();
             e.getDrops().clear();
 
             if(plugin.scenarios.contains("goldenhead")) {
@@ -68,11 +66,10 @@ public class TimeBomb implements Listener {
                     c.getBlockInventory().addItem(PlayerDeath.armorInv.get(player.getUniqueId()));
             }
 
-            CraftArmorStand s = (CraftArmorStand) world.spawnEntity(standLoc, EntityType.ARMOR_STAND);
-            int time = 140;
+            CraftArmorStand s = (CraftArmorStand) plugin.world.spawnEntity(standLoc, EntityType.ARMOR_STAND);
 
             Countdown explode = new Countdown(plugin,
-                    time,
+                    Options.timeBombTime,
 
                     () -> {
                         s.setGravity(false);
@@ -80,14 +77,13 @@ public class TimeBomb implements Listener {
                         s.setCustomNameVisible(true);
                     },
                     () -> {
-                        world.createExplosion(chestLoc_1, 6);
+                        plugin.world.createExplosion(chestLoc_1, 6);
                         s.remove();
                     },
                     (t) -> {
                         s.setCustomName("§7Exploding in §c" + Math.round(t.getSecondsLeft()) + "s");
 
-                        if(t.getSecondsLeft() == 1) {
-
+                        if(t.getSecondsLeft() <= 1) {
                             for(ItemStack items : c.getBlockInventory().getContents()) {
 
                                 if(items != null)

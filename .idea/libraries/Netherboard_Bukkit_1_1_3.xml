@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="Netherboard-Bukkit-1.1.3">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../../Libraries/Netherboard-Bukkit-1.1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Netherboard-Bukkit-1.1.3.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -1,9 +1,7 @@
 package com.belmu.uhc.Events;
 
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Scenarios.Paranoïa;
-import com.belmu.uhc.TeamsManager.Teams;
-import com.belmu.uhc.Utils.UsefulMethods;
+import com.belmu.uhc.Scenarios.Paranoia;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -13,8 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
 import java.text.DecimalFormat;
@@ -39,17 +35,15 @@ public class PlayerDeath implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-
         Player target = e.getEntity();
         Player killer = target.getKiller();
-        UUID uuid = target.getUniqueId();
+        UUID uuid     = target.getUniqueId();
 
-        World world = target.getWorld();
+        World world  = target.getWorld();
         Location loc = target.getLocation();
 
         if(plugin.game.running) {
-            if(killer != null) usefulMethods.addKills(killer, 1);
+            if(killer != null) plugin.common.addKills(killer, 1);
 
             ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
             SkullMeta headM = (SkullMeta) head.getItemMeta();
@@ -59,7 +53,7 @@ public class PlayerDeath implements Listener {
             head.setItemMeta(headM);
 
             if(plugin.scenarios.contains("goldenhead"))
-                if(!plugin.scenarios.contains("timebomb")) usefulMethods.drop(loc, head);
+                if(!plugin.scenarios.contains("timebomb")) plugin.common.drop(loc, head);
 
             inv.put(uuid, target.getInventory().getContents());
             armorInv.put(uuid, target.getInventory().getArmorContents());
@@ -71,7 +65,7 @@ public class PlayerDeath implements Listener {
             for(Player all : Bukkit.getOnlinePlayers())
                 all.playSound(all.getLocation(), Sound.AMBIENCE_THUNDER, 1.0f, 1.0f);
 
-            String rip = "§cR.I.P.";
+            String rip       = "§cR.I.P.";
             String spectator = "§7You are spectator";
 
             plugin.title.sendTitle(target, rip, ChatColor.BLACK, 5, 75, 5);
@@ -86,57 +80,51 @@ public class PlayerDeath implements Listener {
             String y = format.format(yU);
             String z = format.format(zU);
 
-            ScoreboardManager m = Bukkit.getScoreboardManager();
-            Scoreboard s = m.getMainScoreboard();
-
-            if(plugin.getMode().equalsIgnoreCase("Teams")) {
-                Team team = s.getPlayerTeam(target);
+            if(plugin.getMode() == 1) {
+                Team team = plugin.sc.getPlayerTeam(target);
                 playerTeam.put(uuid, team);
 
                 team.removePlayer(target);
                 if(team.getPlayers().size() == 0) {
 
                     Bukkit.broadcastMessage(plugin.prefix + team.getPrefix() + team.getDisplayName() + "§f team has been eliminated!");
-                    Teams.inGameTeams.remove(playerTeam.get(uuid));
+                    plugin.teams.inGameTeams.remove(playerTeam.get(uuid));
 
                     for (Player all : Bukkit.getOnlinePlayers())
                         all.playSound(all.getLocation(), Sound.WITHER_DEATH, 1, Integer.MAX_VALUE);
                 }
             }
 
-            String msg = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r");
+            String msg      = e.getDeathMessage().replace(target.getDisplayName(), "§7" + target.getDisplayName() + "§r");
             String paranoia = " §7at §8[§7X: " + x + " Y: " + y + " Z: " + z + "§8]";
 
-            String deathMessage = "";
+            String deathMessage;
 
             if(killer != null) {
-
-                String msg2 = msg.replace(target.getDisplayName(), "§7" + killer.getDisplayName() + "§r");
+                String msg2     = msg.replace(target.getDisplayName(), "§7" + killer.getDisplayName() + "§r");
                 String finalMsg = msg2.replace(".", "");
 
                 if(plugin.scenarios.contains("paranoia")) {
                     deathMessage = "";
-                    Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§7" + finalMsg + paranoia);
+                    Paranoia.sendBroadcast(plugin.prefix + Paranoia.prefix + "§7" + finalMsg + paranoia);
 
-                } else if (!plugin.scenarios.contains("paranoia"))
-                    deathMessage = plugin.prefix + msg2;
+                } else { deathMessage = plugin.prefix + msg2; }
+
             } else {
                 String finalMsg = msg.replace(".", "");
 
                 if (plugin.scenarios.contains("paranoia")) {
                     deathMessage = "";
-                    Paranoïa.sendBroadcast(plugin.prefix + Paranoïa.prefix + "§7" + finalMsg + paranoia);
+                    Paranoia.sendBroadcast(plugin.prefix + Paranoia.prefix + "§7" + finalMsg + paranoia);
 
-                } else if (!plugin.scenarios.contains("paranoia"))
-                    deathMessage = plugin.prefix + "§f" + msg;
+                } else { deathMessage = plugin.prefix + "§f" + msg; }
             }
             e.setDeathMessage(deathMessage);
 
-            usefulMethods.giveCompass(target);
+            plugin.common.giveCompass(target);
             target.getInventory().setArmorContents(null);
 
-            usefulMethods.setSpectator(target);
+            plugin.common.setSpectator(target);
         }
     }
-
 }

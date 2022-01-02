@@ -22,13 +22,9 @@ public class NoFall implements Listener {
         Entity player = e.getEntity();
 
         if(player instanceof Player) {
-            if (plugin.scenarios.contains("nofall")) {
-                if (!e.isCancelled()) {
-
-                    if (e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) e.setCancelled(true);
-                }
+            if (plugin.scenarios.contains("nofall") && !e.isCancelled()) {
+                if (e.getCause().equals(EntityDamageEvent.DamageCause.FALL)) e.setCancelled(true);
             }
         }
     }
-
 }

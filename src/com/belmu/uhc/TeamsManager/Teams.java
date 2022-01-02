@@ -26,19 +26,15 @@ public class Teams {
         this.plugin = plugin;
     }
 
-    public static List<TeamsList> teams = new ArrayList<>();
-    public static List<Team> allTeams = new ArrayList<>();
-    public static List<Team> inGameTeams = new ArrayList<>();
-    public static List<Team> teamsAtStart = new ArrayList<>();
+    public List<TeamsList> teams = new ArrayList<>();
+    public List<Team> allTeams = new ArrayList<>();
+    public List<Team> inGameTeams = new ArrayList<>();
+    public List<Team> teamsAtStart = new ArrayList<>();
 
-    public static void initializeTeams() {
-        ScoreboardManager m = Bukkit.getScoreboardManager();
-        Scoreboard s = m.getMainScoreboard();
-
+    public void initializeTeams() {
         for(TeamsList teamsList : TeamsList.values()) {
-            if(s.getTeam(teamsList.teamName) == null) {
-
-                Team t = s.registerNewTeam(teamsList.teamName);
+            if(plugin.sc.getTeam(teamsList.teamName) == null) {
+                Team t = plugin.sc.registerNewTeam(teamsList.teamName);
 
                 t.setPrefix(teamsList.prefix);
                 t.setCanSeeFriendlyInvisibles(true);
@@ -46,21 +42,16 @@ public class Teams {
                 t.setNameTagVisibility(NameTagVisibility.ALWAYS);
                 t.setDisplayName(teamsList.teamName);
             }
-            if(!teams.contains(teamsList))
-                teams.add(teamsList);
+            if(!teams.contains(teamsList)) teams.add(teamsList);
         }
     }
 
-    public static List<UUID> playersToSpread = new ArrayList<>();
+    public List<UUID> playersToSpread = new ArrayList<>();
 
     @SuppressWarnings("deprecation")
-    public static void addPlayersToTeams(Player player) {
+    public void addPlayersToTeams(Player player) {
 
-        if (UHC.getInstance().getMode().equalsIgnoreCase("Teams")) {
-
-            ScoreboardManager m = Bukkit.getScoreboardManager();
-            Scoreboard s = m.getMainScoreboard();
-
+        if (plugin.getMode() == 1) {
             UUID uuid = player.getUniqueId();
 
             playersToSpread.add(player.getUniqueId());
@@ -74,38 +65,31 @@ public class Teams {
                         if (Bukkit.getOnlinePlayers().size() > Options.pPerTeam) {
                             int divide = Bukkit.getOnlinePlayers().size() / Options.pPerTeam;
 
-                            int max = Math.round(divide - 1);
-                            int min = 0;
+                            Random r  = new Random();
+                            int upper = Math.round(divide - 1) + 1;
 
-                            Random r = new Random();
-                            int upper = ((max - min) + 1) + min;
-
-                            Team team = s.getTeam(teams.get(r.nextInt(upper)).teamName);
+                            Team team = plugin.sc.getTeam(teams.get(r.nextInt(upper)).teamName);
 
                             if (team.getPlayers().size() < Options.pPerTeam) {
                                 this.cancel();
                                 team.addPlayer(player);
 
                                 playersToSpread.remove(uuid);
-                                player.setDisplayName(s.getPlayerTeam(player).getPrefix() + player.getName());
-                                player.setPlayerListName(s.getPlayerTeam(player).getPrefix() + player.getName());
+                                player.setDisplayName(plugin.sc.getPlayerTeam(player).getPrefix() + player.getName());
+                                player.setPlayerListName(plugin.sc.getPlayerTeam(player).getPrefix() + player.getName());
 
-                                if (!inGameTeams.contains(s.getPlayerTeam(player)))
-                                    inGameTeams.add(s.getPlayerTeam(player));
+                                if (!inGameTeams.contains(plugin.sc.getPlayerTeam(player)))
+                                    inGameTeams.add(plugin.sc.getPlayerTeam(player));
 
-                                if (!teamsAtStart.contains(s.getPlayerTeam(player)))
-                                    teamsAtStart.add(s.getPlayerTeam(player));
+                                if (!teamsAtStart.contains(plugin.sc.getPlayerTeam(player)))
+                                    teamsAtStart.add(plugin.sc.getPlayerTeam(player));
                             }
 
                         } else {
+                            Random r  = new Random();
+                            int upper = Bukkit.getOnlinePlayers().size() + 1;
 
-                            int max = Bukkit.getOnlinePlayers().size();
-                            int min = 0;
-
-                            Random r = new Random();
-                            int upper = ((max - min) + 1) + min; //((max - min) + 1) + min;
-
-                            Team team = s.getTeam(teams.get(r.nextInt(upper)).teamName);
+                            Team team = plugin.sc.getTeam(teams.get(r.nextInt(upper)).teamName);
 
                             if (team.getPlayers().size() < Options.pPerTeam) {
                                 this.cancel();
@@ -113,43 +97,35 @@ public class Teams {
                                 team.addPlayer(player);
                                 playersToSpread.remove(uuid);
 
-                                player.setDisplayName(s.getPlayerTeam(player).getPrefix() + player.getName());
-                                player.setPlayerListName(s.getPlayerTeam(player).getPrefix() + player.getName());
+                                player.setDisplayName(plugin.sc.getPlayerTeam(player).getPrefix() + player.getName());
+                                player.setPlayerListName(plugin.sc.getPlayerTeam(player).getPrefix() + player.getName());
 
-                                if (!inGameTeams.contains(s.getPlayerTeam(player)))
-                                    inGameTeams.add(s.getPlayerTeam(player));
+                                if (!inGameTeams.contains(plugin.sc.getPlayerTeam(player)))
+                                    inGameTeams.add(plugin.sc.getPlayerTeam(player));
 
-                                if (!teamsAtStart.contains(s.getPlayerTeam(player)))
-                                    teamsAtStart.add(s.getPlayerTeam(player));
+                                if (!teamsAtStart.contains(plugin.sc.getPlayerTeam(player)))
+                                    teamsAtStart.add(plugin.sc.getPlayerTeam(player));
                             }
                         }
                     }
                 }
 
-            }.runTaskTimer(UHC.getInstance(), 15, 5);
+            }.runTaskTimer(plugin, 15, 5);
         }
     }
 
-    public static Team getTeam(String teamName) {
-
+    public Team getTeam(String teamName) {
         for(Team team : allTeams) {
-            if(team.getName().equalsIgnoreCase(teamName))
-                return team;
+            if(team.getName().equalsIgnoreCase(teamName)) return team;
         }
         return null;
     }
 
-    public static List<Team> getAllTeams() {
-
-        ScoreboardManager m = Bukkit.getScoreboardManager();
-        Scoreboard s = m.getMainScoreboard();
-
+    public List<Team> getAllTeams() {
         for (TeamsList teamsList : teams) {
-            Team team = s.getTeam(teamsList.teamName);
-            if (!allTeams.contains(team))
-                allTeams.add(team);
+            Team team = plugin.sc.getTeam(teamsList.teamName);
+            if (!allTeams.contains(team)) allTeams.add(team);
         }
         return allTeams;
     }
-
 }

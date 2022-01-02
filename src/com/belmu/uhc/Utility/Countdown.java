@@ -1,4 +1,4 @@
-package com.belmu.uhc.Utils;
+package com.belmu.uhc.Utility;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,5 +52,4 @@ public class Countdown implements Runnable {
     public void scheduleTimer() {
         this.assignedTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, 0L, 20L);
     }
-
 }

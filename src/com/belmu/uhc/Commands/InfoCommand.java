@@ -34,11 +34,11 @@ public class InfoCommand implements CommandExecutor {
                         }
                         Bukkit.broadcastMessage("§8[§cUHC§8]§7(§bInfo§7) " + player.getName() + "§8 »§f " + x.toString().trim());
                     }
-                } else
+                } else {
                     player.sendMessage(plugin.prefix + "§cYou must be operator to do that.");
+                }
             }
         }
         return false;
     }
-
 }

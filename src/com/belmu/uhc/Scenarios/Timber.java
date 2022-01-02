@@ -1,7 +1,7 @@
 package com.belmu.uhc.Scenarios;
 
 import com.belmu.uhc.UHC;
-import com.belmu.uhc.Utils.TreeCutter;
+import com.belmu.uhc.Utility.TreeCutter;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -35,8 +35,7 @@ public class Timber implements Listener {
                         ItemStack item = e.getPlayer().getItemInHand();
                         for(Material tool : tools) {
 
-                            if (item.getType() == tool)
-                                item.setDurability((short) (item.getDurability() - 15));
+                            if (item.getType() == tool) item.setDurability((short) (item.getDurability() - 15));
                         }
                     }
                 }
@@ -78,5 +77,4 @@ public class Timber implements Listener {
             Material.SHEARS,
             Material.FLINT_AND_STEEL
     };
-
 }

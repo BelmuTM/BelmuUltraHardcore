@@ -1,4 +1,4 @@
-package com.belmu.uhc.Utils;
+package com.belmu.uhc.Utility;
 
 import net.minecraft.server.v1_8_R3.DedicatedServer;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
@@ -62,5 +62,4 @@ public class Properties {
             return propertyName;
         }
     }
-
 }

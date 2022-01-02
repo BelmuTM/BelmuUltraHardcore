@@ -2,14 +2,10 @@ package com.belmu.uhc.Core.Packets;
 
 import com.belmu.uhc.UHC;
 import com.belmu.uhc.Core.Options;
-import com.belmu.uhc.Utils.UsefulMethods;
-import com.belmu.uhc.TeamsManager.*;
-import fr.minuskube.netherboard.Netherboard;
 import fr.minuskube.netherboard.bukkit.BPlayerBoard;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -35,13 +31,17 @@ public class GameScoreboard {
         BPlayerBoard board = fr.minuskube.netherboard.Netherboard.instance().createBoard(player, "uhcScoreboard");
 
         String name;
-
-        if(plugin.getMode().equals("Teams"))
-            name = "§c§lUHC Teams";
-        else if(plugin.getMode().equals("Solo"))
-            name = "§c§lUHC Solo";
-        else name = "§c§lUHC";
-
+        switch(plugin.getMode()) {
+            case 0:
+                name = "§c§lUHC Solo";
+                break;
+            case 1:
+                name = "§c§lUHC Teams";
+                break;
+            default:
+                name = "§c§lUHC";
+                break;
+        }
         board.setName(name);
     }
 
@@ -68,16 +68,12 @@ public class GameScoreboard {
     }
 
     public void updateGameScoreboard(Player player) {
-        FileConfiguration cfg = plugin.getConfig();
-        UsefulMethods usefulMethods = new UsefulMethods(plugin);
-
         BPlayerBoard b = fr.minuskube.netherboard.Netherboard.instance().getBoard(player);
-        World world = Bukkit.getWorld("world");
-        Location loc = new Location(player.getWorld(), 0, player.getLocation().getY(), 0);
+        Location loc   = new Location(player.getWorld(), 0, player.getLocation().getY(), 0);
 
-        int kills = usefulMethods.getKills(player);
+        int kills = plugin.common.getKills(player);
         int alive = plugin.players.size();
-        int teams = Teams.inGameTeams.size();
+        int teams = plugin.teams.inGameTeams.size();
 
         String white = "§f";
         String gray = "§7";
@@ -91,15 +87,15 @@ public class GameScoreboard {
         String endL = gray + "§m" + "------------------";
 
         DecimalFormat format = new DecimalFormat("#");
-        Double bord = world.getWorldBorder().getSize() / 2;
+        Double bord          = plugin.world.getWorldBorder().getSize() / 2;
 
         String formattedBorder = format.format(bord);
-        String borderSize = "±" + formattedBorder;
+        String borderSize      = "±" + formattedBorder;
 
-        Double dis = player.getLocation().distance(loc);
-        String formattedDistance = format.format(dis);
+        Double dist              = player.getLocation().distance(loc);
+        String formattedDistance = format.format(dist);
 
-        String compass = usefulMethods.calculateRelativeDirectionFromPlayerTo(player, loc);
+        String compass     = plugin.common.calculateRelativeDirectionFromPlayerTo(player, loc);
         String compassLine = compass + gray + " (" + formattedDistance + ")";
 
         String timer = getTimer();
@@ -109,11 +105,11 @@ public class GameScoreboard {
 
         b.set(l1 + red + " Time " + l2, 11);
 
-        String pvpMinutes = gray + " (" + (Options.pvpSeconds / 60) + "m)";
-        String borderMinutes = gray + " (" + (Options.borderSeconds / 60) + "m)";
+        String pvpMinutes    = gray + " (" + (Options.pvpTime / 60) + "m)";
+        String borderMinutes = gray + " (" + (Options.borderTime / 60) + "m)";
 
         String pvp;
-        if(world.getPVP())
+        if(plugin.world.getPVP())
             pvp = arrow + red + "PvP" + gray + separ + on;
         else pvp = arrow + red + "PvP" + gray + separ + off;
 
@@ -131,9 +127,9 @@ public class GameScoreboard {
 
         String playersLeft = "";
 
-        if(cfg.get("UHC" + "." + "Mode").equals("Solo"))
+        if(plugin.getMode() == 0)
             playersLeft = arrow + red + "Players" + gray + separ + alive;
-        else if(cfg.get("UHC" + "." + "Mode").equals("Teams"))
+        else if(plugin.getMode() == 1)
             playersLeft = arrow + red + "Teams" + separ + white + teams + gray + " (" + alive + ")";
 
         b.set(playersLeft, 6);
@@ -179,5 +175,4 @@ public class GameScoreboard {
             cp.getHandle().triggerHealthUpdate();
         }
     }
-
 }

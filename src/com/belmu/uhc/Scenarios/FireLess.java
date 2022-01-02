@@ -22,16 +22,12 @@ public class FireLess implements Listener {
         Entity player = e.getEntity();
 
         if(player instanceof Player) {
-            if (plugin.scenarios.contains("fireless")) {
-                if (!e.isCancelled()) {
-
-                    if (e.getCause().equals(EntityDamageEvent.DamageCause.FIRE)) {
-                        e.setCancelled(true);
-                        player.setFireTicks(0);
-                    }
+            if (plugin.scenarios.contains("fireless") && !e.isCancelled()) {
+                if (e.getCause().equals(EntityDamageEvent.DamageCause.FIRE)) {
+                    e.setCancelled(true);
+                    player.setFireTicks(0);
                 }
             }
         }
     }
-
 }

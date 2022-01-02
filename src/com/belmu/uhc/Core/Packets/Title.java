@@ -23,7 +23,7 @@ public class Title {
         this.plugin = plugin;
     }
 
-    private String[] winnerTitles = {
+    private final String[] winnerTitles = {
             "§6VICTORY",
             "§eV§6ICTORY",
             "§fV§eI§6CTORY",
@@ -37,7 +37,7 @@ public class Title {
             "§6VICTORY"
     };
 
-    private String[] loserTitles = {
+    private final String[] loserTitles = {
             "§4DEFEAT",
             "§cDEFEAT"
     };

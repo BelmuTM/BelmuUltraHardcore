@@ -35,7 +35,7 @@ public class ListenerManager {
 
         //Scenarios
         reg(new Timber(plugin));
-        reg(new Paranoïa(plugin));
+        reg(new Paranoia(plugin));
         reg(new CutClean(plugin));
         reg(new DiamondLimit(plugin));
         reg(new FastMelting(plugin));
@@ -53,5 +53,4 @@ public class ListenerManager {
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(listener, plugin);
     }
-
 }

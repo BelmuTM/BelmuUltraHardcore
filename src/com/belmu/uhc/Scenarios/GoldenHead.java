@@ -12,6 +12,7 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @author Belmu (https://github.com/BelmuTM/)
@@ -28,12 +29,11 @@ public class GoldenHead implements Listener {
     public void onEnable(PluginEnableEvent e) {
 
         if (plugin.scenarios.contains("goldenhead")) {
-
             ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
             SkullMeta headM = (SkullMeta) head.getItemMeta();
 
             headM.setDisplayName("§6Golden Head");
-            headM.setLore(Arrays.asList("§7Gives buffs."));
+            headM.setLore(Collections.singletonList("§7Gives buffs."));
             headM.setOwner("LegendaryJulien");
             head.setItemMeta(headM);
 
@@ -48,5 +48,4 @@ public class GoldenHead implements Listener {
             Bukkit.addRecipe(recipe);
         }
     }
-
 }

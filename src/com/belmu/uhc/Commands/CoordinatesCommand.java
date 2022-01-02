@@ -30,34 +30,30 @@ public class CoordinatesCommand implements CommandExecutor {
                 if (plugin.game.running) {
                     if (args.length == 0) {
 
-                        if(plugin.getMode().equalsIgnoreCase("Teams")) {
-                            ScoreboardManager m = Bukkit.getScoreboardManager();
-                            Scoreboard s = m.getMainScoreboard();
-
+                        if (plugin.getMode() == 1) {
                             Location loc = player.getLocation();
-
                             long x = loc.getBlockX();
                             long y = loc.getBlockY();
                             long z = loc.getBlockZ();
 
-                            if(plugin.players.contains(player.getUniqueId())) {
+                            if (plugin.players.contains(player.getUniqueId())) {
 
-                                for (OfflinePlayer p : s.getPlayerTeam(player).getPlayers()) {
+                                for (OfflinePlayer p : plugin.sc.getPlayerTeam(player).getPlayers()) {
                                     if (p instanceof Player)
                                         ((Player) p).sendMessage("§8[§cUHC§8]§b " + player.getName() + "§8 » X:§7" + x + "§8 Y:§7" + y + "§8 Z:§7" + z);
                                 }
                             } else player.sendMessage(plugin.prefix + "§cYou can not do that as a spectator.");
 
-                        } else if(plugin.getMode().equalsIgnoreCase("Solo"))
-                            player.sendMessage(plugin.prefix + "§cYou don't have any team mates!");
-                    } else
+                        } else if (plugin.getMode() == 0) { player.sendMessage(plugin.prefix + "§cYou don't have any team mates!"); }
+
+                    } else {
                         player.sendMessage(plugin.prefix + "§cWrong usage. Try /co");
-                } else
+                    }
+                } else {
                     player.sendMessage(plugin.prefix + "§cGame hasn't started yet.");
+                }
             }
         }
-
         return false;
     }
-
 }

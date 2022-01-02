@@ -26,8 +26,10 @@ public class PlayerChat implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
-        String msg = e.getMessage().replaceAll("<3", "§c❤§r").replaceAll("gg", "§agg§r")
-                .replaceAll("ez", "Y'all are good players!");
+        String msg    = e.getMessage().replaceAll("<3", "§c❤§r");
+
+        if(msg.equalsIgnoreCase("ez"))      msg = "Y'all are good players!";
+        else if(msg.equalsIgnoreCase("gg")) msg = "§e§lGG";
 
         for(Player all : Bukkit.getOnlinePlayers())
             if(StringUtils.containsIgnoreCase(msg.toLowerCase(), all.getName().toLowerCase())) {
@@ -40,10 +42,10 @@ public class PlayerChat implements Listener {
             }
         e.setMessage(msg);
 
-        if(plugin.getMode().equalsIgnoreCase("Solo")) {
+        if(plugin.getMode() == 0) {
             e.setFormat(player.getDisplayName() + "§8 »§f " + e.getMessage());
 
-        } else if(plugin.getMode().equalsIgnoreCase("Teams")) {
+        } else if(plugin.getMode() == 1) {
 
             if(plugin.game.running) {
                 if(plugin.players.contains(player.getUniqueId())) {
@@ -53,21 +55,19 @@ public class PlayerChat implements Listener {
                         e.setFormat("§7[Global] " + player.getDisplayName() + "§8 »§f " + finalMsg);
 
                     } else {
-                        ScoreboardManager m = Bukkit.getScoreboardManager();
-                        Scoreboard s = m.getMainScoreboard();
-
-                        for (OfflinePlayer p : s.getPlayerTeam(player).getPlayers()) {
+                        for (OfflinePlayer p : plugin.sc.getPlayerTeam(player).getPlayers()) {
                             if (p instanceof Player) {
                                 e.setCancelled(true);
                                 ((Player) p).sendMessage("§7[Team] " + player.getDisplayName() + "§8 »§f " + msg);
                             }
                         }
                     }
-                } else if(!plugin.players.contains(player.getUniqueId()))
+                } else if(!plugin.players.contains(player.getUniqueId())) {
                     e.setFormat(player.getDisplayName() + "§8 »§f " + e.getMessage());
-            } else
+                }
+            } else {
                 e.setFormat(player.getDisplayName() + "§8 »§f " + e.getMessage());
+            }
         }
     }
-
 }

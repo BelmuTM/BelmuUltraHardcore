@@ -48,6 +48,7 @@ public class TeamChooser implements Listener {
 
         if(p instanceof Player) {
             Player player = (Player) p;
+            Teams teams   = new Teams(plugin);
 
             if (e.getInventory().getName().equals("Teams")) {
 
@@ -60,9 +61,7 @@ public class TeamChooser implements Listener {
                     for (TeamsList team : TeamsList.values()) {
 
                         if (banner.getBaseColor() == team.teamDyeColor) {
-                            ScoreboardManager m = Bukkit.getScoreboardManager();
-                            Scoreboard s = m.getMainScoreboard();
-                            Team chosenTeam = s.getTeam(team.teamName);
+                            Team chosenTeam = plugin.sc.getTeam(team.teamName);
 
                             if(chosenTeam.getPlayers() != null) {
                                 if (chosenTeam.getPlayers().contains(player)) {
@@ -78,22 +77,21 @@ public class TeamChooser implements Listener {
                                 }
                             }
                             chosenTeam.addPlayer(player);
-                            Teams.playersToSpread.remove(player.getUniqueId());
+                            teams.playersToSpread.remove(player.getUniqueId());
 
                             String name = chosenTeam.getPrefix() + player.getName();
                             player.setDisplayName(name);
                             player.setPlayerListName(name);
 
-                            if (!Teams.inGameTeams.contains(chosenTeam))
-                                Teams.inGameTeams.add(chosenTeam);
+                            if (!teams.inGameTeams.contains(chosenTeam))
+                                teams.inGameTeams.add(chosenTeam);
 
                             player.sendMessage(plugin.prefix + "§7Successfully added you to " + chosenTeam.getPrefix() + chosenTeam.getName());
                             player.playSound(player.getLocation(), Sound.CLICK, 1, Integer.MAX_VALUE);
                             refresh(player);
                         }
                     }
-                } else if(cur.getType() == Material.BARRIER)
-                    player.closeInventory();
+                } else if(cur.getType() == Material.BARRIER) { player.closeInventory(); }
             }
         }
     }
@@ -127,42 +125,37 @@ public class TeamChooser implements Listener {
         }
     }
 
-    public static List<Team> getPossibleTeams() {
+    public List<Team> getPossibleTeams() {
+        Teams teams = new Teams(plugin);
         List<Team> possibleTeams = new ArrayList<>();
 
-        int ppt = Options.pPerTeam;
         int players = Bukkit.getOnlinePlayers().size();
-        int f = 0;
+        int amount;
 
-        if(players >= ppt) {
-            f = players / ppt;
-        } else if(players < ppt) {
-
+        if(players >= Options.pPerTeam) {
+            amount = players / Options.pPerTeam;
+        } else {
             Options.pPerTeam = 1;
-            f = players;
+            amount = players;
         }
-
-        if(f % 2 != 0)
-            f = f + 1;
+        if(amount % 2 != 0) amount++;
 
         DecimalFormat formatter = new DecimalFormat("#");
-        String a = formatter.format(f);
+        String a = formatter.format(amount);
 
         int finalNumber = Integer.parseInt(a);
 
         List<TeamsList> teamsList = new ArrayList<>(Arrays.asList(TeamsList.values()));
         for(int i = 0; i < finalNumber; i++) {
 
-            Team team = Teams.getTeam(teamsList.get(i).teamName);
+            Team team = teams.getTeam(teamsList.get(i).teamName);
             possibleTeams.add(team);
         }
         return possibleTeams;
     }
 
     @SuppressWarnings("deprecation")
-    public static Inventory teamChooser(Player player) {
-        ScoreboardManager m = Bukkit.getScoreboardManager();
-        Scoreboard s = m.getMainScoreboard();
+    public Inventory teamChooser(Player player) {
         Inventory inv = Bukkit.createInventory(null, 27, "Teams");
 
         for (int i = 0; i < getPossibleTeams().size(); i++) {
@@ -172,7 +165,7 @@ public class TeamChooser implements Listener {
             ItemStack ch = new ItemStack(Material.BANNER, 1);
             ItemMeta chM = ch.getItemMeta();
 
-            Team scoreboardTeam = s.getTeam(team.teamName);
+            Team scoreboardTeam = plugin.sc.getTeam(team.teamName);
 
             BannerMeta meta = (BannerMeta) chM;
             meta.setBaseColor(team.teamDyeColor);
@@ -184,10 +177,11 @@ public class TeamChooser implements Listener {
 
                 for (OfflinePlayer all : scoreboardTeam.getPlayers())
                     lore.add("§7» " + team.teamColor + all.getName());
-            } else
+            } else {
                 chM.setDisplayName(team.teamColor + team.teamName + "§7 (" + 0 + "/" + Options.pPerTeam + ")");
+            }
 
-            if(s.getPlayerTeam(player) == scoreboardTeam) {
+            if(plugin.sc.getPlayerTeam(player) == scoreboardTeam) {
                 lore.add(" ");
                 lore.add("§cYou are already in this team!");
             }
@@ -204,5 +198,4 @@ public class TeamChooser implements Listener {
         inv.setItem(22, b);
         return inv;
     }
-
 }

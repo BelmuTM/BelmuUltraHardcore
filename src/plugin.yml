@@ -3,7 +3,7 @@ name : BelmuUHC
 author : Belmu
 version : 1.0
 api-version : 1.8
-description : Plugin developed by Belmu. [Ultra Hardcore] | Twitter - @Belmu_
+description : Plugin developed by Belmu | Twitter - @Belmu_
 commands :
   info :
     description : Info command.

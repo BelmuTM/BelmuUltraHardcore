@@ -45,7 +45,7 @@ public class Netheribus implements Listener {
                                     if(all.getWorld() != plugin.nether) {
 
                                         all.sendMessage(plugin.prefix + prefix + "§eHurry up!§7 You to go in the Nether");
-                                        all.damage(7.5);
+                                        all.damage(4.5);
                                         all.getWorld().playEffect(all.getLocation(), Effect.SMOKE, 1, 2);
                                     }
                                 }

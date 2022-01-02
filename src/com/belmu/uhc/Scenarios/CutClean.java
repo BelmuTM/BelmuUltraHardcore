@@ -71,13 +71,15 @@ public class CutClean implements Listener {
                         break;
                 }
 
-                block.setType(AIR);
-                e.setCancelled(true);
+                if(item != null) {
+                    block.setType(AIR);
+                    e.setCancelled(true);
 
-                if(item != null) plugin.common.drop(loc, item);
-                if(random.nextInt(upper) == 1) {
-                    ExperienceOrb orb = (ExperienceOrb) plugin.world.spawnEntity(orbLoc, EXPERIENCE_ORB);
-                    orb.setExperience(exp);
+                    plugin.common.drop(loc, item);
+                    if (random.nextInt(upper) == 1) {
+                        ExperienceOrb orb = (ExperienceOrb) plugin.world.spawnEntity(orbLoc, EXPERIENCE_ORB);
+                        orb.setExperience(exp);
+                    }
                 }
             }
         }

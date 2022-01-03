@@ -21,7 +21,7 @@ public class Options {
 
     public static final int noCleanUpHearts = 2;
 
-    public static final int netheribusMinutes = 35;
+    public static final int netheribusMinutes = 30;
     public static final int netheribusDmgTime = 10;
 
     public static final int diamondLimit = 20;
